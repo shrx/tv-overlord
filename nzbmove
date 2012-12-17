@@ -1,0 +1,66 @@
+#!/usr/bin/env bash
+
+# include the color variables and
+# an error function
+source ~/bin/color_and_error.bash
+# color_and_error:
+#     error [optional message]
+#     colorize 'text to colorize' <color variable name> [optional 'nonl' for no newline]
+# run ~/bin/color_and_error.bash for examples
+
+firstopt=m
+secondopt=t
+thirdopt=l
+help() {
+	echo "usage: $(basename $0) [-$firstopt] [-$secondopt]"
+	echo "-m or -t to specify movies or tv"
+	echo "-l to list contents of staging dir"
+	exit
+}
+staging=~/nzbdownloads/staging
+watchedtv=~/nzbdownloads/watched/tv
+watchedmovies=~/nzbdownloads/watched/movies
+
+while getopts "$firstopt$secondopt$thirdopt" flag; do
+	case $flag in
+		$firstopt)
+			dest=$watchedmovies
+		;;
+		$secondopt)
+			dest=$watchedtv
+		;;
+		$thirdopt)
+			ls $staging;
+			exit;
+		;;
+		* )
+			help
+	esac
+done
+shift $(($OPTIND -1))
+if [ ! $dest ]; then
+	help
+fi
+
+cd $staging
+# is staging empty?
+if [ $(find -type d -empty) ]; then
+	echo "$(basename $staging) is empty"
+	exit
+fi
+# get the list of nzb files
+list=$(ls *nzb |
+	sed "s/\(.*\)/\1 - on/"
+)
+# show in dialog
+title=$(echo "Select nzb files to move to" $(basename $dest))
+files=$(
+	  dialog --no-shadow --stdout --separate-output --separator ' ' \
+		--checklist "$title" 0 0 0 $list
+);
+clear
+
+# now move the files
+if [ "$files" != '' ]; then
+	mv $files $dest
+fi
