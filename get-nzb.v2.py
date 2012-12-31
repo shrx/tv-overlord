@@ -15,7 +15,8 @@ import textwrap
 
 import sys
 from ConsoleInput import ask_user as ask
-import NZBMatrix
+# from search_providers import NZBMatrix
+import Search
 from get_nzb_config import config
 from get_nzb_util import FancyPrint
 from Util import U
@@ -63,9 +64,15 @@ class Series:
 		if show_type == 'current':
 			self._set_db_data (dbdata)
 			self._get_thetvdb_series_data()
-			self.matrix = NZBMatrix.Matrix (username='smmcg', apiKey=config.nzbmatrix_apikey)
+			# self.matrix = NZBMatrix.Matrix (username='smmcg', apiKey=config.nzbmatrix_apikey)
+			# !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+			self.search_provider = Search.Search()
+
+			# !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
 		if show_type == 'nondb':
-			self.matrix = NZBMatrix.Matrix (username='smmcg', apiKey=config.nzbmatrix_apikey)
+			# self.matrix = NZBMatrix.Matrix (username='smmcg', apiKey=config.nzbmatrix_apikey)
+			self.search_provider = Search.Search()
 
 		self.console_rows, self.console_columns = os.popen ('stty size', 'r').read().split()
 
@@ -118,8 +125,8 @@ class Series:
 				'%s %s' % (search_title, se_ep (episode['season'], episode['episode'])),
 				'%s %sx%s' % (search_title, episode['season'], episode['episode'].zfill(2))
 			]
-			XVID = 6			# the nzb api uses 6 for XVID
-			ALLTV = 'tv-all'	# the nzb api uses 'tv-all' for all tv catigories
+			# XVID = 6			# the nzb api uses 6 for XVID
+			# ALLTV = 'tv-all'	# the nzb api uses 'tv-all' for all tv catigories
 			nzbid = None
 
 			showlist = []
@@ -127,7 +134,8 @@ class Series:
 			# The nzb api doesn't allow 'OR' searches so two searches are required.
 			for search_string in search_strings:
 				try:
-					results = self.matrix.Search (search_string, catId=ALLTV, smaller=config.tv_max_size)
+					# results = self.matrix.Search (search_string, catId=ALLTV, smaller=config.tv_max_size)
+					results = self.search_provider.search(search_string, max_size=config.tv_max_size)
 					headers = results['header']
 					print '%s of %s api calls left' % (headers['api_rate_limit_left'], headers['api_rate_limit'])
 					options = results['data'].values()
@@ -211,7 +219,8 @@ class Series:
 	def non_db (self, search_str):
 		self.db_name = search_str
 		try:
-			nzbid = self._ask (self.matrix.Search (search_str)['data'].values(), None, None)
+			# nzbid = self._ask (self.matrix.Search (search_str)['data'].values(), None, None)
+			nzbid = self._ask(self.search_provider.search(search_str))
 			if not nzbid: return
 		except NZBMatrix.MatrixError:
 			print 'No matches'
@@ -355,7 +364,8 @@ class Series:
 		sys.stdout.write (msg)
 		sys.stdout.flush()
 
-		headers = self.matrix.Download (nzbId=show_id, dest=config.staging)
+		# headers = self.matrix.Download (nzbId=show_id, dest=config.staging)
+		headers = self.search_provider.download(show_id, desination=config.staging)
 
 		backspace = '\b' * len (msg)
 		filename = re.findall ('filename="(.*?)"',
@@ -656,10 +666,10 @@ if __name__ == '__main__':
 	parser.add_argument (
 		'-l', '--location',
 		metavar='download_location',
-		help='Set the download location',
+		Help='Set The Download Location',
 	)
-	parser.add_argument (
-		'-n', '--no-cache',
+	Parser.Add_Argument (
+		'-N', '--No-Cache',
 		action='store_false',
 		help='If set, do not use the local thetvdb cache'
 	)
