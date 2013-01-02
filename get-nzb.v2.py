@@ -64,15 +64,10 @@ class Series:
 		if show_type == 'current':
 			self._set_db_data (dbdata)
 			self._get_thetvdb_series_data()
-			# self.matrix = NZBMatrix.Matrix (username='smmcg', apiKey=config.nzbmatrix_apikey)
-			# !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-			self.search_provider = Search.Search()
-
-			# !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+			self.search_provider = Search.Search() # !
 
 		if show_type == 'nondb':
-			# self.matrix = NZBMatrix.Matrix (username='smmcg', apiKey=config.nzbmatrix_apikey)
-			self.search_provider = Search.Search()
+			self.search_provider = Search.Search() # !
 
 		self.console_rows, self.console_columns = os.popen ('stty size', 'r').read().split()
 
@@ -123,8 +118,9 @@ class Series:
 		for episode in missing:
 			search_strings = [
 				'%s %s' % (search_title, se_ep (episode['season'], episode['episode'])),
-				'%s %sx%s' % (search_title, episode['season'], episode['episode'].zfill(2))
-			]
+				# '%s %sx%s' % (search_title, episode['season'], episode['episode'].zfill(2))
+				]
+
 			# XVID = 6			# the nzb api uses 6 for XVID
 			# ALLTV = 'tv-all'	# the nzb api uses 'tv-all' for all tv catigories
 			nzbid = None
@@ -135,23 +131,26 @@ class Series:
 			for search_string in search_strings:
 				try:
 					# results = self.matrix.Search (search_string, catId=ALLTV, smaller=config.tv_max_size)
-					results = self.search_provider.search(search_string, max_size=config.tv_max_size)
-					headers = results['header']
-					print '%s of %s api calls left' % (headers['api_rate_limit_left'], headers['api_rate_limit'])
-					options = results['data'].values()
-					for i in options:
-						showlist.append (i)
-				except NZBMatrix.MatrixError as inst:
-					error_a = True
+					results = self.search_provider.search(search_string, max_size=config.tv_max_size) # !
+					#headers = results['header']
+					#print '%s of %s api calls left' % (headers['api_rate_limit_left'], headers['api_rate_limit'])
+					#options = results['data'].values()
+					#for i in options:
+					# 	showlist.append (i)
+				# except NZBMatrix.MatrixError as inst:
+				except Search.SearchError as inst:
+						error_a = True
 
-			if showlist:
+			if results:
 				nzbid = self._ask (
-					showlist,
+					results,
 					season=episode['season'],
 					episode=episode['episode'])
 			else:
-				print '"%s" or "%s" are listed in TheTVDB, but not found at NZBMatrix' % (
-					search_strings[0], search_strings[1])
+				#print '"%s" or "%s" are listed in TheTVDB, but not found at NZBMatrix' % (
+				# 	search_strings[0]), search_strings[1])
+				print '"%s" is listed in TheTVDB, but not found at the NZB search engine' % (
+					search_strings[0])
 
 			if nzbid == 'skip_rest':
 				return
@@ -220,12 +219,13 @@ class Series:
 		self.db_name = search_str
 		try:
 			# nzbid = self._ask (self.matrix.Search (search_str)['data'].values(), None, None)
-			nzbid = self._ask(self.search_provider.search(search_str))
-			if not nzbid: return
-		except NZBMatrix.MatrixError:
+			show_data = self._ask(self.search_provider.search(search_str), None, None)
+			if not show_data['nzbid']: return
+		# except NZBMatrix.MatrixError:
+		except Search.SearchError:
 			print 'No matches'
 			return
-		self._download_nzb (nzbid)
+		self._download_nzb (show_data)
 
 
 	def _get_missing (self):
@@ -263,8 +263,9 @@ class Series:
 		num_w = 2
 		size_w = 10
 		date_w = 12
-		hits_w = 6
-		title_w = int (self.console_columns) - (size_w + hits_w + date_w + 6)
+		# hits_w = 6
+		# title_w = int (self.console_columns) - (size_w + hits_w + date_w + 6)
+		title_w = int (self.console_columns) - (size_w + date_w + 6)
 
 		class color:
 			title_bg = 19
@@ -299,8 +300,8 @@ class Series:
 						background=color.tb_header_bg, foreground=color.tb_header_fg),
 			U.hi_color ('Size'.ljust (size_w),
 						background=color.tb_header_bg, foreground=color.tb_header_fg),
-			U.hi_color ('Hits'.ljust (hits_w),
-						background=color.tb_header_bg, foreground=color.tb_header_fg),
+			# U.hi_color ('Hits'.ljust (hits_w),
+			#			background=color.tb_header_bg, foreground=color.tb_header_fg),
 			U.hi_color ('Date'.ljust (date_w),
 						background=color.tb_header_bg, foreground=color.tb_header_fg),
 		])
@@ -315,20 +316,20 @@ class Series:
 		key = ('1','2','3','4','5','6','7','8','9','0','a','b','c','d','e','f','g','h','i',
 			   'j','k','l','n','o','p','q','r','s','t','u','v','w','x','y','z')
 		for row, counter in zip (shows, key):
-			size = U.pretty_filesize (row['SIZE'])
+			size = U.pretty_filesize (row['size'])
 			size = size.rjust (size_w)
 			size = size.replace ('GB', U.fg_color ('yellow', 'GB'))
 
-			title = U.snip (row['NZBNAME'].ljust (title_w), title_w)
+			title = U.snip (row['nzbname'].ljust (title_w), title_w)
 			title = title.replace ('avi', U.fg_color ('green', 'avi'))
 
-			date = row['USENET_DATE'].split (' ')[0]
+			date = row['usenet_date']
 			print bar.join ([
 				counter.rjust (num_w),
 				title,
 				size,
 				# U.snip (row['HITS'].ljust (hits_w), hits_w),
-				row['HITS'].ljust (hits_w),
+				# row['HITS'].ljust (hits_w),
 				U.snip (date.ljust (date_w), date_w),
 			])
 
@@ -357,19 +358,20 @@ class Series:
 			print 'Wrong choice'
 			return
 
-		return shows[choice]['NZBID']
+		# return shows[choice]['nzbid']
+		return shows[choice]
 
-	def _download_nzb (self, show_id):
+	def _download_nzb (self, show_data):
 		msg = U.hi_color ('Downloading nzb...', foreground=16, background=184)
 		sys.stdout.write (msg)
 		sys.stdout.flush()
 
 		# headers = self.matrix.Download (nzbId=show_id, dest=config.staging)
-		headers = self.search_provider.download(show_id, desination=config.staging)
+		filename = self.search_provider.download(chosen_show=show_data, destination=config.staging)
 
 		backspace = '\b' * len (msg)
-		filename = re.findall ('filename="(.*?)"',
-							   headers['content-disposition'])[0]
+		#filename = re.findall ('filename="(.*?)"',
+		# 					   headers['content-disposition'])[0]
 		done = U.hi_color (filename.ljust (len (msg)), foreground=34)#34
 		print '%s%s' % (backspace, done)
 
@@ -666,10 +668,10 @@ if __name__ == '__main__':
 	parser.add_argument (
 		'-l', '--location',
 		metavar='download_location',
-		Help='Set The Download Location',
+		help='set the download location',
 	)
-	Parser.Add_Argument (
-		'-N', '--No-Cache',
+	parser.add_argument (
+		'-n', '--no-cache',
 		action='store_false',
 		help='If set, do not use the local thetvdb cache'
 	)

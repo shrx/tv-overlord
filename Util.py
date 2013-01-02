@@ -259,7 +259,7 @@ class U:
 			# color_sep = U.__redb + U.__greenf + U.__boldon + sep + U.__reset
 			color_sep = U.__greenf + U.__boldon + sep + U.__reset
 
-		return start + color_sep + end + ' '
+		return start + color_sep + end #+ ' '
 
 	@staticmethod
 	def is_odd (val):
@@ -464,5 +464,3 @@ if __name__ == '__main__':
 	##
 	## spin = SpinCursor (msg="Spinning another time", minspin=10, speed=2)
 	## spin.start()
-
-

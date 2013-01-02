@@ -1,9 +1,13 @@
 #!/usr/bin/env python
 
 import feedparser
+import urllib
+import os
+from time import mktime
+from datetime import datetime
 
 
-class NZBIndexError (Exception):
+class ProviderError (Exception):
 
     def __init__ (self, value):
         self.value = value
@@ -12,13 +16,15 @@ class NZBIndexError (Exception):
         return repr(self.value)
 
 
-class NZBIndex:
+class Provider (object):
 
-    def __init__ (self):
-        pass
+    # def __init__ (self):
+        # print 'NZBIndex.py __init__'
 
-    def search (self, search_string):
+    def search  (self, search_string):
         '''
+        Search options:
+        ---------------
         Minimum age:	 days
         Sort by:         agedesc, age, sizedesc, size
         Minimum size:	 MB
@@ -67,17 +73,159 @@ class NZBIndex:
         You can't use more than 20 keywords when searching.
 
 
-nzbindex.com/rss/?q=arrow+s01e09&minage=1&sort=agedesc&minsize=100&maxsize=1000&complete=1&max=100&more=1
 
+        Top level of data structure returned from NZBIndex:
+        ---------------------------------------------------
+        bozo        ?
+        encoding    u'UTF-8'
+        entries     all shows                           results['entries'][0...x]
+        feed        info about the feed                 results['feed']
+        headers
+        href        the rss link for these results
+        namespaces  ?
+        status      200
+        version     u'rss20'
+
+
+        Example of one show entry (results['entries'][0]):
+        --------------------------------------------------
+
+          summary_detail
+          ----------------
+          {'base': u'http://nzbindex.com/rss/?q=American+Horror+Story+S02E09&sort=agedesc&maxsize=5000&minage=0&complete=1&minsize=100&max=100&more=1',
+           'type': u'text/html', 'value': u'<p><font color="gray">alt.binaries.boneless, alt.binaries.cores, alt.binaries.multimedia, alt.binaries.town</font><br />\n<b>1.15 GB</b><br />\n19.6 dagen<br />\n<font color="#3DA233">16 bestanden (3098 delen)</font>\n<font color="gray">door Profess0r &lt;town@town.ag&gt;</font><br />\n<font color="#E2A910">\n5 PAR2 | 11 ARCHIEF</font>\n</p>',
+           'language': None}
+
+          published_parsed
+          ----------------
+          time.struct_time(tm_year=2012, tm_mon=12, tm_mday=13, tm_hour=4, tm_min=58, tm_sec=19, tm_wday=3, tm_yday=348, tm_isdst=0)
+
+          links
+          ----------------
+          [{'href': u'http://nzbindex.com/release/80986743/TOWNwww.town.ag-partner-of-www.ssl-news.info-American.Horror.Story.S02E09.720p.HDTV.X264-DIMENSION-0116-American.Horror.Story.S02E09.720p.HDTV.X2.nzb',
+            'type': u'text/html',
+            'rel': u'alternate'},
+           {'length': u'1233191350',
+            'href': u'http://nzbindex.com/download/80986743/TOWNwww.town.ag-partner-of-www.ssl-news.info-American.Horror.Story.S02E09.720p.HDTV.X264-DIMENSION-0116-American.Horror.Story.S02E09.720p.HDTV.X2.nzb',
+            'type': u'text/xml',
+            'rel': u'enclosure'}]
+
+          title
+          ----------------
+          <TOWN><www.town.ag > <partner of www.ssl-news.info > American.Horror.Story.S02E09.720p.HDTV.X264-DIMENSION [01/16] - "American.Horror.Story.S02E09.720p.HDTV.X264-DIMENSION.par2" - 1,11 GB - yEnc
+
+          tags
+          ----------------
+          [{'term': u'alt.binaries.boneless', 'scheme': None, 'label': None},
+           {'term': u'alt.binaries.cores', 'scheme': None, 'label': None},
+           {'term': u'alt.binaries.multimedia', 'scheme': None, 'label': None},
+           {'term': u'alt.binaries.town', 'scheme': None, 'label': None}]
+
+          summary
+          ----------------
+          <p><font color="gray">alt.binaries.boneless, alt.binaries.cores, alt.binaries.multimedia, alt.binaries.town</font><br />
+          <b>1.15 GB</b><br />
+          19.6 dagen<br />
+          <font color="#3DA233">16 bestanden (3098 delen)</font>
+          <font color="gray">door Profess0r &lt;town@town.ag&gt;</font><br />
+          <font color="#E2A910">
+          5 PAR2 | 11 ARCHIEF</font>
+          </p>
+
+          guidislink
+          ----------------
+          False
+
+          title_detail
+          ----------------
+          {'base': u'http://nzbindex.com/rss/?q=American+Horror+Story+S02E09&sort=agedesc&maxsize=5000&minage=0&complete=1&minsize=100&max=100&more=1',
+           'type': u'text/plain',
+           'value': u'<TOWN><www.town.ag > <partner of www.ssl-news.info > American.Horror.Story.S02E09.720p.HDTV.X264-DIMENSION [01/16] - "American.Horror.Story.S02E09.720p.HDTV.X264-DIMENSION.par2" - 1,11 GB - yEnc',
+           'language': None}
+
+          link
+          ----------------
+          http://nzbindex.com/release/80986743/TOWNwww.town.ag-partner-of-www.ssl-news.info-American.Horror.Story.S02E09.720p.HDTV.X264-DIMENSION-0116-American.Horror.Story.S02E09.720p.HDTV.X2.nzb
+
+          published
+          ----------------
+          Thu, 13 Dec 2012 05:58:19 +0100
+
+          id
+          ----------------
+          http://nzbindex.com/release/80986743/TOWNwww.town.ag-partner-of-www.ssl-news.info-American.Horror.Story.S02E09.720p.HDTV.X264-DIMENSION-0116-American.Horror.Story.S02E09.720p.HDTV.X2.nzb
+
+
+          '''
+
+        # search_template = ('nzbindex.com/rss/?q=%s&minage=%s&sort=%s' +
+        #                    '&minsize=%s&maxsize=%s&complete=%s&max=%s&more=1')
+
+        search_term = ''
+        min_age = '0'
+        sort = 'agedesc'    # age, agedesc, size, sizedesc
+        min_size = '100'    # mb
+        max_size = '1000'   # mb
+        complete_only = '1' # return only complete posts
+        max_results = '100'
+
+        url = 'http://nzbindex.com/rss/?'
+        query = {
+              'q': search_string
+            , 'minage': '0'
+            , 'sort': 'agedesc'
+            , 'minsize': '100'
+            , 'maxsize': '5000'
+            , 'complete': '1'
+            , 'max': '100' # results per page
+            , 'more': '1'
+        }
+
+        full_url = url + urllib.urlencode (query)
+
+        # print 'searching...'
+        parsed = feedparser.parse(full_url)
+
+        # print '-' * 10
+        # print parsed['headers']
+        # print parsed['feed']
+        # print 'status:', parsed['status']
+        # print '-' * 10
+
+        show_data = []
+        for show in parsed['entries']:
+            dt = datetime.fromtimestamp(mktime(show['published_parsed']))
+            date = dt.strftime('%b %d/%Y')
+
+            show_data.append({
+                'nzbname': show['title'],
+                'usenet_date': date,
+                'size': show['links'][1]['length'],
+                'nzbid': show['links'][1]['href']
+            })
+
+        # print 'show_data:', show_data
+        # print 'shows:', len(show_data)
+        return show_data
+
+        # exit()
+
+
+    def download (self, chosen_show, destination):
         '''
 
+        '''
+        # print chosen_show
+        if not os.path.isdir (destination):
+            raise ProviderError ('%s is not a dir' % (dest))
 
-        search_template = 'http://nzbindex.com/rss/?q=%s&sort=agedesc&minsize=100&complete=1&max=25&more=1'
-        return search_template
+        href = chosen_show['nzbid']
+        filename = href.split('/')[-1]
+        fullname = destination + '/' + filename
 
-    def download (self):
-        pass
+        urllib.urlretrieve(href, fullname)
 
+        return filename
 
 if __name__ == '__main__':
 
