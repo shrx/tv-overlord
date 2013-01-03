@@ -21,6 +21,12 @@ class Provider (object):
     # def __init__ (self):
         # print 'NZBIndex.py __init__'
 
+    self.identity = 'NZBIndex'
+
+    def identity():
+        return self.identity
+
+
     def search  (self, search_string):
         '''
         Search options:
@@ -201,7 +207,8 @@ class Provider (object):
                 'nzbname': show['title'],
                 'usenet_date': date,
                 'size': show['links'][1]['length'],
-                'nzbid': show['links'][1]['href']
+                'nzbid': show['links'][1]['href'],
+                'identity': self.identity()
             })
 
         # print 'show_data:', show_data

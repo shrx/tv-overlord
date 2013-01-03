@@ -31,7 +31,9 @@ class config:
 		exit()
 
 	cfg = ConfigParser.ConfigParser()
-	cfg.read ([user_config, app_config])
+	# only use user config, not app config
+	# cfg.read ([user_config, app_config])
+	cfg.read ([user_config])
 
 	try:
 		# [App Settings]

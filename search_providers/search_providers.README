@@ -1,0 +1,37 @@
+
+
+A search provider provides a data structure that get-nzb can use.
+
+* Input
+
+The search provider must have two methods, search and download.
+
+** search()
+
+search_string
+
+** download()
+
+chosen_show, destination
+
+
+* Output
+
+** search()
+
+The *search* method returns and array of dictionaries.
+Each dict is a show with the following required fields.
+
+_nzbname_: the text used for display on the console.
+_size_: the size of the downloaded video in bytes.
+_usenet_date_: the date the nzb file was posted.
+_nzbid_: this is some information that you will need to download
+the nzb file.  Either a url, or id, etc...
+
+Any aditional data that gets passed as part of each show,
+will be ignored and passed back.
+
+** download()
+
+The *download* method returns the name of the nzb
+file that was downloaded.

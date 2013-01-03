@@ -3,6 +3,7 @@
 
 from get_nzb_config import config
 from search_providers.NZBIndex import Provider as engine1
+from search_providers.newsnet-crawler import Provider as engine2
 
 
 class SearchError (Exception):
@@ -16,27 +17,10 @@ class SearchError (Exception):
 
 class Search (object):
 
-    # providers = ['engine1']
-    # provider = 'NZBIndex'
-    # config = {
-    #       'NZBMatrix': [username:'smmcg', apiKey:config.nzbmatrix_apikey]
-    #     , 'NZBIndex': []
-    # }
-
-    def __init__(self, provider='NZBIndex', config=[]):
-        # pass
-        # print 'search_providers.%s' % provider
-        #try:
-        #    mod = __import__ ('search_providers.%s' % provider)
-        #    print dir(mod)
-        #    self.engine = mod.Provider
-        #except ImportError:
-        #    print '%s is not a valid search provider' % provider
-        #    exit()
-
-
-        # import search_providers.NZBIndex as enginex
-        self.engine1 = engine1()
+    def __init__(self):
+        # self.engine1 = engine1()
+        # self.engine2 = engine2()
+        self.engines = [engine1(), engine2()]
 
 
     def config(self):
@@ -65,10 +49,12 @@ class Search (object):
 
         '''
 
+        all_results = []
+        for engine in self.engines:
+            search_results = self.engine1.search(search_string)
+            all_results = all_results + search_results
 
-
-        search_results = self.engine1.search(search_string)
-        return search_results
+        return all_results
 
 
     def download(self, chosen_show, destination):
@@ -78,14 +64,21 @@ class Search (object):
         back to get-nzb.v2.py
         '''
 
-        downloaded_filename = self.engine1.download(chosen_show, destination)
+        downloaded_filename = ''
+        for engine in self.engines:
+            if chosen_show['engine'] == engine.identity():
+                downloaded_filename = engine.download (chosen_show, destination)
+
         return downloaded_filename
+
+
+        # download_engine = chosen_show['engine']
+        # downloaded_filename = self.engine1.download (chosen_show, destination)
+        # return downloaded_filename
 
 
 if __name__ == '__main__':
 
     test = Search ('nzbindex')
-
     test = Search ('NZBIndex')
-
     test = Search('x')
