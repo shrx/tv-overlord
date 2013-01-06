@@ -1,9 +1,11 @@
 #!/usr/bin/env python
 
+import sys
+from Util import U
 
 from get_nzb_config import config
 from search_providers.NZBIndex import Provider as engine1
-from search_providers.newsnet-crawler import Provider as engine2
+# from search_providers.nzb-cc import Provider as engine2
 
 
 class SearchError (Exception):
@@ -18,16 +20,29 @@ class SearchError (Exception):
 class Search (object):
 
     def __init__(self):
-        # self.engine1 = engine1()
-        # self.engine2 = engine2()
-        self.engines = [engine1(), engine2()]
+        # self.engines = [engine1(), engine2()]
+        self.engines = [engine1()]
+        self.season = ''
+        self.episode = ''
+        self.show_name = ''
 
 
     def config(self):
         pass
 
 
-    def search(self, search_string, min_size=100, max_size=False):
+    def se_ep (self, season, episode, both=True):
+        season_just = str (season).rjust (2, '0')
+        episode = str (episode).rjust (2, '0')
+        if both:
+            fixed = 'S%sE%s | %sx%s' % (season_just, episode, season, episode)
+        else:
+            fixed = 'S%sE%s' % (season_just, episode)
+
+        return fixed
+
+
+    def search(self, search_string, season=False, episode=False, min_size=100, max_size=False):
         '''
         Return an array of values:
 
@@ -40,7 +55,7 @@ class Search (object):
         Example:
         --------
         [
-          {nzbname: "American.Horror.Story.S01E01.FRENCH.BDRip.XviD-JMT.nfo" - 602,76 MB - yEnc",
+          {nzbname: '"American.Horror.Story.S01E01.FRENCH.BDRip.XviD-JMT.nfo" - 602,76 MB - yEnc',
            size: 592686000,
            usenet_date: 'Nov 05/2012'}
           {...}
@@ -48,11 +63,33 @@ class Search (object):
         ]
 
         '''
+        print 'Search obj'
+
+        se = ''
+        if (season and episode):
+            self.season = season
+            self.episode = episode
+            self.show_name = search_string
+
+            search_string = '%s %s' % (search_string, self.se_ep(season, episode, both=True))
+
+        # print 'searching for:', search_string
+
+        msg = 'Searching for: %s...' % (search_string)
+        msg = U.hi_color (msg, foreground=16, background=184)
+        sys.stdout.write (msg)
+        sys.stdout.flush()
+        backspace = '\b' * len (msg)
+        overwrite = ' ' * len (msg)
 
         all_results = []
         for engine in self.engines:
-            search_results = self.engine1.search(search_string)
-            all_results = all_results + search_results
+            search_results = engine.search(search_string)
+            all_results += search_results
+
+
+        # done = U.hi_color (filename.ljust (len (msg)), foreground=34)#34
+        print '%s%s' % (backspace, overwrite)
 
         return all_results
 
@@ -66,15 +103,23 @@ class Search (object):
 
         downloaded_filename = ''
         for engine in self.engines:
-            if chosen_show['engine'] == engine.identity():
-                downloaded_filename = engine.download (chosen_show, destination)
+            if chosen_show['provider_name'] == engine.name:
+                final_name = ''
+                if self.season and self.episode:
+                    cleaned_title = chosen_show['nzbname'].replace(' ', '_')
+                    nogo = '/\\"\'[]()#<>?!@$%^&*+='
+                    for c in nogo:
+                        cleaned_title = cleaned_title.replace(c, '')
+
+                    final_name = '%s.%s---%s.nzb' % (
+                        self.show_name.replace(' ', '.')
+                        , self.se_ep(self.season, self.episode, both=False)
+                        , cleaned_title
+                    )
+                print 'final name:', final_name
+                downloaded_filename = engine.download (chosen_show, destination, final_name)
 
         return downloaded_filename
-
-
-        # download_engine = chosen_show['engine']
-        # downloaded_filename = self.engine1.download (chosen_show, destination)
-        # return downloaded_filename
 
 
 if __name__ == '__main__':

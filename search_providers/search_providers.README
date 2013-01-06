@@ -1,21 +1,30 @@
 
 
+* Overview
+
 A search provider provides a data structure that get-nzb can use.
+There must be an object called Provider and it must have two methods
+called search and download.
+
 
 * Input
 
 The search provider must have two methods, search and download.
 
-** search()
+** search
 
-search_string
+Provider.search (search_string)
 
-** download()
+** download
 
-chosen_show, destination
+Provider.download (chosen_show, destination)
 
 
 * Output
+
+** Properties
+
+There must be two global properties, provider_url and name.
 
 ** search()
 
@@ -35,3 +44,27 @@ will be ignored and passed back.
 
 The *download* method returns the name of the nzb
 file that was downloaded.
+
+
+* Example
+
+#+BEGIN_SRC Python
+
+#!/usr/bin/env python
+
+class Provider (object):
+
+    provider_url = 'http://nzb.cc'
+    name = 'nzb.cc'
+
+    def __init__ (self):
+        pass
+
+    def search (self, search_string):
+        pass
+
+    def download (self, chosen_show, destination):
+        pass
+
+
+#+END_SRC

@@ -14,17 +14,18 @@ class config:
 	config_filename = 'nzb_config.ini'
 	user_config = os.path.join (
 		os.environ ['HOME'],	# '/Users/sm/'
-		'.%s' % (config_filename)
+		'.nzb',
+		config_filename
 	)
-	realpath = os.path.realpath (sys.argv[0])
-	dirname = os.path.dirname (realpath)
-	app_config = os.path.join (dirname, config_filename)
+	#realpath = os.path.realpath (sys.argv[0])
+	#dirname = os.path.dirname (realpath)
+	#app_config = os.path.join (dirname, config_filename)
 
 	user_config_exists = app_config_exists = True
 	if not os.path.exists (user_config):
 		user_config_exists = False
-	if not os.path.exists (app_config):
-		app_config_exists = False
+	#if not os.path.exists (app_config):
+	#	app_config_exists = False
 	if (not user_config_exists) and (not app_config_exists):
 		print 'Both config files do not exist.  At lease one must exist'
 		print '%s and %s are missing' % (user_config, app_config)

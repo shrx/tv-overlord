@@ -80,8 +80,11 @@ fi
 cd "$source"
 
 # clean up files I don't want
-log "delete sample: $(find -iname "*sample*")"
-find -iname "*sample*" -delete
+# sometimes full shows have the name sample in
+# it so can't automaticaly delete files with
+# sample string in it.
+#log "delete sample: $(find -iname "*sample*")"
+#find -iname "*sample*" -delete
 
 log "move: $(find -iname "*srr" \
 	-or -iname "*sfv" \
@@ -92,6 +95,7 @@ log "move: $(find -iname "*srr" \
 	-or -iname "*sub" \
 	-or -iname "*txt" \
 	-or -iname "*url" \
+	-or -iname "*torrent" \
 )"
 
 find \( -iname "*srr" \
@@ -103,6 +107,7 @@ find \( -iname "*srr" \
 	-or -iname "*sub" \
 	-or -iname "*txt" \
 	-or -iname "*url" \
+	-or -iname "*torrent" \
 	\) -exec mv "{}" "$storage" \;
 
 

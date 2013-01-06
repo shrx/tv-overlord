@@ -19,13 +19,10 @@ class ProviderError (Exception):
 class Provider (object):
 
     # def __init__ (self):
-        # print 'NZBIndex.py __init__'
+        # pass
 
-    self.identity = 'NZBIndex'
-
-    def identity():
-        return self.identity
-
+    provider_url = 'http://nzbindex.com'
+    name = 'NZBIndex'
 
     def search  (self, search_string):
         '''
@@ -192,43 +189,45 @@ class Provider (object):
         # print 'searching...'
         parsed = feedparser.parse(full_url)
 
-        # print '-' * 10
-        # print parsed['headers']
-        # print parsed['feed']
-        # print 'status:', parsed['status']
-        # print '-' * 10
-
         show_data = []
         for show in parsed['entries']:
             dt = datetime.fromtimestamp(mktime(show['published_parsed']))
             date = dt.strftime('%b %d/%Y')
 
             show_data.append({
-                'nzbname': show['title'],
-                'usenet_date': date,
-                'size': show['links'][1]['length'],
-                'nzbid': show['links'][1]['href'],
-                'identity': self.identity()
+                'nzbname': show['title']
+                , 'usenet_date': date
+                , 'size': show['links'][1]['length']
+                , 'nzbid': show['links'][1]['href']
+                , 'search_string': search_string
+                , 'provider_name': Provider.name # In this case: NZBIndex
             })
 
         # print 'show_data:', show_data
         # print 'shows:', len(show_data)
         return show_data
 
-        # exit()
 
-
-    def download (self, chosen_show, destination):
+    def download (self, chosen_show, destination, final_name):
         '''
 
         '''
-        # print chosen_show
+        # print '>>>chosen_show, destination, final_name', chosen_show, destination, final_name
         if not os.path.isdir (destination):
             raise ProviderError ('%s is not a dir' % (dest))
 
         href = chosen_show['nzbid']
         filename = href.split('/')[-1]
-        fullname = destination + '/' + filename
+        if final_name:
+            # final_name should be a name that SABNzbd can parse
+            # if this is being used, it means that this download is
+            # a tv show with a season and episode.
+            fullname = destination + '/' + final_name
+        else:
+            # if NOT final_name, then this download came from
+            # nondbshow, and is not associated with a tv show.
+            # Could be a movie or one off download.
+            fullname = destination + '/' + filename
 
         urllib.urlretrieve(href, fullname)
 

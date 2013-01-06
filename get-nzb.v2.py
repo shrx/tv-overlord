@@ -27,9 +27,9 @@ from Util import U
 
 
 def se_ep (season, episode):
-	season = str (season).rjust (2, '0')
+	season_just = str (season).rjust (2, '0')
 	episode = str (episode).rjust (2, '0')
-	fixed = 'S%sE%s' % (season, episode)
+	fixed = 'S%sE%s | %sx%s' % (season_just, episode, season, episode)
 	return fixed
 
 
@@ -64,10 +64,10 @@ class Series:
 		if show_type == 'current':
 			self._set_db_data (dbdata)
 			self._get_thetvdb_series_data()
-			self.search_provider = Search.Search() # !
+			self.search_provider = Search.Search()
 
 		if show_type == 'nondb':
-			self.search_provider = Search.Search() # !
+			self.search_provider = Search.Search()
 
 		self.console_rows, self.console_columns = os.popen ('stty size', 'r').read().split()
 
@@ -103,7 +103,6 @@ class Series:
 
 	def download_missing (self):
 		missing = self._get_missing()
-		# print missing
 		if self.db_nzbmatrix_search_name:
 			search_title = self.db_nzbmatrix_search_name
 		else:
@@ -121,8 +120,6 @@ class Series:
 				# '%s %sx%s' % (search_title, episode['season'], episode['episode'].zfill(2))
 				]
 
-			# XVID = 6			# the nzb api uses 6 for XVID
-			# ALLTV = 'tv-all'	# the nzb api uses 'tv-all' for all tv catigories
 			nzbid = None
 
 			showlist = []
@@ -130,8 +127,12 @@ class Series:
 			# The nzb api doesn't allow 'OR' searches so two searches are required.
 			for search_string in search_strings:
 				try:
-					# results = self.matrix.Search (search_string, catId=ALLTV, smaller=config.tv_max_size)
-					results = self.search_provider.search(search_string, max_size=config.tv_max_size) # !
+					results = self.search_provider.search(
+							search_title,
+							season=episode['season'],
+							episode=episode['episode'],
+							max_size=config.tv_max_size)
+
 					#headers = results['header']
 					#print '%s of %s api calls left' % (headers['api_rate_limit_left'], headers['api_rate_limit'])
 					#options = results['data'].values()
@@ -188,7 +189,8 @@ class Series:
 		indent = '    '
 		missing_list = []
 		for s in missing:
-			se = se_ep (s['season'], s['episode'])
+			#se = se_ep (s['season'], s['episode'])
+			se = 'S%sE%s' % (s['season'], s['episode'])
 			missing_list.append (se)
 		ret += textwrap.fill (', '.join (missing_list), width=int(self.console_columns),
 							  initial_indent=indent, subsequent_indent=indent)
@@ -218,7 +220,6 @@ class Series:
 	def non_db (self, search_str):
 		self.db_name = search_str
 		try:
-			# nzbid = self._ask (self.matrix.Search (search_str)['data'].values(), None, None)
 			show_data = self._ask(self.search_provider.search(search_str), None, None)
 			if not show_data['nzbid']: return
 		# except NZBMatrix.MatrixError:
@@ -375,6 +376,7 @@ class Series:
 		done = U.hi_color (filename.ljust (len (msg)), foreground=34)#34
 		print '%s%s' % (backspace, done)
 
+
 	def set_inactive (self):
 		sql = 'UPDATE shows SET status="inactive" WHERE thetvdb_series_id=:tvdb_id'
 		conn = sqlite3.connect (config.db_file)
@@ -395,6 +397,7 @@ class Series:
 
 		conn.commit()
 		conn.close()
+
 
 	def _add_new_db (self, season, episode):
 		sql = '''insert into shows (
