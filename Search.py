@@ -63,7 +63,6 @@ class Search (object):
         ]
 
         '''
-        print 'Search obj'
 
         se = ''
         if (season and episode):
@@ -106,7 +105,7 @@ class Search (object):
             if chosen_show['provider_name'] == engine.name:
                 final_name = ''
                 if self.season and self.episode:
-                    cleaned_title = chosen_show['nzbname'].replace(' ', '_')
+                    cleaned_title = chosen_show['nzbname'].replace(' ', '_').replace('.', '_')
                     nogo = '/\\"\'[]()#<>?!@$%^&*+='
                     for c in nogo:
                         cleaned_title = cleaned_title.replace(c, '')
@@ -116,7 +115,6 @@ class Search (object):
                         , self.se_ep(self.season, self.episode, both=False)
                         , cleaned_title
                     )
-                print 'final name:', final_name
                 downloaded_filename = engine.download (chosen_show, destination, final_name)
 
         return downloaded_filename
