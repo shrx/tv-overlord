@@ -92,6 +92,7 @@ log "move: $(find -iname "*srr" \
 	-or -iname "*idx" \
 	-or -iname "*nzb" \
 	-or -iname "*srt" \
+	-or -iname "*srs" \
 	-or -iname "*sub" \
 	-or -iname "*txt" \
 	-or -iname "*url" \
@@ -104,6 +105,7 @@ find \( -iname "*srr" \
 	-or -iname "*idx" \
 	-or -iname "*nzb" \
 	-or -iname "*srt" \
+	-or -iname "*srs" \
 	-or -iname "*sub" \
 	-or -iname "*txt" \
 	-or -iname "*url" \

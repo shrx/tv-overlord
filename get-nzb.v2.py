@@ -29,7 +29,9 @@ from Util import U
 def se_ep (season, episode):
 	season_just = str (season).rjust (2, '0')
 	episode = str (episode).rjust (2, '0')
-	fixed = 'S%sE%s | %sx%s' % (season_just, episode, season, episode)
+	# fixed = 'S%sE%s | %sx%s' % (season_just, episode, season, episode)
+	fixed = 'S%sE%s' % (season_just, episode)
+
 	return fixed
 
 
@@ -75,10 +77,15 @@ class Series:
 		'''Add the data from the local db'''
 		self.db_name = dbdata['name']
 		self.db_thetvdb_series_id = dbdata['thetvdb_series_id']
+		self.db_ragetv_series_id = dbdata['ragetv_series_id']
 		self.db_current_season = dbdata['season']
 		self.db_last_episode = dbdata['episode']
 		self.db_nzbmatrix_search_name = dbdata['nzbmatrix_search_name']
 		self.db_status = dbdata['status']
+
+	# def _get_tvrage_series_data(self):
+		# tv = rage
+
 
 	def _get_thetvdb_series_data (self):
 		'''Dynamicaly add all the data from Thetvdb.com'''
@@ -100,6 +107,7 @@ class Series:
 			setattr (self, i, series.data[i])
 
 		self.series = series
+
 
 	def download_missing (self):
 		missing = self._get_missing()
@@ -190,7 +198,7 @@ class Series:
 		missing_list = []
 		for s in missing:
 			#se = se_ep (s['season'], s['episode'])
-			se = 'S%sE%s' % (s['season'], s['episode'])
+			se = 'S%sE%s' % (s['season'].rjust(2, '0'), s['episode'].rjust(2, '0'))
 			missing_list.append (se)
 		ret += textwrap.fill (', '.join (missing_list), width=int(self.console_columns),
 							  initial_indent=indent, subsequent_indent=indent)
@@ -432,7 +440,7 @@ class AllSeries:
 		return series
 
 	def _query_db (self):
-		sql = "SELECT name, season, episode, thetvdb_series_id, nzbmatrix_search_name, status \
+		sql = "SELECT name, season, episode, thetvdb_series_id, ragetv_series_id, nzbmatrix_search_name, status \
 			FROM shows WHERE status='active' ORDER BY replace (name, 'The ', '');"
 		# sql = "SELECT name, season, episode, thetvdb_series_id \
 			# FROM shows ORDER BY replace (name, 'The ', '');"

@@ -4,9 +4,12 @@ import sys
 from Util import U
 
 from get_nzb_config import config
-from search_providers.NZBIndex import Provider as engine1
-# from search_providers.nzb-cc import Provider as engine2
 
+##############################################################
+from search_providers.NZBIndex_com import Provider as engine1
+# from search_providers.nzb_cc import Provider as engine2
+# from search_providers.nzbclub_com import Provider as engine1
+##############################################################
 
 class SearchError (Exception):
 
@@ -63,7 +66,6 @@ class Search (object):
         ]
 
         '''
-
         se = ''
         if (season and episode):
             self.season = season
@@ -86,6 +88,7 @@ class Search (object):
             search_results = engine.search(search_string)
             all_results += search_results
 
+        # print '>>>', all_results
 
         # done = U.hi_color (filename.ljust (len (msg)), foreground=34)#34
         print '%s%s' % (backspace, overwrite)
@@ -100,20 +103,24 @@ class Search (object):
         back to get-nzb.v2.py
         '''
 
+        # print chosen_show
+
         downloaded_filename = ''
         for engine in self.engines:
             if chosen_show['provider_name'] == engine.name:
                 final_name = ''
+                # only cleans name for tv show downloads
+                # TODO: make work for 'nondbshow' also.
                 if self.season and self.episode:
                     cleaned_title = chosen_show['nzbname'].replace(' ', '_').replace('.', '_')
                     nogo = '/\\"\'[]()#<>?!@$%^&*+='
                     for c in nogo:
                         cleaned_title = cleaned_title.replace(c, '')
 
-                    final_name = '%s.%s---%s.nzb' % (
+                    final_name = '%s.%s.nzb' % (        # '%s.%s---%s.nzb'
                         self.show_name.replace(' ', '.')
                         , self.se_ep(self.season, self.episode, both=False)
-                        , cleaned_title
+                        #, cleaned_title
                     )
                 downloaded_filename = engine.download (chosen_show, destination, final_name)
 
