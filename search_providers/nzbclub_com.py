@@ -5,6 +5,7 @@ import urllib
 import os
 from time import mktime
 from datetime import datetime
+import pprint
 
 
 class Provider (object):
@@ -15,20 +16,51 @@ class Provider (object):
 
     def search(self, search_string):
 
-        # http://www.nzbclub.com/nzbfeed.aspx?q=cougar%20town%20s04e01&ig=2&szs=14&sze=24&st=1&ns=1
-        # http://www.nzbclub.com/nzbfeed.aspx?q=cougar%20town%20s04e01&ig=2&szs=14&sze=24&st=5&ns=1
+        '''
+        Default Search: Our default is prefix match
+        Search 123 will match 123, 1234, 1234abcdefg
+        Search 123 will not match 0123, ab123, ab123yz
+
+        AND search:
+        -----------
+        the words hello and world:
+        hello world
+
+        NOT search:
+        -----------
+        the word hello but NOT the word world:
+        hello -world
+
+        We can't do NOT only search
+        -world
+
+        OR search:
+        ----------
+        the words hello or world:
+        hello or world
+
+        Each "or" is treated as new query part
+        hello abcd or hello efgh != hello abcd or efgh
+
+        grouping:
+        ---------
+        the exact phrase hello world:
+        "hello world"
+        '''
 
         url = 'http://www.nzbclub.com/nzbfeed.aspx?'
         query = {
             'q': search_string
-            , 'ig': 2
-            , 'szs': 1
-            , 'sze': 24
-            , 'st': 1
-            , 'ns': 1   # no spam
+            , 'ig': 2       # hide adult: 1=yes, 2=no
+            , 'szs': 15     # min size: 15=75m, 16=100m,
+            , 'sze': 24     # max size: 24=2gig
+            , 'st': 5       # sort.  5=relevence, 4=size (smallest first)
+            , 'ns': 1       # no spam
+            , 'sp': 1       # don't show passworded files
+            , 'nfo': 0      # has to have nfo  1=yes, 0=no
             }
         full_url = url + urllib.urlencode (query)
-
+        # print full_url
         parsed = feedparser.parse(full_url)
 
         show_data = []
@@ -46,8 +78,6 @@ class Provider (object):
                 , 'provider_name': Provider.name # In this case: NZBClub
                 })
 
-        # print 'show_data:', show_data
-        # print 'shows:', len(show_data)
         return show_data
 
 
@@ -55,7 +85,7 @@ class Provider (object):
         '''
 
         '''
-        # print '>>>chosen_show, destination, final_name', chosen_show, destination, final_name
+
         if not os.path.isdir (destination):
             raise ProviderError ('%s is not a dir' % (dest))
 

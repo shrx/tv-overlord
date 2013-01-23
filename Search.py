@@ -6,9 +6,9 @@ from Util import U
 from get_nzb_config import config
 
 ##############################################################
-from search_providers.NZBIndex_com import Provider as engine1
+# from search_providers.NZBIndex_com import Provider as engine1
 # from search_providers.nzb_cc import Provider as engine2
-# from search_providers.nzbclub_com import Provider as engine1
+from search_providers.nzbclub_com import Provider as engine1
 ##############################################################
 
 class SearchError (Exception):
@@ -34,11 +34,12 @@ class Search (object):
         pass
 
 
-    def se_ep (self, season, episode, both=True):
+    def se_ep (self, season, episode, both=True, show_title=''):
         season_just = str (season).rjust (2, '0')
         episode = str (episode).rjust (2, '0')
         if both:
-            fixed = 'S%sE%s | %sx%s' % (season_just, episode, season, episode)
+            # fixed = 'S%sE%s | %sx%s' % (season_just, episode, season, episode)
+            fixed = '%s S%sE%s or %s %sx%s' % (show_title, season_just, episode, show_title, season, episode)
         else:
             fixed = 'S%sE%s' % (season_just, episode)
 
@@ -72,7 +73,8 @@ class Search (object):
             self.episode = episode
             self.show_name = search_string
 
-            search_string = '%s %s' % (search_string, self.se_ep(season, episode, both=True))
+            # search_string = '%s %s' % (search_string, self.se_ep(season, episode, both=False))
+            search_string = '%s' % (self.se_ep(season, episode, both=True, show_title=search_string))
 
         # print 'searching for:', search_string
 
