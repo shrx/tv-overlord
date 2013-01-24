@@ -594,32 +594,37 @@ def init (args):
         config.use_cache = False
 
     if args.action == t.info:
+        show_info = {}
+        counter = 0
         for series in AllSeries():
-            # title = '%s' % (U.effects (['boldon', 'greenf'], series.db_name))
             title = series.db_name
             if series.status == 'Ended':
                 status = U.hi_color (series.status, foreground=196)
             else:
-                status = U.hi_color ('Continuing', foreground=27)
+                status = ''  # U.hi_color ('Continuing', foreground=27)
 
             se = 'S%sE%s' % (
                 str (series.db_current_season).rjust (2, '0'),
                 str (series.db_last_episode).rjust (2,'0'),
-            )
+                )
             se = U.hi_color(se, foreground=48)
             imdb_url = U.hi_color('http://imdb.com/title/%s' % series.imdb_id, foreground=17)
+
             # first row
-            print '%s, %s, %s, %s' % (
-                title,
-                se,
-                status,
-                imdb_url,
-            )
+            #print '%s' % (
+            #    ', '.join([title, se, status, imdb_url])
+            #    )
+            first_row_a = []
+            for i in [title, se, status, imdb_url]:
+                if i: first_row_a.append(i)
+            first_row = ' - '.join(first_row_a) + '\n'
+            # print first_row
 
             today = datetime.datetime.today()
             first_time = True
             episodes_list = []
-
+            counter += 1
+            next_episode_days = 0
             for i in series.series:
                 for j in series.series[i]:
                     b_date = series.series[i][j]['firstaired']
@@ -630,8 +635,6 @@ def init (args):
 
                     if broadcast_date < today:
                         continue
-                    if first_time:
-                        first_time = False
 
                     future_date = dateParser.parse (series.series[i][j]['firstaired'])
                     diff = future_date - today
@@ -641,18 +644,30 @@ def init (args):
                         series.series[i][j]['seasonnumber'].rjust (2, '0'),
                         series.series[i][j]['episodenumber'].rjust (2, '0'),
                         fancy_date,
-                        diff.days,
+                        diff.days + 1,
                     ))
+
+                    if first_time:
+                        first_time = False
+                        next_episode_days_key = str(diff.days).rjust(5, '0') + str(counter)
 
             if not first_time:
                 indent = '    '
                 episode_list = 'Future episodes: ' + ' - '.join (episodes_list)
-                print textwrap.fill (
+                #print textwrap.fill (
+                #    U.hi_color (episode_list, foreground=22),
+                #    width=int(series.console_columns),
+                #    initial_indent=indent,
+                #    subsequent_indent=indent
+                #    )
+                episodes = textwrap.fill (
                     U.hi_color (episode_list, foreground=22),
                     width=int(series.console_columns),
                     initial_indent=indent,
                     subsequent_indent=indent
-                )
+                    )
+                show_info[next_episode_days_key] = first_row + episodes
+
 
             if args.ask_inactive:
                 if series.status == 'Ended' and first_time:
@@ -660,7 +675,13 @@ def init (args):
                     if set_status == 'y':
                         series.set_inactive()
 
-            '''
+        keys = show_info.keys()
+        keys.sort()
+        for i in keys:
+            print show_info[i]
+
+
+        '''
             S05E01, Jun 10 (48) - S05E02, Jun 17 (55)
 
             if show ended:                           series.status == ended
@@ -677,13 +698,13 @@ def init (args):
 
             '''
 
-            '''
+        '''
             Torchwood S04E11, Continuing
             Battlestar Galactica (2002) S03E03, Ended
               S07E19 S07E20 S07E21 S07E22 S07E23
             '''
 
-            '''
+        '''
             Torchwood
               S04E11, Continuing
               Left in season: 6
