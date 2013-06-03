@@ -571,8 +571,9 @@ def edit_db (search_str):
         if not new_status:
             new_status = row['status']
 
+
         sql = '''UPDATE shows SET name=:name, season=:season,
-            episode=:episode, status=:status, nzbmatrix_search_name=:nzbmatrix_search_name
+            episode=:episode, status=:status, nzbmatrix_search_name=:nzbmatrix_search_name,
             WHERE thetvdb_series_id=:tvdb_id'''
 
         row_values = {'name':new_name, 'season':new_season, 'episode':new_episode,
@@ -598,6 +599,13 @@ def init (args):
         counter = 0
         for series in AllSeries():
             title = series.db_name
+
+            # check if the series object has a status attribute. if it
+            # doesn't then its probably a show that nothing is known
+            # about it yet.
+            if 'status' not in dir(series):
+                continue
+
             if series.status == 'Ended':
                 status = U.hi_color (series.status, foreground=196)
             else:
