@@ -301,7 +301,7 @@ class Series:
         self.db_name = search_str
         try:
             show_data = self._ask(self.search_provider.search(search_str), None, None)
-            if not show_data['nzbid']: return
+            if not show_data: return
         # except NZBMatrix.MatrixError:
         except Search.SearchError:
             print 'No matches'
@@ -341,13 +341,6 @@ class Series:
         return missing
 
     def _ask (self, shows, season, episode):
-        num_w = 2
-        size_w = 10
-        date_w = 12
-        # hits_w = 6
-        # title_w = int (self.console_columns) - (size_w + hits_w + date_w + 6)
-        title_w = int (self.console_columns) - (size_w + date_w + 6)
-
         class color:
             title_bg = 19
             title_fg = None
@@ -374,45 +367,26 @@ class Series:
             background=color.title_bg,
             ))
 
-        # Table header row
-        print title_bar.join ([
-            U.hi_color (' '.rjust (num_w), background=color.tb_header_bg),
-            U.hi_color ('NZB Name'.ljust (title_w),
-                        background=color.tb_header_bg, foreground=color.tb_header_fg),
-            U.hi_color ('Size'.ljust (size_w),
-                        background=color.tb_header_bg, foreground=color.tb_header_fg),
-            # U.hi_color ('Hits'.ljust (hits_w),
-            #           background=color.tb_header_bg, foreground=color.tb_header_fg),
-            U.hi_color ('Date'.ljust (date_w),
-                        background=color.tb_header_bg, foreground=color.tb_header_fg),
-        ])
+        num_w = 2
+        header_titles = [' '] + shows[0][0]
+        all_length = num_w + sum(shows[0][1]) + 4 # width of first column: 1...Z
+        title_w = int (self.console_columns) - all_length
+        header_widths = [num_w] + [title_w if x is 0 else x for x in shows[0][1]]
 
-        # [{'NZBNAME': 'Californication S04E12 HDTV XviD LOL', 'CATEGORY': 'TV > Divx/Xvid', 'HITS': '0',
-        #   'GROUP': 'alt.binaries.teevee', 'LANGUAGE': 'English', 'NFO': 'yes',
-        #   'IMAGE': '', 'INDEX_DATE': '2011-03-28 01:29:33', 'USENET_DATE': '2011-03-28 1:29:34',
-        #   'WEBLINK': '', 'LINK': 'nzbmatrix.com/nzb-details.php?id=886802&hit=1',
-        #   'COMMENTS': '0', 'NZBID': '886802', 'REGION': '0', 'SIZE': '279120445.44'}]
+        head_row = []
+        for header_title, header_width in zip(header_titles, header_widths):
+            head_row.append(
+                U.hi_color(header_title.ljust (header_width), background=color.tb_header_bg))
+        print title_bar.join(head_row)
 
         # Matched episodes
         key = ('1','2','3','4','5','6','7','8','9','0','a','b','c','d','e','f','g','h','i',
                'j','k','l','n','o','p','q','r','s','t','u','v','w','x','y','z')
-        for row, counter in zip (shows, key):
-            size = U.pretty_filesize (row['size'])
-            size = size.rjust (size_w)
-            size = size.replace ('GB', U.fg_color ('yellow', 'GB'))
-
-            title = U.snip (row['nzbname'].ljust (title_w), title_w)
-            title = title.replace ('avi', U.fg_color ('green', 'avi'))
-
-            date = row['usenet_date']
-            print bar.join ([
-                counter.rjust (num_w),
-                title,
-                size,
-                # U.snip (row['HITS'].ljust (hits_w), hits_w),
-                # row['HITS'].ljust (hits_w),
-                U.snip (date.ljust (date_w), date_w),
-            ])
+        for row, counter in zip (shows[1], key):
+            full_row = [counter] + row
+            for width, i in zip (header_widths, range(len(header_widths))):
+                full_row[i] = full_row[i].ljust(width)
+            print bar.join(full_row[:-1])
 
         # User Input
         choice = ''
@@ -428,8 +402,8 @@ class Series:
         elif get in key:    # number choice
             choice_num = [i for i,j in enumerate (key) if j == get][0]
             choice = int (choice_num)
-            if choice not in range (len (shows)):
-                U.wr ('Number not between 1 and %s' % (len (shows)))
+            if choice not in range (len (shows[1])):
+                U.wr ('Number not between 1 and %s' % (len (shows[1])))
                 return
         elif get == 'm':    # mark show as watched, but don't download it
             return 'mark'
@@ -439,8 +413,8 @@ class Series:
             print 'Wrong choice'
             return
 
-        # return shows[choice]['nzbid']
-        return shows[choice]
+        return shows[1][choice][-1:][0]
+
 
     def _download_nzb (self, show_data):
         msg = U.hi_color ('Downloading nzb...', foreground=16, background=184)
@@ -469,6 +443,7 @@ class Series:
 
 
     def _update_db (self, season, episode):
+        return
         sql = "UPDATE shows SET season=:season, episode=:episode WHERE thetvdb_series_id=:tvdb_id"
         conn = sqlite3.connect (config.db_file)
         curs = conn.cursor()
@@ -706,20 +681,6 @@ def init (args):
 
             '''
 
-        '''
-            Torchwood S04E11, Continuing
-            Battlestar Galactica (2002) S03E03, Ended
-              S07E19 S07E20 S07E21 S07E22 S07E23
-            '''
-
-        '''
-            Torchwood
-              S04E11, Continuing
-              Left in season: 6
-            Battlestar Galactica (2002)
-              S03E03, Ended, Last episode: S05E12
-              Left in season: 9; Seasons left: 3
-            '''
 
 
     if args.action == t.showmissing:

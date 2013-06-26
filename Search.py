@@ -2,13 +2,16 @@
 
 import sys
 from Util import U
+from subprocess import call
+from subprocess import Popen
 
 from get_nzb_config import config
 
 ##############################################################
-# from search_providers.NZBIndex_com import Provider as engine1
+# from search_providers.NZBIndex_com import Provider as search_engine
 # from search_providers.nzb_cc import Provider as engine2
-from search_providers.nzbclub_com import Provider as engine1
+# from search_providers.nzbclub_com import Provider as search_engine
+from search_providers.kickass_to import Provider as search_engine
 ##############################################################
 
 class SearchError (Exception):
@@ -23,8 +26,8 @@ class SearchError (Exception):
 class Search (object):
 
     def __init__(self):
-        # self.engines = [engine1(), engine2()]
-        self.engines = [engine1()]
+        # self.engines = [search_engine(), engine2()]
+        self.engines = [search_engine()]
         self.season = ''
         self.episode = ''
         self.show_name = ''
@@ -39,42 +42,38 @@ class Search (object):
         episode = str (episode).rjust (2, '0')
         if both:
             # fixed = 'S%sE%s | %sx%s' % (season_just, episode, season, episode)
-            fixed = '%s S%sE%s or %s %sx%s' % (show_title, season_just, episode, show_title, season, episode)
+            fixed = '"%s S%sE%s" OR "%s %sx%s"' % (
+                show_title, season_just, episode, show_title, season, episode)
         else:
             fixed = 'S%sE%s' % (season_just, episode)
 
         return fixed
 
 
-    def search(self, search_string, season=False, episode=False, min_size=100, max_size=False):
+    def search(self, search_string, season=False,
+               episode=False, min_size=100, max_size=False):
         '''
         Return an array of values:
 
-        <nzbname> is the text used for display.
-        <size> is the size of the download in bytes.
-        <usenet_date> is the date in human readable form no wider that 12 characters.
-        <nzbid> is an id or href that identifies the nzb file to download.  It will be
-          passed to the download method.
-
-        Example:
-        --------
         [
-          {nzbname: '"American.Horror.Story.S01E01.FRENCH.BDRip.XviD-JMT.nfo" - 602,76 MB - yEnc',
-           size: 592686000,
-           usenet_date: 'Nov 05/2012'}
-          {...}
-          {...}
+          [
+            [head1, head2, head3, id],
+            [head1-width, head2-width, head3-width],
+            [head1-alignment, head1-alignment, head1-alignment]
+          ],
+          [data from search...]
         ]
-
         '''
+
         se = ''
         if (season and episode):
             self.season = season
             self.episode = episode
             self.show_name = search_string
 
-            # search_string = '%s %s' % (search_string, self.se_ep(season, episode, both=False))
-            search_string = '%s' % (self.se_ep(season, episode, both=True, show_title=search_string))
+            search_string = '%s' % (
+                self.se_ep(
+                    season, episode, both=True, show_title=search_string))
 
         # print 'searching for:', search_string
 
@@ -105,16 +104,25 @@ class Search (object):
         back to get-nzb.v2.py
         '''
 
-        # print chosen_show
-
         downloaded_filename = ''
-        for engine in self.engines:
-            if chosen_show['provider_name'] == engine.name:
+        if chosen_show.startswith("magnet:"):
+
+            # gvfs-... are the Gnome tools for interacting with
+            # the file system.  Use KIO for kde.
+            # gvfs-open will open whatever application is associated
+            # with magnet links.
+            Popen (["gvfs-open", chosen_show])
+            # print chosen_show
+
+
+        else:       # is a nzb file
+            for engine in self.engines:
                 final_name = ''
                 # only cleans name for tv show downloads
                 # TODO: make work for 'nondbshow' also.
                 if self.season and self.episode:
-                    cleaned_title = chosen_show['nzbname'].replace(' ', '_').replace('.', '_')
+                    cleaned_title = chosen_show.replace(
+                        ' ', '_').replace('.', '_')
                     nogo = '/\\"\'[]()#<>?!@$%^&*+='
                     for c in nogo:
                         cleaned_title = cleaned_title.replace(c, '')
@@ -124,7 +132,8 @@ class Search (object):
                         , self.se_ep(self.season, self.episode, both=False)
                         #, cleaned_title
                     )
-                downloaded_filename = engine.download (chosen_show, destination, final_name)
+                downloaded_filename = engine.download (
+                    chosen_show, destination, final_name)
 
         return downloaded_filename
 

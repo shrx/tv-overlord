@@ -17,54 +17,97 @@ Provider.search (search_string)
 
 ** download
 
-Provider.download (chosen_show, destination)
+Provider.download (chosen_show, destination, final_name)
 
 
 * Output
 
-** Properties
+** search(search_string)
 
-There must be two global properties, provider_url and name.
+Search returns a data structure that contains information on how the
+table is laid out and the data for that table.  It is a array that
+consists of two sub arrays.  The first sub array is an array of three
+arrays, first one is the column titles, second one is the width of
+each title, and the third is the alignment.  The second sub array is
+the data from the search.
 
-** search()
+- If one of the title widths is a zero, it will expand to fill the
+  table
+- Alignment is specified with a '<' or '>'
+- The last field in each of the data arrays, is the ID.  This is whats
+  returned when the user makes that choice.  The download method uses
+  this to retrieve the correct file.
 
-The *search* method returns and array of dictionaries.
-Each dict is a show with the following required fields.
+If the search modual uses bittorent, the download method is not used.
+The search method must send a magnet url as the ID field and that is
+then passed to =gvfs-open= which then opens whatever application is
+associated with magnet links.
 
-_nzbname_: the text used for display on the console.
-_size_: the size of the downloaded video in bytes.
-_usenet_date_: the date the nzb file was posted.
-_nzbid_: this is some information that you will need to download
-the nzb file.  Either a url, or id, etc...
-
-Any aditional data that gets passed as part of each show,
-will be ignored and passed back.
-
-** download()
-
-The *download* method returns the name of the nzb
-file that was downloaded.
-
-
-* Example
 
 #+BEGIN_SRC Python
-
-#!/usr/bin/env python
-
-class Provider (object):
-
-    provider_url = 'http://nzb.cc'
-    name = 'nzb.cc'
-
-    def __init__ (self):
-        pass
-
-    def search (self, search_string):
-        pass
-
-    def download (self, chosen_show, destination):
-        pass
-
-
+[
+  [
+    [head1, head2, head3],
+    [head1-width, head2-width, head3-width]
+    [head1-alignment, head1-alignment, head1-alignment]
+  ],
+  [
+    [column 1 data,
+     column 2 data,
+     column 3 data,
+     id
+    ],
+    [column 1 data,
+     column 2 data,
+     column 3 data,
+     id
+    ],
+    [column 1 data,
+     column 2 data,
+     column 3 data,
+     id
+    ],
+    [...],
+    [...]
+  ]
+]
 #+END_SRC
+
+Example data returned from search():
+
+#+BEGIN_SRC Python
+[
+  [
+    ['Name', 'Size', 'Date', 'Seeds'],
+    [0, 10, 12, 10],
+    ['<', '>', '<', '>']
+  ],
+  [
+    [u'Family Guy S09E01 HDTV XviD-LOL',
+     '349.99 MB',
+     'Sep 27/2010',
+     u'179',
+     u'magnet:?xt=urn:btih:1a1f0a125c4...dp%3A%2F%2Fopen.demonii.com%3A1337'],
+    [u'Family Guy S09E01 720p HDTV X264-DIMENSION (BX)',
+     '1.09 GB',
+     'Sep 27/2010',
+     u'0',
+     u'magnet:?xt=urn:btih:e631eb0553b...dp%3A%2F%2Fopen.demonii.com%3A1337'],
+    [u'Family Guy S09E01 HDTV XviD-LOL (BX)',
+     '350.00 MB',
+     'Sep 27/2010',
+     u'0',
+     u'magnet:?xt=urn:btih:1cfa99a9025...dp%3A%2F%2Fopen.demonii.com%3A1337']
+  ]
+]
+#+END_SRC
+
+
+** download(chosen_show, destination, final_name)
+
+- =chosen_show=: The url of the nzb file to download
+- =destination=: Where to download to
+- =final_name=: Optionaly, give the downloaded file this name
+
+The =download= method returns the name of the nzb
+file that was downloaded.

@@ -6,6 +6,7 @@ import os
 from time import mktime
 from datetime import datetime
 import pprint
+from Util import U
 
 
 class Provider (object):
@@ -60,8 +61,11 @@ class Provider (object):
             , 'nfo': 0      # has to have nfo  1=yes, 0=no
             }
         full_url = url + urllib.urlencode (query)
-        # print full_url
         parsed = feedparser.parse(full_url)
+
+        header = [['Name', 'Date', 'Size'],
+                  [0, 12, 10],
+                  ['<', '<', '>']]
 
         show_data = []
         for show in parsed['entries']:
@@ -69,16 +73,16 @@ class Provider (object):
             dt = datetime.fromtimestamp(mktime(show['published_parsed']))
             date = dt.strftime('%b %d/%Y')
 
-            show_data.append({
-                'nzbname': show['title']
-                , 'usenet_date': date
-                , 'size': show['links'][0]['length']
-                , 'nzbid': show['links'][0]['href']
-                , 'search_string': search_string
-                , 'provider_name': Provider.name # In this case: NZBClub
-                })
+            size = U.pretty_filesize (show['links'][0]['length'])
 
-        return show_data
+            show_data.append([
+                show['title'],
+                date,
+                size,
+                show['links'][0]['href'] # id
+                ])
+
+        return [header] + [show_data]
 
 
     def download (self, chosen_show, destination, final_name):
@@ -89,7 +93,7 @@ class Provider (object):
         if not os.path.isdir (destination):
             raise ProviderError ('%s is not a dir' % (dest))
 
-        href = chosen_show['nzbid']
+        href = chosen_show
         filename = href.split('/')[-1]
         if final_name:
             # final_name should be a name that SABNzbd can parse
