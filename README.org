@@ -1,0 +1,68 @@
+
+* TV Downloader
+
+** Overview
+
+A command line tool to download and manage tv shows from newsgroups or
+bittorent.  It will download nzb files or magnet links.
+
+TV Downloader keeps track of which shows have been downloaded and what
+shows are available to download.
+
+** Install
+
+TV Downloader requires two additional python librarys to use:
+  1. tvdb_api [[https://github.com/dbr/tvdb_api]]
+  2. tvrage [[https://pypi.python.org/pypi/python-tvrage/]]
+
+Install steps:
+  1. =easy_install tvdb_api=
+  2. =easy_install -U python-tvrage=
+  3. Clone this repository
+
+** Configure
+
+TV Downloader stores the config file sqlite database in ~/.tv_downloader.
+
+** Command line
+
+$ tv --help
+usage: tv [-h] [-d db-file] [-l download_location] [-n]
+          [--search-method-a-only]
+          {download,info,showmissing,addnew,nondbshow,editdbinfo} ...
+
+Download and manage tv shows and movies
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -d db-file, --db-file db-file
+                        Use a different database than the default one
+  -l download_location, --location download_location
+                        set the download location
+  -n, --no-cache        If set, do not use the local thetvdb cache
+  --search-method-a-only
+                        Search using SXXEXX pattern only instead of both
+                        SXXEXX and SxXX
+
+Command help:
+  Use one of the following commands. For aditional help, use <command> -h
+  for help with a specific command
+
+  {download,info,showmissing,addnew,nondbshow,editdbinfo}
+    download            Download any new shows available. Optionally, download
+                        a single show
+    info                Display information stored in the local db; last
+                        episode downloaded, show status (canceled, etc...),
+                        episodes in current season, etc...
+    showmissing         Display episodes ready to download
+    addnew              Add a new show to download
+    nondbshow           Download a show or movie not in the db
+    editdbinfo          Edit the information in the db for a single show
+
+
+** Requirements
+
++ Linux
++ Python
+  - tvdb_api
+  - tvrage

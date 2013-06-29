@@ -1,0 +1,36 @@
+
+
+* Features [0/17]
+
++ [ ] rename ~/.nzb to ~/.tv_downloader
++ [ ] rename nzb_config.ini to config.ini
++ [ ] rename shows.v2.sqlite3 to shows.sqlite3
++ [ ] remove --search-method-a-only command
++ [ ] add features to info
+  - [ ] various sort options, alphabetical, upcoming...
+  - [ ] show only cancelled, all shows
+  - [ ] option to show series id
++ [ ] list all search providers from command line
++ [ ] command to switch search provider
++ [ ] download one show only with series id
++ [ ] remove -m MAX_SIZE option from download
++ [ ] remove -s SEASON_NUMBER and -e EPISODE_NUMBER from addnew
++ [ ] rename editdbinfo to editshowinfo
++ [ ] if run for first time, create config folder or create a
+      --first-time command which would set up dirs.
++ [ ] remove movie functionality (move to a separate project?)
++ [ ] add alignment options to table in search providers [> < =]
++ [ ] add snip() to table in search providers
++ [ ] for torrent downloads, use $DESKTOP_SESSION and look for
+      =kioclient=, =gvfs-open=, or =open= on mac.  Look at:
+      http://h3manth.com/content/desktop-session-detection-python
++ [ ] create a search provider for thepiratebay
+
+
+* Bugs [0/3]
+
++ [ ] fix bug where the series is is not retrieved from thetvdb
+      when adding a new show
++ [ ] make editdbinfo more friendly
++ [ ] test if having the show db on a network drive works, so the tv
+      command could be run from multiple machines and stay in sync
