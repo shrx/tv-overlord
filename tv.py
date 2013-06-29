@@ -17,8 +17,8 @@ import textwrap
 import sys
 from ConsoleInput import ask_user as ask
 import Search
-from get_nzb_config import config
-from get_nzb_util import FancyPrint
+from tv_config import config
+from tv_util import FancyPrint
 from Util import U
 
 # http://nzbmatrix.info/  <-- status info page
@@ -443,7 +443,6 @@ class Series:
 
 
     def _update_db (self, season, episode):
-        return
         sql = "UPDATE shows SET season=:season, episode=:episode WHERE thetvdb_series_id=:tvdb_id"
         conn = sqlite3.connect (config.db_file)
         curs = conn.cursor()

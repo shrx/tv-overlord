@@ -5,7 +5,7 @@ from Util import U
 from subprocess import call
 from subprocess import Popen
 
-from get_nzb_config import config
+from tv_config import config
 
 ##############################################################
 # from search_providers.NZBIndex_com import Provider as search_engine

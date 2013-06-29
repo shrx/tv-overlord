@@ -4,7 +4,7 @@ import os
 import sys
 from Util import U
 from ConsoleInput import ask_user
-from get_nzb_config import config
+from tv_config import config
 import urllib2
 import json
 
@@ -299,4 +299,3 @@ if __name__ == '__main__':
 	#  		fp.standard_print (i)
 	#  	else:
 	#  		fp.fancy_print ('Current animal: %s' % i)
-
