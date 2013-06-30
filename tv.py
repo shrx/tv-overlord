@@ -21,7 +21,6 @@ from tv_config import config
 from tv_util import FancyPrint
 from Util import U
 
-# http://nzbmatrix.info/  <-- status info page
 # http://docs.python.org/release/3.0.1/library/string.htm  String formating
 # https://github.com/dbr/tvdb_api/wiki
 
@@ -59,7 +58,7 @@ class Series:
     episodename
     '''
 
-    def __init__ (self, dbdata=[], show_type='current'):
+    def __init__ (self, provider, dbdata=[], show_type='current'):
         typelist = ('new', 'nondb', 'current')
         if show_type not in typelist:
             raise exception ('incorrect show type')
@@ -67,10 +66,10 @@ class Series:
             self._set_db_data (dbdata)
             # self._get_tvrage_series_data()
             self._get_thetvdb_series_data()
-            self.search_provider = Search.Search()
+            self.search_provider = Search.Search(provider)
 
         if show_type == 'nondb':
-            self.search_provider = Search.Search()
+            self.search_provider = Search.Search(provider)
 
         self.console_rows, self.console_columns = os.popen ('stty size', 'r').read().split()
 
@@ -81,7 +80,9 @@ class Series:
         self.db_ragetv_series_id = dbdata['ragetv_series_id']
         self.db_current_season = dbdata['season']
         self.db_last_episode = dbdata['episode']
-        self.db_nzbmatrix_search_name = dbdata['nzbmatrix_search_name']
+        # Sometimes the thetvdb name is slighly different than the
+        # name to use for searching, thats why we use search_engine_name
+        self.db_search_engine_name = dbdata['search_engine_name']
         self.db_status = dbdata['status']
 
     def _get_tvrage_series_data(self):
@@ -173,18 +174,13 @@ class Series:
 
         for i in series.data:
             setattr (self, i, series.data[i])
-            # print i, '-', series.data[i]
         self.series = series
-
-        # print type (series)
-        # print series
-        # exit()
 
 
     def download_missing (self):
         missing = self._get_missing()
-        if self.db_nzbmatrix_search_name:
-            search_title = self.db_nzbmatrix_search_name
+        if self.db_search_engine_name:
+            search_title = self.db_search_engine_name
         else:
             search_title = self.db_name
 
@@ -195,56 +191,41 @@ class Series:
             return
 
         for episode in missing:
-            search_strings = [
-                '%s %s' % (search_title, se_ep (episode['season'], episode['episode'])),
-                # '%s %sx%s' % (search_title, episode['season'], episode['episode'].zfill(2))
-                ]
-
-            nzbid = None
+            showid = None
 
             showlist = []
             error_a = error_b = False
-            # The nzb api doesn't allow 'OR' searches so two searches are required.
-            for search_string in search_strings:
-                try:
-                    results = self.search_provider.search(
-                            search_title,
-                            season=episode['season'],
-                            episode=episode['episode'],
-                            max_size=config.tv_max_size)
+            try:
+                results = self.search_provider.search(
+                        search_title,
+                        season=episode['season'],
+                        episode=episode['episode'],
+                        )
 
-                    #headers = results['header']
-                    #print '%s of %s api calls left' % (headers['api_rate_limit_left'], headers['api_rate_limit'])
-                    #options = results['data'].values()
-                    #for i in options:
-                    #   showlist.append (i)
-                # except NZBMatrix.MatrixError as inst:
-                except Search.SearchError as inst:
-                        error_a = True
+            except Search.SearchError as inst:
+                    error_a = True
 
             if results:
-                nzbid = self._ask (
+                showid = self._ask (
                     results,
                     season=episode['season'],
                     episode=episode['episode'])
             else:
-                #print '"%s" or "%s" are listed in TheTVDB, but not found at NZBMatrix' % (
-                #   search_strings[0]), search_strings[1])
-                print '"%s" is listed in TheTVDB, but not found at the NZB search engine' % (
-                    search_strings[0])
+                print '"%s" is listed in TheTVDB, but not found at the search engine' % (
+                    search_title)
 
-            if nzbid == 'skip_rest':
+            if showid == 'skip_rest':
                 return
 
-            if nzbid == 'mark':
+            if showid == 'mark':
                 # mark the episode as watched, but don't download it
                 self._update_db (season=episode['season'], episode=episode['episode'])
                 continue
 
-            if not nzbid:
+            if not showid:
                 continue
 
-            self._download_nzb (nzbid)
+            self._download (showid)
             self._update_db (season=episode['season'], episode=episode['episode'])
 
     def is_missing (self):
@@ -276,7 +257,7 @@ class Series:
                               initial_indent=indent, subsequent_indent=indent)
         return ret
 
-    def add_new (self, name, season=1, episode=0):
+    def add_new (self, name):
         # search thetvdb
         self.db_name = name
         self._get_thetvdb_series_data()
@@ -295,18 +276,17 @@ class Series:
         correct = ask ('Is this the correct show? [y/n]')
 
         if correct == 'y':
-            self._add_new_db (season=season, episode=episode)
+            self._add_new_db()
 
     def non_db (self, search_str):
         self.db_name = search_str
         try:
             show_data = self._ask(self.search_provider.search(search_str), None, None)
             if not show_data: return
-        # except NZBMatrix.MatrixError:
         except Search.SearchError:
             print 'No matches'
             return
-        self._download_nzb (show_data)
+        self._download (show_data)
 
 
     def _get_missing (self):
@@ -353,25 +333,26 @@ class Series:
         title_bar = U.hi_color ('|', foreground=color.bar, background=color.tb_header_bg)
         bar =       U.hi_color ('|', foreground=color.bar)
 
-        # Title bar row
+        ### Title bar row
         print
-        # show_title = '%s %s' % (U.effects (['boldon',], self.db_name), 'SXXEXX')
         if season and episode:
             show_title = '%s %s' % (self.db_name, se_ep (season, episode))
         else:
             show_title = self.db_name
 
+        show_title = shows[0][0]
         print U.effects (['boldon'], U.hi_color (
             show_title.ljust (int (self.console_columns)),
             foreground=color.title_fg,
             background=color.title_bg,
             ))
 
+        ### Header row
         num_w = 2
-        header_titles = [' '] + shows[0][0]
-        all_length = num_w + sum(shows[0][1]) + 4 # width of first column: 1...Z
+        header_titles = [' '] + shows[0][1]
+        all_length = num_w + sum(shows[0][2]) + 4 # width of first column: 1...Z
         title_w = int (self.console_columns) - all_length
-        header_widths = [num_w] + [title_w if x is 0 else x for x in shows[0][1]]
+        header_widths = [num_w] + [title_w if x is 0 else x for x in shows[0][2]]
 
         head_row = []
         for header_title, header_width in zip(header_titles, header_widths):
@@ -379,7 +360,7 @@ class Series:
                 U.hi_color(header_title.ljust (header_width), background=color.tb_header_bg))
         print title_bar.join(head_row)
 
-        # Matched episodes
+        ### Matched episodes
         key = ('1','2','3','4','5','6','7','8','9','0','a','b','c','d','e','f','g','h','i',
                'j','k','l','n','o','p','q','r','s','t','u','v','w','x','y','z')
         for row, counter in zip (shows[1], key):
@@ -416,17 +397,14 @@ class Series:
         return shows[1][choice][-1:][0]
 
 
-    def _download_nzb (self, show_data):
-        msg = U.hi_color ('Downloading nzb...', foreground=16, background=184)
+    def _download (self, show_data):
+        msg = U.hi_color ('Downloading...', foreground=16, background=184)
         sys.stdout.write (msg)
         sys.stdout.flush()
 
-        # headers = self.matrix.Download (nzbId=show_id, dest=config.staging)
         filename = self.search_provider.download(chosen_show=show_data, destination=config.staging)
 
         backspace = '\b' * len (msg)
-        #filename = re.findall ('filename="(.*?)"',
-        #                      headers['content-disposition'])[0]
         done = U.hi_color (filename.ljust (len (msg)), foreground=34)#34
         print '%s%s' % (backspace, done)
 
@@ -453,7 +431,7 @@ class Series:
         conn.close()
 
 
-    def _add_new_db (self, season, episode):
+    def _add_new_db (self, season=0, episode=0):
         sql = '''insert into shows (
             network_status, status, thetvdb_series_id, name, season, episode)
             values (:network_status, :status, :thetvdb_id, :name, :season, :episode)'''
@@ -472,21 +450,23 @@ class Series:
 
 class AllSeries:
     '''Return an iterable class of Series'''
-    def __init__ (self):
+    def __init__ (self, provider):
         self.dbdata = self._query_db()
         self.index = len (self.dbdata)
         self.i = 0
+        self.provider = provider
     def __iter__ (self):
         return self
     def next (self):
         if self.i == len (self.dbdata):
             raise StopIteration
-        series = Series (dbdata=self.dbdata[self.i])
+        series = Series (self.provider, dbdata=self.dbdata[self.i])
         self.i = self.i + 1
         return series
 
     def _query_db (self):
-        sql = "SELECT name, season, episode, thetvdb_series_id, ragetv_series_id, nzbmatrix_search_name, status \
+        sql = "SELECT name, season, episode, thetvdb_series_id, \
+            ragetv_series_id, search_engine_name, status \
             FROM shows WHERE status='active' ORDER BY replace (name, 'The ', '');"
         # sql = "SELECT name, season, episode, thetvdb_series_id \
             # FROM shows ORDER BY replace (name, 'The ', '');"
@@ -522,16 +502,16 @@ def edit_db (search_str):
         print 'Season:', row['season'], '--',
         print 'Episode:', row['episode'], '--',
         print 'Status:', row['status'], '--',
-        print 'NZBMatrix search title:', row['nzbmatrix_search_name']
+        print 'Search engine title:', row['search_engine_name']
         print
 
         new_name = raw_input ('Name (%s): ' % (row['name']))
         if not new_name:
             new_name = row['name']
 
-        new_nzbmatrix_name = raw_input ('NZB search name (%s): ' % (row['nzbmatrix_search_name']))
-        if not new_nzbmatrix_name:
-            new_nzbmatrix_name = row['nzbmatrix_search_name']
+        new_search_engine_name = raw_input ('Search engine title (%s): ' % (row['search_engine_name']))
+        if not new_search_engine_name:
+            new_search_engine_name = row['search_engine_name']
 
         new_season = raw_input ('Season (%s): ' % (row['season']))
         if not new_season:
@@ -547,11 +527,11 @@ def edit_db (search_str):
 
 
         sql = '''UPDATE shows SET name=:name, season=:season,
-            episode=:episode, status=:status, nzbmatrix_search_name=:nzbmatrix_search_name,
+            episode=:episode, status=:status, search_engine_name=:search_engine_name,
             WHERE thetvdb_series_id=:tvdb_id'''
 
         row_values = {'name':new_name, 'season':new_season, 'episode':new_episode,
-                      'status':new_status, 'nzbmatrix_search_name':new_nzbmatrix_name,
+                      'status':new_status, 'search_engine_name':new_search_engine_name,
                       'tvdb_id':row['thetvdb_series_id']}
         curs.execute (sql, row_values)
 
@@ -568,10 +548,17 @@ def init (args):
     if args.no_cache == False:
         config.use_cache = False
 
+    if args.search_provider:
+        provider = args.search_provider
+    else:
+        provider = config.providers[0]
+
+    print 'Using "%s" search engine' % provider
+
     if args.action == t.info:
         show_info = {}
         counter = 0
-        for series in AllSeries():
+        for series in AllSeries(provider):
             title = series.db_name
 
             # check if the series object has a status attribute. if it
@@ -684,7 +671,7 @@ def init (args):
 
     if args.action == t.showmissing:
         fp = FancyPrint()
-        for series in AllSeries():
+        for series in AllSeries(provider):
             if series.is_missing():
                 fp.standard_print (series.show_missing())
             else:
@@ -693,25 +680,25 @@ def init (args):
 
 
     if args.action == t.download: #'download':
-        if args.max_size:
-            config.tv_max_size = args.max_size
-
-        for series in AllSeries():
+        for series in AllSeries(provider):
             series.download_missing()
 
     if args.action == t.addnew:
         # print args
         newShow = Series (show_type='new')
-        newShow.add_new (name=args.search_string,
-                         season=args.season_number,
-                         episode=args.episode_number)
+        newShow.add_new (name=args.search_string)
 
     if args.action == t.nondbshow:
-        nons = Series (show_type='nondb')
+        nons = Series (provider, show_type='nondb')
         nons.non_db (args.search_string)
 
     if args.action == t.editdbinfo:
         edit_db (args.search_string)
+
+    if args.action == t.providers:
+        providers = config.providers
+        for p in providers:
+            print p, '  http://%s' % p.replace('_', '.')
 
 
 if __name__ == '__main__':
@@ -723,6 +710,7 @@ if __name__ == '__main__':
         addnew = 'addnew'
         nondbshow = 'nondbshow'
         editdbinfo = 'editdbinfo'
+        providers = 'providers'
 
     parser = ArgumentParser (
         description='Download and manage tv shows and movies'
@@ -742,10 +730,9 @@ if __name__ == '__main__':
         action='store_false',
         help='If set, do not use the local thetvdb cache'
     )
-    parser.add_argument (
-        '--search-method-a-only',
-        action='store_true',
-        help='Search using SXXEXX pattern only instead of both SXXEXX and SxXX'
+    parser.add_argument(
+        '-p', '--search-provider',
+        help='Use this search provider instead of the default one'
     )
     sub = parser.add_subparsers (
         title='Command help',
@@ -764,11 +751,6 @@ if __name__ == '__main__':
         '-i', '--series-id',
         help='The series id can be used to specify a single \
             show to download'
-    )
-    par1.add_argument (
-        '-m', '--max-size',
-        default=2000, type=int,
-        help='Set the max size in kilobytes'
     )
 
     # info
@@ -810,20 +792,6 @@ if __name__ == '__main__':
         metavar='SEARCH_STRING',
         help='The name of the show to add to the db',
     )
-    par4.add_argument (
-        '-s', '--season-number',
-        # metavar='season-number',
-        default='1',
-        help='Specify the season to start downloading at.  If \
-            not used, will default to season one',
-    )
-    par4.add_argument (
-        '-e', '--episode-number',
-        # metavar='episode-number',
-        default='0',
-        help='Specify the episode to start downloading at.  If \
-            not used, will default to episode one',
-    )
 
     # nondbshow
     par5 = sub.add_parser (
@@ -847,6 +815,13 @@ if __name__ == '__main__':
         help= ('The name of the show to edit.  If more than one ' +
                'show matches the SEARCH_STRING, edit multiple shows.'),
     )
+
+    # providers
+    par7 = sub.add_parser(
+        t.providers,
+        help='List all available search providers'
+    )
+
     # change showname
     # change season, episode
 

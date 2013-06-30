@@ -7,12 +7,6 @@ from subprocess import Popen
 
 from tv_config import config
 
-##############################################################
-# from search_providers.NZBIndex_com import Provider as search_engine
-# from search_providers.nzb_cc import Provider as engine2
-# from search_providers.nzbclub_com import Provider as search_engine
-from search_providers.kickass_to import Provider as search_engine
-##############################################################
 
 class SearchError (Exception):
 
@@ -25,33 +19,33 @@ class SearchError (Exception):
 
 class Search (object):
 
-    def __init__(self):
-        # self.engines = [search_engine(), engine2()]
-        self.engines = [search_engine()]
+    def __init__(self, provider):
+
+        mod_name = 'search_providers.' + provider
+        mod = __import__(mod_name, fromlist=["Provider"])
+        engine = getattr (mod, 'Provider')
+        self.engine = engine()
+
         self.season = ''
         self.episode = ''
         self.show_name = ''
 
 
-    def config(self):
-        pass
-
-
-    def se_ep (self, season, episode, both=True, show_title=''):
-        season_just = str (season).rjust (2, '0')
-        episode = str (episode).rjust (2, '0')
-        if both:
-            # fixed = 'S%sE%s | %sx%s' % (season_just, episode, season, episode)
-            fixed = '"%s S%sE%s" OR "%s %sx%s"' % (
-                show_title, season_just, episode, show_title, season, episode)
-        else:
-            fixed = 'S%sE%s' % (season_just, episode)
-
-        return fixed
+    #def se_ep (self, season, episode, both=True, show_title=''):
+    #    season_just = str (season).rjust (2, '0')
+    #    episode = str (episode).rjust (2, '0')
+    #    if both:
+    #        # fixed = 'S%sE%s | %sx%s' % (season_just, episode, season, episode)
+    #        fixed = '"%s S%sE%s" OR "%s %sx%s"' % (
+    #            show_title, season_just, episode, show_title, season, episode)
+    #    else:
+    #        fixed = 'S%sE%s' % (season_just, episode)
+    #
+    #    return fixed
 
 
     def search(self, search_string, season=False,
-               episode=False, min_size=100, max_size=False):
+               episode=False):
         '''
         Return an array of values:
 
@@ -65,17 +59,9 @@ class Search (object):
         ]
         '''
 
-        se = ''
-        if (season and episode):
-            self.season = season
-            self.episode = episode
-            self.show_name = search_string
-
-            search_string = '%s' % (
-                self.se_ep(
-                    season, episode, both=True, show_title=search_string))
-
-        # print 'searching for:', search_string
+        self.season = season
+        self.episode = episode
+        self.show_name = search_string
 
         msg = 'Searching for: %s...' % (search_string)
         msg = U.hi_color (msg, foreground=16, background=184)
@@ -84,17 +70,11 @@ class Search (object):
         backspace = '\b' * len (msg)
         overwrite = ' ' * len (msg)
 
-        all_results = []
-        for engine in self.engines:
-            search_results = engine.search(search_string)
-            all_results += search_results
+        search_results = self.engine.search(search_string, season, episode)
 
-        # print '>>>', all_results
-
-        # done = U.hi_color (filename.ljust (len (msg)), foreground=34)#34
         print '%s%s' % (backspace, overwrite)
 
-        return all_results
+        return search_results
 
 
     def download(self, chosen_show, destination):
@@ -116,24 +96,26 @@ class Search (object):
 
 
         else:       # is a nzb file
-            for engine in self.engines:
-                final_name = ''
-                # only cleans name for tv show downloads
-                # TODO: make work for 'nondbshow' also.
-                if self.season and self.episode:
-                    cleaned_title = chosen_show.replace(
-                        ' ', '_').replace('.', '_')
-                    nogo = '/\\"\'[]()#<>?!@$%^&*+='
-                    for c in nogo:
-                        cleaned_title = cleaned_title.replace(c, '')
+            # for engine in self.engines:
+            final_name = ''
+            # only cleans name for tv show downloads
+            # TODO: make work for 'nondbshow' also.
+            if self.season and self.episode:
+                cleaned_title = chosen_show.replace(
+                    ' ', '_').replace('.', '_')
+                nogo = '/\\"\'[]()#<>?!@$%^&*+='
+                for c in nogo:
+                    cleaned_title = cleaned_title.replace(c, '')
 
-                    final_name = '%s.%s.nzb' % (        # '%s.%s---%s.nzb'
-                        self.show_name.replace(' ', '.')
-                        , self.se_ep(self.season, self.episode, both=False)
-                        #, cleaned_title
-                    )
-                downloaded_filename = engine.download (
-                    chosen_show, destination, final_name)
+                final_name = '%s.%s.nzb' % (        # '%s.%s---%s.nzb'
+                    self.show_name.replace(' ', '.'),
+                    "S%sE%s" % (self.season.rjust(2, '0'), self.episode.rjust(2, '0'))
+                    # self.se_ep(self.season, self.episode, both=False)
+                    #, cleaned_title
+                )
+                print final_name
+            downloaded_filename = self.engine.download (
+                chosen_show, destination, final_name)
 
         return downloaded_filename
 

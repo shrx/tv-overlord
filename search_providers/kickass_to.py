@@ -14,15 +14,31 @@ class Provider (object):
     name = 'Kickass Torrents'
 
 
-    def search(self, search_string):
+    def se_ep (self, season, episode, show_title):
+        season_just = str (season).rjust (2, '0')
+        episode = str (episode).rjust (2, '0')
+        fixed = '"%s S%sE%s" OR "%s %sx%s"' % (
+            show_title, season_just, episode, show_title, season, episode)
+
+        return fixed
+
+
+    def search(self, search_string, season=False, episode=False):
+
+        if (season and episode):
+            search_string = '%s' % (
+                self.se_ep(
+                    season, episode, search_string))
 
         query = search_string
         encoded_search = urllib.quote (query)
         full_url = self.provider_url % (encoded_search)
-        # print full_url
 
         parsed = feedparser.parse(full_url)
-        header = [['Name', 'Size', 'Date', 'Seeds'], [0, 10, 12, 10]]
+        header = [
+            search_string,
+            ['Name', 'Size', 'Date', 'Seeds'],
+            [0, 10, 12, 10]]
         show_data = []
 
         for show in parsed['entries']:
@@ -30,7 +46,6 @@ class Provider (object):
             date = dt.strftime('%b %d/%Y')
 
             size = U.pretty_filesize (show['torrent_contentlength'])
-            # size = size.replace ('GB', U.fg_color ('yellow', 'GB'))
 
             # title = U.snip (show['title'].ljust (title_w), title_w)
             # title = title.replace ('avi', U.fg_color ('green', 'avi'))

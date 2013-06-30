@@ -1,30 +1,34 @@
 
 
-* Features [0/17]
+* Features [11/20]
 
-+ [ ] rename ~/.nzb to ~/.tv_downloader
-+ [ ] rename nzb_config.ini to config.ini
-+ [ ] rename shows.v2.sqlite3 to shows.sqlite3
-+ [ ] remove --search-method-a-only command
++ [X] rename ~/.nzb to ~/.tv_downloader
++ [X] rename nzb_config.ini to config.ini
++ [X] rename shows.v2.sqlite3 to shows.sqlite3
++ [X] remove --search-method-a-only command
++ [X] remove all reverences to nzbmatrix
 + [ ] add features to info
   - [ ] various sort options, alphabetical, upcoming...
   - [ ] show only cancelled, all shows
   - [ ] option to show series id
-+ [ ] list all search providers from command line
-+ [ ] command to switch search provider
++ [X] list all search providers from command line
++ [X] command to switch search provider
 + [ ] download one show only with series id
-+ [ ] remove -m MAX_SIZE option from download
-+ [ ] remove -s SEASON_NUMBER and -e EPISODE_NUMBER from addnew
++ [X] remove -m MAX_SIZE option from download
 + [ ] rename editdbinfo to editshowinfo
++ [ ] remove -s SEASON_NUMBER and -e EPISODE_NUMBER from addnew.  Do
+      this in editshowinfo
 + [ ] if run for first time, create config folder or create a
-      --first-time command which would set up dirs.
-+ [ ] remove movie functionality (move to a separate project?)
+      --first-time command which would set up dirs and create db
++ [X] remove movie functionality (move to a separate project?)
 + [ ] add alignment options to table in search providers [> < =]
 + [ ] add snip() to table in search providers
 + [ ] for torrent downloads, use $DESKTOP_SESSION and look for
       =kioclient=, =gvfs-open=, or =open= on mac.  Look at:
       http://h3manth.com/content/desktop-session-detection-python
 + [ ] create a search provider for thepiratebay
++ [X] move se_ep() to search_providers
++ [X] have search provider supply the table title
 
 
 * Bugs [0/3]

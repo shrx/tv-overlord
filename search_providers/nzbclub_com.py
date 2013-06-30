@@ -15,7 +15,15 @@ class Provider (object):
     name = 'NZBClub'
 
 
-    def search(self, search_string):
+    def se_ep (self, season, episode, show_title):
+        season_just = str (season).rjust (2, '0')
+        episode = str (episode).rjust (2, '0')
+        fixed = '%s S%sE%s or %s %sx%s' % (
+            show_title, season_just, episode, show_title, season, episode)
+        return fixed
+
+
+    def search(self, search_string, season=False, episode=False):
 
         '''
         Default Search: Our default is prefix match
@@ -49,6 +57,12 @@ class Provider (object):
         "hello world"
         '''
 
+        if (season and episode):
+            search_string = '%s' % (
+                self.se_ep(
+                    season, episode, search_string))
+
+        # print search_string
         url = 'http://www.nzbclub.com/nzbfeed.aspx?'
         query = {
             'q': search_string
@@ -63,9 +77,12 @@ class Provider (object):
         full_url = url + urllib.urlencode (query)
         parsed = feedparser.parse(full_url)
 
-        header = [['Name', 'Date', 'Size'],
-                  [0, 12, 10],
-                  ['<', '<', '>']]
+        header = [
+            search_string,
+            ['Name', 'Date', 'Size'],
+            [0, 12, 10],
+            ['<', '<', '>']
+        ]
 
         show_data = []
         for show in parsed['entries']:

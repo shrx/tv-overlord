@@ -17,7 +17,7 @@ def dict_factory (cursor, row):
 
 
 db_file = '/home/sm/.nzb/shows.v2.sqlite3'
-sql = "SELECT name, season, episode, thetvdb_series_id, nzbmatrix_search_name, ragetv_series_id, status \
+sql = "SELECT name, season, episode, thetvdb_series_id, search_engine_name, ragetv_series_id, status \
     FROM shows ORDER BY replace (name, 'The ', '');"
 conn = sqlite3.connect (db_file)
 conn.row_factory = dict_factory
