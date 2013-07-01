@@ -78,7 +78,7 @@ class Provider (object):
         parsed = feedparser.parse(full_url)
 
         header = [
-            search_string,
+            '%s  (%s)' % (search_string, self.provider_url),
             ['Name', 'Date', 'Size'],
             [0, 12, 10],
             ['<', '<', '>']

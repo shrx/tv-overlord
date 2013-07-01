@@ -4,6 +4,8 @@ import sys
 from Util import U
 from subprocess import call
 from subprocess import Popen
+import os
+import platform
 
 from tv_config import config
 
@@ -29,19 +31,6 @@ class Search (object):
         self.season = ''
         self.episode = ''
         self.show_name = ''
-
-
-    #def se_ep (self, season, episode, both=True, show_title=''):
-    #    season_just = str (season).rjust (2, '0')
-    #    episode = str (episode).rjust (2, '0')
-    #    if both:
-    #        # fixed = 'S%sE%s | %sx%s' % (season_just, episode, season, episode)
-    #        fixed = '"%s S%sE%s" OR "%s %sx%s"' % (
-    #            show_title, season_just, episode, show_title, season, episode)
-    #    else:
-    #        fixed = 'S%sE%s' % (season_just, episode)
-    #
-    #    return fixed
 
 
     def search(self, search_string, season=False,
@@ -87,31 +76,31 @@ class Search (object):
         downloaded_filename = ''
         if chosen_show.startswith("magnet:"):
 
-            # gvfs-... are the Gnome tools for interacting with
-            # the file system.  Use KIO for kde.
-            # gvfs-open will open whatever application is associated
-            # with magnet links.
-            Popen (["gvfs-open", chosen_show])
-            # print chosen_show
+            if platform.system() == 'Linux':
+                # gvfs-... are the Gnome tools for interacting with
+                # the file system.  Use KIO for kde.
+                # gvfs-open will open whatever application is associated
+                # with magnet links.
+                desktop = os.environ.get('DESKTOP_SESSION')
+                if desktop == "gnome":
+                    Popen (["gvfs-open", chosen_show])
+                elif desktop == 'kde':
+                    Popen (["kioclient", chosen_show])
+            elif platform.system() == 'Darwin':
+                Popen (["open", chosen_show])
+            else:
+                unknown_system = platform.platform()
+                print 'Unknown system:', unknown_system
+                exit()
 
 
         else:       # is a nzb file
-            # for engine in self.engines:
             final_name = ''
             # only cleans name for tv show downloads
-            # TODO: make work for 'nondbshow' also.
             if self.season and self.episode:
-                cleaned_title = chosen_show.replace(
-                    ' ', '_').replace('.', '_')
-                nogo = '/\\"\'[]()#<>?!@$%^&*+='
-                for c in nogo:
-                    cleaned_title = cleaned_title.replace(c, '')
-
-                final_name = '%s.%s.nzb' % (        # '%s.%s---%s.nzb'
+                final_name = '%s.%s.nzb' % (
                     self.show_name.replace(' ', '.'),
                     "S%sE%s" % (self.season.rjust(2, '0'), self.episode.rjust(2, '0'))
-                    # self.se_ep(self.season, self.episode, both=False)
-                    #, cleaned_title
                 )
                 print final_name
             downloaded_filename = self.engine.download (

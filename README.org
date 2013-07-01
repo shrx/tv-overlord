@@ -16,17 +16,29 @@ TV Downloader requires two additional python librarys to use:
   2. tvrage [[https://pypi.python.org/pypi/python-tvrage/]]
 
 Install steps:
-  1. =easy_install tvdb_api=
-  2. =easy_install -U python-tvrage=
+  1. =sudo easy_install tvdb_api=
+  2. =sudo easy_install python-tvrage=
   3. Clone this repository
+
+** Features
+
++ Keeps track of watched shows
++ Show a list of shows available for download
++ Gives you a list of torrents or nzbs you can choose from
++ You can add new shows from the command line
++ Will display info showing what show will be next and how many days
+  till broadcast
 
 ** Configure
 
-TV Downloader stores the config file sqlite database in ~/.tv_downloader.
+TV Downloader stores the config file sqlite database in
+~/.tv_downloader.  If that dir doesn't exist, the programe will offer
+to create it for you.
 
 ** Command line
 
-$ tv --help
+=$ tv --help=
+#+BEGIN_EXAMPLE
 usage: tv [-h] [-d db-file] [-l download_location] [-n]
           [--search-method-a-only]
           {download,info,showmissing,addnew,nondbshow,editdbinfo} ...
@@ -58,11 +70,84 @@ Command help:
     addnew              Add a new show to download
     nondbshow           Download a show or movie not in the db
     editdbinfo          Edit the information in the db for a single show
+#+END_EXAMPLE
 
 
-** Requirements
+=$ tv download --help=
+#+BEGIN_EXAMPLE
+usage: tv download [-h] [-i SERIES_ID]
 
-+ Linux
-+ Python
-  - tvdb_api
-  - tvrage
+optional arguments:
+  -h, --help            show this help message and exit
+  -i SERIES_ID, --series-id SERIES_ID
+                        The series id can be used to specify a single show to
+                        download
+#+END_EXAMPLE
+
+
+=$ tv info --help=
+#+BEGIN_EXAMPLE
+usage: tv info [-h] [-a] [-n]
+
+optional arguments:
+  -h, --help          show this help message and exit
+  -a, --ask-inactive  Ask if shows that are ended, and all have been
+                      downloaded, should they be set to INACTIVE
+  -n, --sort-by-next  Sort by upcoming instead of alphabetical
+#+END_EXAMPLE
+
+
+$ tv showmissing --help
+#+BEGIN_EXAMPLE
+usage: tv showmissing [-h] [-i SERIES_ID]
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -i SERIES_ID, --series-id SERIES_ID
+                        The series id can be used to specify a single show
+#+END_EXAMPLE
+
+=$ tv addnew --help=
+#+BEGIN_EXAMPLE
+usage: tv addnew [-h] SEARCH_STRING
+
+positional arguments:
+  SEARCH_STRING  The name of the show to add to the db
+
+optional arguments:
+  -h, --help     show this help message and exit
+#+END_EXAMPLE
+
+
+=$ tv nondbshow --help=
+#+BEGIN_EXAMPLE
+usage: tv nondbshow [-h] SEARCH_STRING
+
+positional arguments:
+  SEARCH_STRING  The name of the show or movie to download
+
+optional arguments:
+  -h, --help     show this help message and exit
+#+END_EXAMPLE
+
+
+=$ tv editdbinfo --help=
+#+BEGIN_EXAMPLE
+usage: tv editdbinfo [-h] SEARCH_STRING
+
+positional arguments:
+  SEARCH_STRING  The name of the show to edit. If more than one show matches
+                 the SEARCH_STRING, edit multiple shows.
+
+optional arguments:
+  -h, --help     show this help message and exit
+#+END_EXAMPLE
+
+
+=$ tv providers --help=
+#+BEGIN_EXAMPLE
+usage: tv providers [-h]
+
+optional arguments:
+  -h, --help  show this help message and exit
+#+END_EXAMPLE

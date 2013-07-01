@@ -6,6 +6,23 @@ torrentname=$2
 torrentpath=$3
 shows_dir='/home/sm/net1/dl/TV Shows/'
 
+function msg
+{
+	if notify-send --help &> /dev/null; then
+		icon1='/usr/share/icons/Faenza/places/scalable/folder-videos.svg'
+		icon2='/usr/share/icons/gnome-wine/scalable/places/folder-videos.svg'
+		if [ -e icon1 ]; then
+			icon=$icon1
+		elif [ -e icon2 ]; then
+			icon=$icon2
+		fi
+		# notify-send --hint=int:transient:1 --icon=$icon 'Video Mover' "$1"
+		notify-send --icon=$icon 'Video Mover' "$1"
+	elif kdialog --help &> /dev/null; then
+		kdialog --title 'Video Mover' --passivepopup "$1" 10;
+	fi
+}
+
 echo $(date) '==============' >> $log
 
 echo $torrentid >> $log
@@ -32,5 +49,6 @@ if [ ! -d "$full_dest" ]; then
 fi
 
 if [ -d "$full_dest" ]; then
-    cp -v "$torrentpath/$torrentname" "$full_dest"
+    cp "$torrentpath/$torrentname" "$full_dest"
+    msg "Show copied: $torrentname\nTo: $full_dest"
 fi

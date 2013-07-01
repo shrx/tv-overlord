@@ -10,7 +10,7 @@ from Util import U
 
 
 class Provider (object):
-    provider_url = 'http://kickass.to/usearch/%s/?rss=1'
+    provider_url = 'http://kickass.to'
     name = 'Kickass Torrents'
 
 
@@ -32,13 +32,15 @@ class Provider (object):
 
         query = search_string
         encoded_search = urllib.quote (query)
-        full_url = self.provider_url % (encoded_search)
+        url = 'http://kickass.to/usearch/%s/?rss=1'
+        full_url = url % (encoded_search)
 
         parsed = feedparser.parse(full_url)
         header = [
-            search_string,
+            '%s  (%s)' % (search_string, self.provider_url),
             ['Name', 'Size', 'Date', 'Seeds'],
-            [0, 10, 12, 10]]
+            [0, 10, 12, 6],
+            ['<', '>', '<', '>']]
         show_data = []
 
         for show in parsed['entries']:

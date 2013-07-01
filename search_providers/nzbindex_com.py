@@ -6,6 +6,8 @@ import os
 from time import mktime
 from datetime import datetime
 
+from Util import U
+
 
 class ProviderError (Exception):
 
@@ -24,7 +26,16 @@ class Provider (object):
     provider_url = 'http://nzbindex.com'
     name = 'NZBIndex'
 
-    def search  (self, search_string):
+
+    def se_ep (self, season, episode, show_title):
+        season_just = str (season).rjust (2, '0')
+        episode = str (episode).rjust (2, '0')
+        fixed = '%s S%sE%s | %sx%s' % (
+            show_title, season_just, episode, season, episode)
+        return fixed
+
+
+    def search  (self, search_string, season=False, episode=False):
         '''
         Search options:
         ---------------
@@ -164,6 +175,11 @@ class Provider (object):
         # search_template = ('nzbindex.com/rss/?q=%s&minage=%s&sort=%s' +
         #                    '&minsize=%s&maxsize=%s&complete=%s&max=%s&more=1')
 
+        if (season and episode):
+            search_string = '%s' % (
+                self.se_ep(
+                    season, episode, search_string))
+
         search_term = ''
         min_age = '0'
         sort = 'agedesc'    # age, agedesc, size, sizedesc
@@ -194,25 +210,26 @@ class Provider (object):
             dt = datetime.fromtimestamp(mktime(show['published_parsed']))
             date = dt.strftime('%b %d/%Y')
 
-            show_data.append({
-                'nzbname': show['title']
-                , 'usenet_date': date
-                , 'size': show['links'][1]['length']
-                , 'nzbid': show['links'][1]['href']
-                , 'search_string': search_string
-                , 'provider_name': Provider.name # In this case: NZBIndex
-            })
+            size = U.pretty_filesize (show['links'][1]['length'])
 
-        # print 'show_data:', show_data
-        # print 'shows:', len(show_data)
-        return show_data
+            show_data.append([
+                show['title'],
+                date,
+                size,
+                show['links'][1]['href']
+            ])
+
+        header = [
+            '%s  (%s)' % (search_string, self.provider_url),
+            ['Name', 'Date', 'Size'],
+            [0, 12, 10],
+            ['<', '<', '>']
+        ]
+
+        return [header] + [show_data]
 
 
     def download (self, chosen_show, destination, final_name):
-        '''
-
-        '''
-        # print '>>>chosen_show, destination, final_name', chosen_show, destination, final_name
         if not os.path.isdir (destination):
             raise ProviderError ('%s is not a dir' % (dest))
 

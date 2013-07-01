@@ -1,40 +1,39 @@
 
 
-* Features [11/20]
+* Features [16/20]
 
 + [X] rename ~/.nzb to ~/.tv_downloader
 + [X] rename nzb_config.ini to config.ini
 + [X] rename shows.v2.sqlite3 to shows.sqlite3
 + [X] remove --search-method-a-only command
 + [X] remove all reverences to nzbmatrix
-+ [ ] add features to info
++ [X] list all search providers from command line
++ [X] command to switch search provider
++ [X] remove -m MAX_SIZE option from download
++ [X] remove movie functionality (move to a separate project?)
++ [X] move se_ep() to search_providers
++ [X] have search provider supply the table title
+
++ [X] make magnet links download work on mac and linux
++ [X] add snip() to table code
++ [X] add alignment options to table in search providers [> < =]
++ [X] if the user dir doesn't exist, ask the user if the app should
+      create the config folder and db
++ [X] remove -s SEASON_NUMBER and -e EPISODE_NUMBER from addnew
++ [ ] download one show only with series id
++ [ ] create a search provider for thepiratebay
++ [ ] *info*
   - [ ] various sort options, alphabetical, upcoming...
   - [ ] show only cancelled, all shows
   - [ ] option to show series id
-+ [X] list all search providers from command line
-+ [X] command to switch search provider
-+ [ ] download one show only with series id
-+ [X] remove -m MAX_SIZE option from download
-+ [ ] rename editdbinfo to editshowinfo
-+ [ ] remove -s SEASON_NUMBER and -e EPISODE_NUMBER from addnew.  Do
-      this in editshowinfo
-+ [ ] if run for first time, create config folder or create a
-      --first-time command which would set up dirs and create db
-+ [X] remove movie functionality (move to a separate project?)
-+ [ ] add alignment options to table in search providers [> < =]
-+ [ ] add snip() to table in search providers
-+ [ ] for torrent downloads, use $DESKTOP_SESSION and look for
-      =kioclient=, =gvfs-open=, or =open= on mac.  Look at:
-      http://h3manth.com/content/desktop-session-detection-python
-+ [ ] create a search provider for thepiratebay
-+ [X] move se_ep() to search_providers
-+ [X] have search provider supply the table title
++ [ ] *editdbinfo*
+  - [ ] rename editdbinfo to editshowinfo
+  - [ ] make editdbinfo more friendly
 
 
 * Bugs [0/3]
 
 + [ ] fix bug where the series is is not retrieved from thetvdb
       when adding a new show
-+ [ ] make editdbinfo more friendly
 + [ ] test if having the show db on a network drive works, so the tv
       command could be run from multiple machines and stay in sync

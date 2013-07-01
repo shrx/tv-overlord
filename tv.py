@@ -21,14 +21,10 @@ from tv_config import config
 from tv_util import FancyPrint
 from Util import U
 
-# http://docs.python.org/release/3.0.1/library/string.htm  String formating
-# https://github.com/dbr/tvdb_api/wiki
-
 
 def se_ep (season, episode):
     season_just = str (season).rjust (2, '0')
     episode = str (episode).rjust (2, '0')
-    # fixed = 'S%sE%s | %sx%s' % (season_just, episode, season, episode)
     fixed = 'S%sE%s' % (season_just, episode)
 
     return fixed
@@ -64,7 +60,6 @@ class Series:
             raise exception ('incorrect show type')
         if show_type == 'current':
             self._set_db_data (dbdata)
-            # self._get_tvrage_series_data()
             self._get_thetvdb_series_data()
             self.search_provider = Search.Search(provider)
 
@@ -72,6 +67,7 @@ class Series:
             self.search_provider = Search.Search(provider)
 
         self.console_rows, self.console_columns = os.popen ('stty size', 'r').read().split()
+
 
     def _set_db_data (self, dbdata):
         '''Add the data from the local db'''
@@ -84,47 +80,6 @@ class Series:
         # name to use for searching, thats why we use search_engine_name
         self.db_search_engine_name = dbdata['search_engine_name']
         self.db_status = dbdata['status']
-
-    def _get_tvrage_series_data(self):
-
-        '''
-        30 Rock        - 11215
-        showid         - 11215
-        showname       - 30 Rock
-        showlink       - http://tvrage.com/30_Rock
-        seasons        - 7
-        started        - 2006
-        startdate      - Oct/11/2006
-        ended          - None
-        origin_country - US
-        status         - Final Season
-        classification - Scripted
-        genres         - None
-        runtime        - 30
-        network        - NBC
-        airtime        - 20:00
-        airday         - Thursday
-        timezone       - GMT-5 -DST
-        akas           - None
-        '''
-
-
-
-
-        # tv = feeds.showinfo(self.db_ragetv_series_id)
-        tv = feeds.full_show_info(self.db_ragetv_series_id)
-        for i in tv:
-            if i.tag == 'Episodelist':
-                # for j in i:
-                    # print j
-                self.series = i
-            else:
-                print i.tag, '-', i.text
-
-
-
-        # exit()
-
 
 
     def _get_thetvdb_series_data (self):
@@ -228,6 +183,7 @@ class Series:
             self._download (showid)
             self._update_db (season=episode['season'], episode=episode['episode'])
 
+
     def is_missing (self):
         missing = self._get_missing()
         self.missing = missing
@@ -241,6 +197,7 @@ class Series:
 
         return ret
 
+
     def show_missing (self):
         missing = self.missing
         if len (missing) == 0:
@@ -250,15 +207,14 @@ class Series:
         indent = '    '
         missing_list = []
         for s in missing:
-            #se = se_ep (s['season'], s['episode'])
             se = 'S%sE%s' % (s['season'].rjust(2, '0'), s['episode'].rjust(2, '0'))
             missing_list.append (se)
         ret += textwrap.fill (', '.join (missing_list), width=int(self.console_columns),
                               initial_indent=indent, subsequent_indent=indent)
         return ret
 
+
     def add_new (self, name):
-        # search thetvdb
         self.db_name = name
         self._get_thetvdb_series_data()
         indent = '  '
@@ -277,6 +233,7 @@ class Series:
 
         if correct == 'y':
             self._add_new_db()
+
 
     def non_db (self, search_str):
         self.db_name = search_str
@@ -315,10 +272,10 @@ class Series:
                 last_episode = self.series[i][j]['episodenumber']
                 last_broadcast = se_ep (last_season, last_episode)
                 if (last_watched < last_broadcast):
-                    # missing.append (se_ep (last_season, last_episode))
                     missing.append ({'season':last_season, 'episode':last_episode})
 
         return missing
+
 
     def _ask (self, shows, season, episode):
         class color:
@@ -333,7 +290,7 @@ class Series:
         title_bar = U.hi_color ('|', foreground=color.bar, background=color.tb_header_bg)
         bar =       U.hi_color ('|', foreground=color.bar)
 
-        ### Title bar row
+        ### Title bar row ###
         print
         if season and episode:
             show_title = '%s %s' % (self.db_name, se_ep (season, episode))
@@ -347,8 +304,8 @@ class Series:
             background=color.title_bg,
             ))
 
-        ### Header row
-        num_w = 2
+        ### Header row ###
+        num_w = 1
         header_titles = [' '] + shows[0][1]
         all_length = num_w + sum(shows[0][2]) + 4 # width of first column: 1...Z
         title_w = int (self.console_columns) - all_length
@@ -357,16 +314,31 @@ class Series:
         head_row = []
         for header_title, header_width in zip(header_titles, header_widths):
             head_row.append(
-                U.hi_color(header_title.ljust (header_width), background=color.tb_header_bg))
+                U.hi_color(header_title.ljust (header_width),
+                           background=color.tb_header_bg))
         print title_bar.join(head_row)
 
-        ### Matched episodes
+        ### Matched episodes ###
+        alignments = ['>'] + shows[0][3]
         key = ('1','2','3','4','5','6','7','8','9','0','a','b','c','d','e','f','g','h','i',
                'j','k','l','n','o','p','q','r','s','t','u','v','w','x','y','z')
         for row, counter in zip (shows[1], key):
             full_row = [counter] + row
-            for width, i in zip (header_widths, range(len(header_widths))):
-                full_row[i] = full_row[i].ljust(width)
+            for width, i, alignment in zip (header_widths,
+                                            range(len(header_widths)),
+                                            alignments):
+                text = full_row[i]
+                if len(text) >= width:
+                    text = U.snip(text, width)
+
+                if alignment == '<':
+                    full_row[i] = text.ljust(width)
+                elif alignment == '>':
+                    full_row[i] = text.rjust(width)
+                elif alignment == '=':
+                    full_row[i] = text.center(width)
+                else:
+                    full_row[i] = text.ljust(width)
             print bar.join(full_row[:-1])
 
         # User Input
@@ -405,7 +377,7 @@ class Series:
         filename = self.search_provider.download(chosen_show=show_data, destination=config.staging)
 
         backspace = '\b' * len (msg)
-        done = U.hi_color (filename.ljust (len (msg)), foreground=34)#34
+        done = U.hi_color (filename.ljust (len (msg)), foreground=34)
         print '%s%s' % (backspace, done)
 
 
@@ -448,6 +420,7 @@ class Series:
         conn.commit()
         conn.close()
 
+
 class AllSeries:
     '''Return an iterable class of Series'''
     def __init__ (self, provider):
@@ -468,8 +441,6 @@ class AllSeries:
         sql = "SELECT name, season, episode, thetvdb_series_id, \
             ragetv_series_id, search_engine_name, status \
             FROM shows WHERE status='active' ORDER BY replace (name, 'The ', '');"
-        # sql = "SELECT name, season, episode, thetvdb_series_id \
-            # FROM shows ORDER BY replace (name, 'The ', '');"
         conn = sqlite3.connect (config.db_file)
         conn.row_factory = dict_factory
         curs = conn.cursor()
@@ -481,6 +452,7 @@ class AllSeries:
         conn.close()
         return data
 
+
 def dict_factory (cursor, row):
     '''Changes the data returned from the db from a
     tupple to a dictionary'''
@@ -488,6 +460,7 @@ def dict_factory (cursor, row):
     for idx, col in enumerate (cursor.description):
         d[col[0]] = row[idx]
     return d
+
 
 def edit_db (search_str):
     sql = 'SELECT * FROM shows WHERE name LIKE :search'
@@ -553,8 +526,6 @@ def init (args):
     else:
         provider = config.providers[0]
 
-    print 'Using "%s" search engine' % provider
-
     if args.action == t.info:
         show_info = {}
         counter = 0
@@ -570,7 +541,7 @@ def init (args):
             if series.status == 'Ended':
                 status = U.hi_color (series.status, foreground=196)
             else:
-                status = ''  # U.hi_color ('Continuing', foreground=27)
+                status = ''
 
             se = 'S%sE%s' % (
                 str (series.db_current_season).rjust (2, '0'),
@@ -579,10 +550,6 @@ def init (args):
             se = U.hi_color(se, foreground=48)
             imdb_url = U.hi_color('http://imdb.com/title/%s' % series.imdb_id, foreground=17)
 
-            # first row
-            #print '%s' % (
-            #    ', '.join([title, se, status, imdb_url])
-            #    )
             first_row_a = []
             for i in [title, se, status, imdb_url]:
                 if i: first_row_a.append(i)
@@ -623,12 +590,6 @@ def init (args):
             if not first_time:
                 indent = '    '
                 episode_list = 'Future episodes: ' + ' - '.join (episodes_list)
-                #print textwrap.fill (
-                #    U.hi_color (episode_list, foreground=22),
-                #    width=int(series.console_columns),
-                #    initial_indent=indent,
-                #    subsequent_indent=indent
-                #    )
                 episodes = textwrap.fill (
                     U.hi_color (episode_list, foreground=22),
                     width=int(series.console_columns),
@@ -650,25 +611,6 @@ def init (args):
             print show_info[i]
 
 
-        '''
-            S05E01, Jun 10 (48) - S05E02, Jun 17 (55)
-
-            if show ended:                           series.status == ended
-                if still watching:                   db.status == active
-                    get shows left in season         series.shows_left_in_season
-                    get seasons left                 series.seasons_left
-                ? else:                              db.status == inactive
-                    ? set show status to INACTIVE
-            else show still running:                 series.status == continuing
-                if still watching:
-                    get shows left in season
-                ? else done watching:
-                    ? set show status to INACTIVE
-
-            '''
-
-
-
     if args.action == t.showmissing:
         fp = FancyPrint()
         for series in AllSeries(provider):
@@ -679,12 +621,11 @@ def init (args):
         fp.done()
 
 
-    if args.action == t.download: #'download':
+    if args.action == t.download:
         for series in AllSeries(provider):
             series.download_missing()
 
     if args.action == t.addnew:
-        # print args
         newShow = Series (show_type='new')
         newShow.add_new (name=args.search_string)
 
@@ -821,9 +762,6 @@ if __name__ == '__main__':
         t.providers,
         help='List all available search providers'
     )
-
-    # change showname
-    # change season, episode
 
     args = parser.parse_args()
     init (args)
