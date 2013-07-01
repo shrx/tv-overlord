@@ -1,9 +1,7 @@
 
 * TV Downloader
 
-** Overview
-
-A command line tool to download and manage tv shows from newsgroups or
+A command line tool to download and manage TV shows from newsgroups or
 bittorent.  It will download nzb files or magnet links.
 
 TV Downloader keeps track of which shows have been downloaded and what
@@ -11,7 +9,7 @@ shows are available to download.
 
 ** Install
 
-TV Downloader requires two additional python librarys to use:
+TV Downloader requires two additional python libraries to use:
   1. tvdb_api [[https://github.com/dbr/tvdb_api]]
   2. tvrage [[https://pypi.python.org/pypi/python-tvrage/]]
 
@@ -32,7 +30,7 @@ Install steps:
 ** Configure
 
 TV Downloader stores the config file sqlite database in
-~/.tv_downloader.  If that dir doesn't exist, the programe will offer
+~/.tv_downloader.  If that dir doesn't exist, the program will offer
 to create it for you.
 
 ** Command line
@@ -57,14 +55,14 @@ optional arguments:
                         SXXEXX and SxXX
 
 Command help:
-  Use one of the following commands. For aditional help, use <command> -h
+  Use one of the following commands. For additional help, use <command> -h
   for help with a specific command
 
   {download,info,showmissing,addnew,nondbshow,editdbinfo}
     download            Download any new shows available. Optionally, download
                         a single show
     info                Display information stored in the local db; last
-                        episode downloaded, show status (canceled, etc...),
+                        episode downloaded, show status (cancelled, etc...),
                         episodes in current season, etc...
     showmissing         Display episodes ready to download
     addnew              Add a new show to download
