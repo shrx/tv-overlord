@@ -11,12 +11,55 @@ shows are available to download.
 
 TV Downloader requires two additional python libraries to use:
   1. tvdb_api [[https://github.com/dbr/tvdb_api]]
-  2. tvrage [[https://pypi.python.org/pypi/python-tvrage/]]
+  #2. tvrage [[https://pypi.python.org/pypi/python-tvrage/]]
 
 Install steps:
   1. =sudo easy_install tvdb_api=
   2. =sudo easy_install python-tvrage=
   3. Clone this repository
+  4. Put tv.py on your $PATH or call it directly
+     (I have it symlinked to =tv= in a bin folder thats on the path)
+  5. type: =tv=
+     The first time its run, it will ask to create the
+     config dir.  Type =Y= to allow it.
+  6. Type =tv addnew someshow= to start.
+
+
+** How to use
+
+:tv addnew "show name"
+
+tv will search thetvdb.com for a match to your show name.  If the show it
+asks you is not the right one, it helps to type: =tv addnew 'show name year';=.
+
+:tv showmissing
+
+This will list any shows that are ready to download.
+
+:tv download
+
+For each show thats ready to download, it will ask you which one you
+want to download.
+
+:tv info
+
+This will show you what shows are next, and how many days till they
+are broadcast
+
+:tv nondbshow "some search name"
+
+This will show you matches to your search.  Anything downloaded this
+way will not be put in your database.
+
+:tv providers
+
+This will list search providers available to the program.
+
+:tv editdbinfo "show name"
+
+Edit the data in the database for show name.
+
+
 
 ** Features
 
