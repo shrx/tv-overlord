@@ -463,50 +463,75 @@ def dict_factory (cursor, row):
 
 
 def edit_db (search_str):
-    sql = 'SELECT * FROM shows WHERE name LIKE :search'
+    sql = 'SELECT * FROM shows WHERE name=:search'
     conn = sqlite3.connect (config.db_file)
     conn.row_factory = dict_factory
     curs = conn.cursor()
-    search_str = '%%%s%%' % search_str
     values = {'search': search_str}
-    data = curs.execute (sql, values)
-    for row in data:
-        print 'Name:', row['name'], '--',
-        print 'Season:', row['season'], '--',
-        print 'Episode:', row['episode'], '--',
-        print 'Status:', row['status'], '--',
-        print 'Search engine title:', row['search_engine_name']
-        print
+    curs.execute (sql, values)
+    row = curs.fetchone()
 
-        new_name = raw_input ('Name (%s): ' % (row['name']))
+    if not row:
+        print '"%s" not found' % search_str
+        exit()
+
+    is_error = False
+
+    print 'While editing a field, hit <enter> to leave it unchanged.'
+    print 'Type "<ctrl> c" to cancel all edits.\n'
+    try:
+        new_name = raw_input ('Name: (%s) ' % (row['name']))
         if not new_name:
             new_name = row['name']
 
-        new_search_engine_name = raw_input ('Search engine title (%s): ' % (row['search_engine_name']))
+        new_search_engine_name = raw_input ('Search engine title: (%s) ' % (row['search_engine_name']))
         if not new_search_engine_name:
             new_search_engine_name = row['search_engine_name']
 
-        new_season = raw_input ('Season (%s): ' % (row['season']))
+        new_season = raw_input ('Current season: (%s) ' % (row['season']))
         if not new_season:
-            new_season = row['season']
+            new_season = str(row['season'])
 
-        new_episode = raw_input ('Episode (%s): ' % (row['episode']))
+        new_episode = raw_input ('Last episode: (%s) ' % (row['episode']))
         if not new_episode:
-            new_episode = row['episode']
+            new_episode = str(row['episode'])
 
-        new_status = raw_input ('Status (%s): ' % (row['status']))
+        new_status = raw_input ('Status: (%s) ' % (row['status']))
         if not new_status:
             new_status = row['status']
 
+        print
 
-        sql = '''UPDATE shows SET name=:name, season=:season,
-            episode=:episode, status=:status, search_engine_name=:search_engine_name,
-            WHERE thetvdb_series_id=:tvdb_id'''
+    except KeyboardInterrupt:
+        print '\nDatabase edit canceled.'
+        exit()
 
-        row_values = {'name':new_name, 'season':new_season, 'episode':new_episode,
-                      'status':new_status, 'search_engine_name':new_search_engine_name,
-                      'tvdb_id':row['thetvdb_series_id']}
-        curs.execute (sql, row_values)
+    if not new_season.isdigit():
+        print 'Error: Season must be a number'
+        is_error = True
+
+    if not new_episode.isdigit():
+        print 'Error: Episode must be a number'
+        is_error = True
+
+    if new_status not in ['active', 'inactive']:
+        print 'Error: Status must be either "active" or "inactive"'
+        is_error = True
+
+    if is_error:
+        exit()
+
+    sql = '''UPDATE shows SET name=:name, season=:season,
+        episode=:episode, status=:status, search_engine_name=:search_engine_name
+        WHERE thetvdb_series_id=:tvdb_id'''
+
+    row_values = {'name':new_name, 'season':new_season, 'episode':new_episode,
+                  'status':new_status, 'search_engine_name':new_search_engine_name,
+                  'tvdb_id':row['thetvdb_series_id']}
+
+    curs.execute (sql, row_values)
+
+    print 'Database updated'
 
     conn.commit()
     conn.close()
