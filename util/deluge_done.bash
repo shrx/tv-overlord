@@ -23,23 +23,23 @@ function msg
 	fi
 }
 
-echo $(date) '==============' >> $log
+echo '\n' $(date) '==============' >> $log
 
-echo $torrentid >> $log
-echo $torrentname >> $log
-echo $torrentpath >> $log
+echo "torrentid:   $torrentid" >> $log
+echo "torrentname: $torrentname" >> $log
+echo "torrentpath: $torrentpath" >> $log
 
 
 dest=$(echo $torrentname |
-    sed 's/\.\([[:digit:]]x[[:digit:]]\{2\}\|S[[:digit:]]\{2\}E[[:digit:]]\{2\}\).*//'|
-    sed 's/\./_/g')
+    # 1x11.* or S11E11.*
+    sed 's/[. ]\([[:digit:]]x[[:digit:]]\{2\}\|S[[:digit:]]\{2\}E[[:digit:]]\{2\}\).*//'|
+    sed 's/[. ]/_/g')
 
 full_dest=$shows_dir$dest
 
 echo "Destination dir: $full_dest" >> $log
 
 if [ ! -d "$full_dest" ]; then
-
     if zenity --question --text="$full_dest does not exist.\nCreate new dir?"; then
         mkdir "$full_dest";
         echo "Creating dir: $dest" >> $log
@@ -49,6 +49,10 @@ if [ ! -d "$full_dest" ]; then
 fi
 
 if [ -d "$full_dest" ]; then
-    cp "$torrentpath/$torrentname" "$full_dest"
-    msg "Show copied: $torrentname\nTo: $full_dest"
+    if cp -r "$torrentpath/$torrentname" "$full_dest"; then
+        msg "Show copied: $torrentname\nTo: $full_dest"
+    else
+        msg "ERROR copying $torrentname\nTo: $full_dest"
+        echo "ERROR copying $torrentname To: $full_dest" >> $log
+    fi
 fi
