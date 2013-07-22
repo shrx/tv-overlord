@@ -463,50 +463,75 @@ def dict_factory (cursor, row):
 
 
 def edit_db (search_str):
-    sql = 'SELECT * FROM shows WHERE name LIKE :search'
+    sql = 'SELECT * FROM shows WHERE name=:search'
     conn = sqlite3.connect (config.db_file)
     conn.row_factory = dict_factory
     curs = conn.cursor()
-    search_str = '%%%s%%' % search_str
     values = {'search': search_str}
-    data = curs.execute (sql, values)
-    for row in data:
-        print 'Name:', row['name'], '--',
-        print 'Season:', row['season'], '--',
-        print 'Episode:', row['episode'], '--',
-        print 'Status:', row['status'], '--',
-        print 'Search engine title:', row['search_engine_name']
-        print
+    curs.execute (sql, values)
+    row = curs.fetchone()
 
-        new_name = raw_input ('Name (%s): ' % (row['name']))
+    if not row:
+        print '"%s" not found' % search_str
+        exit()
+
+    is_error = False
+
+    print 'While editing a field, hit <enter> to leave it unchanged.'
+    print 'Type "<ctrl> c" to cancel all edits.\n'
+    try:
+        new_name = raw_input ('Name: (%s) ' % (row['name']))
         if not new_name:
             new_name = row['name']
 
-        new_search_engine_name = raw_input ('Search engine title (%s): ' % (row['search_engine_name']))
+        new_search_engine_name = raw_input ('Search engine title: (%s) ' % (row['search_engine_name']))
         if not new_search_engine_name:
             new_search_engine_name = row['search_engine_name']
 
-        new_season = raw_input ('Season (%s): ' % (row['season']))
+        new_season = raw_input ('Current season: (%s) ' % (row['season']))
         if not new_season:
-            new_season = row['season']
+            new_season = str(row['season'])
 
-        new_episode = raw_input ('Episode (%s): ' % (row['episode']))
+        new_episode = raw_input ('Last episode: (%s) ' % (row['episode']))
         if not new_episode:
-            new_episode = row['episode']
+            new_episode = str(row['episode'])
 
-        new_status = raw_input ('Status (%s): ' % (row['status']))
+        new_status = raw_input ('Status: (%s) ' % (row['status']))
         if not new_status:
             new_status = row['status']
 
+        print
 
-        sql = '''UPDATE shows SET name=:name, season=:season,
-            episode=:episode, status=:status, search_engine_name=:search_engine_name,
-            WHERE thetvdb_series_id=:tvdb_id'''
+    except KeyboardInterrupt:
+        print '\nDatabase edit canceled.'
+        exit()
 
-        row_values = {'name':new_name, 'season':new_season, 'episode':new_episode,
-                      'status':new_status, 'search_engine_name':new_search_engine_name,
-                      'tvdb_id':row['thetvdb_series_id']}
-        curs.execute (sql, row_values)
+    if not new_season.isdigit():
+        print 'Error: Season must be a number'
+        is_error = True
+
+    if not new_episode.isdigit():
+        print 'Error: Episode must be a number'
+        is_error = True
+
+    if new_status not in ['active', 'inactive']:
+        print 'Error: Status must be either "active" or "inactive"'
+        is_error = True
+
+    if is_error:
+        exit()
+
+    sql = '''UPDATE shows SET name=:name, season=:season,
+        episode=:episode, status=:status, search_engine_name=:search_engine_name
+        WHERE thetvdb_series_id=:tvdb_id'''
+
+    row_values = {'name':new_name, 'season':new_season, 'episode':new_episode,
+                  'status':new_status, 'search_engine_name':new_search_engine_name,
+                  'tvdb_id':row['thetvdb_series_id']}
+
+    curs.execute (sql, row_values)
+
+    print 'Database updated'
 
     conn.commit()
     conn.close()
@@ -543,61 +568,78 @@ def init (args):
             else:
                 status = ''
 
-            se = 'S%sE%s' % (
+            # build first row of info for each show
+            se = 'Last downloaded: S%sE%s' % (
                 str (series.db_current_season).rjust (2, '0'),
                 str (series.db_last_episode).rjust (2,'0'),
                 )
             se = U.hi_color(se, foreground=48)
-            imdb_url = U.hi_color('http://imdb.com/title/%s' % series.imdb_id, foreground=17)
+            imdb_url = U.hi_color(   '\n    IMDB.com:    http://imdb.com/title/%s' % series.imdb_id, foreground=20)
+            thetvdb_url = U.hi_color('\n    TheTVDB.com: http://thetvdb.com/?tab=series&id=%s' % series.id, foreground=20)
 
             first_row_a = []
-            for i in [title, se, status, imdb_url]:
+            for i in [title, se, status, imdb_url, thetvdb_url]:
                 if i: first_row_a.append(i)
-            first_row = ' - '.join(first_row_a) + '\n'
-            # print first_row
+            first_row = '  '.join(first_row_a)
 
+            # build 'upcoming episodes' list
             today = datetime.datetime.today()
             first_time = True
             episodes_list = []
             counter += 1
             next_episode_days = 0
-            for i in series.series:
-                for j in series.series[i]:
+            for i in series.series: # season
+                for j in series.series[i]: # episode
                     b_date = series.series[i][j]['firstaired']
                     if not b_date: continue  # some episode have no broadcast date?
                     split_date = b_date.split ('-')
                     broadcast_date = datetime.datetime (
                         int (split_date[0]), int (split_date[1]), int (split_date[2]))
 
-                    if broadcast_date < today:
-                        continue
+                    # use only future dates
+                    #if args.show_all:
+                    #    pass
+                    #else:
+                    #    if broadcast_date < today:
+                    #        continue
 
-                    future_date = dateParser.parse (series.series[i][j]['firstaired'])
+                    if not args.show_all:
+                        if broadcast_date < today:
+                            continue
+
+                    future_date = dateParser.parse (b_date)# (series.series[i][j]['firstaired'])
                     diff = future_date - today
                     fancy_date = future_date.strftime ('%b %-d')
+                    if broadcast_date >= today:
 
-                    episodes_list.append ('S%sE%s, %s (%s)' % (
-                        series.series[i][j]['seasonnumber'].rjust (2, '0'),
-                        series.series[i][j]['episodenumber'].rjust (2, '0'),
-                        fancy_date,
-                        diff.days + 1,
-                    ))
+
+                        episodes_list.append ('S%sE%s, %s (%s)' % (
+                            series.series[i][j]['seasonnumber'].rjust (2, '0'),
+                            series.series[i][j]['episodenumber'].rjust (2, '0'),
+                            fancy_date,
+                            diff.days + 1,
+                        ))
 
                     if first_time:
                         first_time = False
-                        next_episode_days_key = str(diff.days).rjust(5, '0') + str(counter)
+                        if args.sort_by_next:
+                            sort_key = str(diff.days).rjust(5, '0') + str(counter)
+                        else:
+                            sort_key = series.db_name.replace('The ', '')
 
             if not first_time:
-                indent = '    '
-                episode_list = 'Future episodes: ' + ' - '.join (episodes_list)
-                episodes = textwrap.fill (
-                    U.hi_color (episode_list, foreground=22),
-                    width=int(series.console_columns),
-                    initial_indent=indent,
-                    subsequent_indent=indent
-                    )
-                show_info[next_episode_days_key] = first_row + episodes
-
+                if episodes_list:
+                    indent = '    '
+                    episode_list = 'Future episodes: ' + ' - '.join (episodes_list)
+                    episodes = textwrap.fill (
+                        U.hi_color (episode_list, foreground=22),
+                        width=int(series.console_columns),
+                        initial_indent=indent,
+                        subsequent_indent=indent
+                        )
+                    show_info[sort_key] = first_row + '\n' + episodes
+                else:
+                    show_info[sort_key] = first_row
 
             if args.ask_inactive:
                 if series.status == 'Ended' and first_time:
@@ -626,7 +668,7 @@ def init (args):
             series.download_missing()
 
     if args.action == t.addnew:
-        newShow = Series (show_type='new')
+        newShow = Series (provider, show_type='new')
         newShow.add_new (name=args.search_string)
 
     if args.action == t.nondbshow:
@@ -702,15 +744,20 @@ if __name__ == '__main__':
             episodes in current season, etc...'
     )
     par2.add_argument (
-        '-a', '--ask-inactive',
-        action='store_true',
-        help='Ask if shows that are ended, and all have been \
-            downloaded, should they be set to INACTIVE'
-    )
-    par2.add_argument (
         '-n', '--sort-by-next',
         action='store_true',
         help='Sort by upcoming instead of alphabetical'
+    )
+    par2.add_argument (
+        '-a', '--show-all',
+        action='store_true',
+        help='Show all shows, not just ones with upcoming episodes'
+    )
+    par2.add_argument (
+        '--ask-inactive',
+        action='store_true',
+        help='Ask if shows that are ended, and all have been \
+            downloaded, should they be set to INACTIVE'
     )
 
     # showmissing

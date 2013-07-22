@@ -7,6 +7,10 @@ bittorent.  It will download nzb files or magnet links.
 TV Downloader keeps track of which shows have been downloaded and what
 shows are available to download.
 
+There are two NZB search providers, nzbclub.com and nzbindex.com.
+Also, there are two bittorent search providers, kickass.to and
+thepiratebay.sx.
+
 ** Install
 
 TV Downloader requires two additional python libraries to use:
