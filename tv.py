@@ -578,9 +578,9 @@ def init (args):
             thetvdb_url = U.hi_color('\n    TheTVDB.com: http://thetvdb.com/?tab=series&id=%s' % series.id, foreground=20)
 
             first_row_a = []
-            for i in [title, se, status, imdb_url, thetvdb_url]:
+            for i in [title + ',', se, status, imdb_url, thetvdb_url]:
                 if i: first_row_a.append(i)
-            first_row = '  '.join(first_row_a)
+            first_row = ' '.join(first_row_a)
 
             # build 'upcoming episodes' list
             today = datetime.datetime.today()
