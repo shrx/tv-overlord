@@ -13,28 +13,34 @@ thepiratebay.sx.
 
 ** Install
 
-TV Downloader requires two additional python libraries to use:
-  1. tvdb_api [[https://github.com/dbr/tvdb_api]]
-  #2. tvrage [[https://pypi.python.org/pypi/python-tvrage/]]
+TV Downloader has been tested on Linux and Mac.  It would probably not
+be to hard to make it work on windows, and if anyone is interested, I
+can take a look at making it work or alternatively send me a pull request.
+
+TV Downloader requires two additional python libraries to be installed:
+  1. tvdb_api - [[https://github.com/dbr/tvdb_api]]
+  2. Beautiful Soup - http://www.crummy.com/software/BeautifulSoup/
 
 Install steps:
-  1. =sudo easy_install tvdb_api=
-  2. =sudo easy_install python-tvrage=
+  1. =easy_install tvdb_api=
+  2. =easy_install beautifulsoup4=
   3. Clone this repository
   4. Put tv.py on your $PATH or call it directly
      (I have it symlinked to =tv= in a bin folder thats on the path)
   5. type: =tv=
      The first time its run, it will ask to create the
-     config dir.  Type =Y= to allow it.
-  6. Type =tv addnew someshow= to start.
+     config dir.  Type =Y= to allow it.  The config directory will be
+     created in your home dir called =.tv-downloader/=
+  6. Type =tv addnew "someshow";= to start.
 
 
 ** How to use
 
 :tv addnew "show name"
 
-tv will search thetvdb.com for a match to your show name.  If the show it
-asks you is not the right one, it helps to type: =tv addnew 'show name year';=.
+tv will search thetvdb.com for a match to your show name.  If the show
+it asks you is not the right one, it helps to add the year to the
+name: =tv addnew 'show name year';=.
 
 :tv showmissing
 
@@ -57,12 +63,26 @@ way will not be put in your database.
 
 :tv providers
 
-This will list search providers available to the program.
+This will list search providers available to the program.  The default
+one is the provider at the top of the list in config.ini.
 
 :tv editdbinfo "show name"
 
 Edit the data in the database for show name.
 
+
+** Screenshots
+
+
+[[http://i.imgur.com/jMP4T3h.gif]]
+This screenshot shows the providers list command and downloading using
+an NZB search provider.
+
+[[http://i.imgur.com/umS1DqH.gif]]
+This shows using a bittorrent search provider to download.
+
+[[http://i.imgur.com/eg0Ui7U.gif]]
+This show the info command.
 
 
 ** Features
@@ -142,7 +162,7 @@ optional arguments:
 #+END_EXAMPLE
 
 
-$ tv showmissing --help
+=$ tv showmissing --help=
 #+BEGIN_EXAMPLE
 usage: tv showmissing [-h] [-i SERIES_ID]
 
