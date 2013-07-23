@@ -596,23 +596,14 @@ def init (args):
                     broadcast_date = datetime.datetime (
                         int (split_date[0]), int (split_date[1]), int (split_date[2]))
 
-                    # use only future dates
-                    #if args.show_all:
-                    #    pass
-                    #else:
-                    #    if broadcast_date < today:
-                    #        continue
-
                     if not args.show_all:
                         if broadcast_date < today:
                             continue
 
-                    future_date = dateParser.parse (b_date)# (series.series[i][j]['firstaired'])
+                    future_date = dateParser.parse (b_date)
                     diff = future_date - today
                     fancy_date = future_date.strftime ('%b %-d')
                     if broadcast_date >= today:
-
-
                         episodes_list.append ('S%sE%s, %s (%s)' % (
                             series.series[i][j]['seasonnumber'].rjust (2, '0'),
                             series.series[i][j]['episodenumber'].rjust (2, '0'),
@@ -643,7 +634,9 @@ def init (args):
 
             if args.ask_inactive:
                 if series.status == 'Ended' and first_time:
-                    set_status = ask ('Series ended, and all have been downloaded. Set as inactive? [y/n]: ')
+                    set_status = ask (
+                        '%s has ended, and all have been downloaded. Set as inactive? [y/n]: ' %
+                        title)
                     if set_status == 'y':
                         series.set_inactive()
 
