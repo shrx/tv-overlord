@@ -40,7 +40,12 @@ class Provider (object):
             ['<', '>', '<', '>']]
         show_data = []
 
-        for search in self.se_ep(search_string, season, episode):
+        if season and episode:
+            searches = self.se_ep(search_string, season, episode)
+        else:
+            searches = [search_string]
+
+        for search in searches:
             search_string = urllib.quote(search)
             url = '%s/search/%s/0/7/0' % (self.provider_url, search_string)
             html = urllib2.urlopen(url)
