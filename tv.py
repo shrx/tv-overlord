@@ -310,7 +310,6 @@ class Series:
         all_length = num_w + sum(shows[0][2]) + 4 # width of first column: 1...Z
         title_w = int (self.console_columns) - all_length
         header_widths = [num_w] + [title_w if x is 0 else x for x in shows[0][2]]
-
         head_row = []
         for header_title, header_width in zip(header_titles, header_widths):
             head_row.append(

@@ -241,25 +241,22 @@ class U:
 			return text
 
 		sep_len = len (sep)
-		if U.is_odd (sep_len):
-			start_half = sep_len / 2
-			end_half = (sep_len / 2) + 1
+		if U.is_odd (length):
+			end_half = 0
 		else:
-			start_half = sep_len / 2
-			end_half = sep_len / 2
+			end_half = 1
 
 		middle = len(text) / 2
 		short_mid = length / 2
-		start = text [0 : short_mid - start_half]
+		start = text [0 : short_mid]
 		end = text [short_mid + end_half - short_mid * 2 : len (text)]
 
 		if U.is_windows_console():
 			color_sep = sep
 		else:
-			# color_sep = U.__redb + U.__greenf + U.__boldon + sep + U.__reset
 			color_sep = U.__greenf + U.__boldon + sep + U.__reset
 
-		return start + color_sep + end #+ ' '
+		return start + color_sep + end
 
 	@staticmethod
 	def is_odd (val):
@@ -377,79 +374,83 @@ class SpinCursor (threading.Thread):
 if __name__ == '__main__':
 
 	line = "-" * 50
-
-	print "\nTesting U.is_windows_console\n", line
-
-	print "Is windows console?", U.is_windows_console()
-
-
-	print "\nTesting U.wr\n", line
-
-	U.wr ("single string")
-	U.wr ("two strings", "another")
-	U.wr ("a bunch", "a", "b", "c", "d", "e")
-	U.wr ("numbers:", 100, 200, 300)
-	U.wr (("tuple", "tuple 2"))
-	U.wr (["list", "list 2"])
-	U.wr ({"key 1": "key 1 value", "key 2": "key 2 value"})
-	U.wr ("A complex one", ("Nested", ("one", 2, 3)), [1, 2, {"dict1":"dict1_val", "dict2":"dict2_val"}, 3])
+        #
+	#print "\nTesting U.is_windows_console\n", line
+        #
+	#print "Is windows console?", U.is_windows_console()
+        #
+        #
+	#print "\nTesting U.wr\n", line
+        #
+	#U.wr ("single string")
+	#U.wr ("two strings", "another")
+	#U.wr ("a bunch", "a", "b", "c", "d", "e")
+	#U.wr ("numbers:", 100, 200, 300)
+	#U.wr (("tuple", "tuple 2"))
+	#U.wr (["list", "list 2"])
+	#U.wr ({"key 1": "key 1 value", "key 2": "key 2 value"})
+	#U.wr ("A complex one", ("Nested", ("one", 2, 3)), [1, 2, {"dict1":"dict1_val", "dict2":"dict2_val"}, 3])
 
 
 	print "\nTesting U.snip -- U.snip (<text>, <length>)\n", line
 
 	seq = "abcdefghijklmnopqrstuvwxyz"
-	length = 14
+	length = 13
 	for i in range (30):
 		U.wr (U.snip (seq[0:i], length).ljust (length), "<")
 
+        for i in range(20,30):
 
-	print "\nTesting U.randomize_sequence -- U.randomize_sequence (<seq>)\n", line
-
-	seq = range (10)
-	print seq, '\n'
-	for x in range (5):
-		U.randomize_sequence (seq)
-		print seq
+            print U.snip(seq, i)
 
 
-	print '\nTesting U.hi_color() -- U.hi_color (<text>, <foreground>, <background>)\n', line
-
-	k = int (15)
-	for i in range (17, 52):
-		pad = ''
-		for j in range (6):
-			k += 1
-			if   len (str (k)) == 1: pad = '   '
-			elif len (str (k)) == 2: pad = '  '
-			elif len (str (k)) == 3: pad = ' '
-
-			label = ' ' + str (k) + pad
-			print U.hi_color (label, foreground=16, background=k),
-		print ''
-
-
-	print '\nTest effects -- U.effects (<[effect list]>, <text>)\n', line
-
-	effects = ['blackf', 'bluef', 'cyanf', 'greenf', 'purplef', 'redf',
-			   'whitef', 'yellowf', 'blackb', 'blueb', 'cyanb', 'greenb',
-			   'purpleb', 'redb', 'whiteb', 'yellowb', 'boldon',
-			   'italicon', 'ulon']
-
-	for eff in effects:
-		print U.effects ([eff], eff)
-
-	print ''
-	print 'Combining effects:'
-	for e in range (10):
-		U.randomize_sequence (effects)
-		print U.effects ([effects[0], effects[1], effects[2]],
-						 '%s %s %s' % (effects[0], effects[1], effects[2]))
-
-
-
-	print ''
-	print U.effects (['boldon', 'ulon', 'greenf'],
-					 'This text should have bold, underline, and green text')
+	#print "\nTesting U.randomize_sequence -- U.randomize_sequence (<seq>)\n", line
+        #
+	#seq = range (10)
+	#print seq, '\n'
+	#for x in range (5):
+	#        U.randomize_sequence (seq)
+	#        print seq
+        #
+        #
+	#print '\nTesting U.hi_color() -- U.hi_color (<text>, <foreground>, <background>)\n', line
+        #
+	#k = int (15)
+	#for i in range (17, 52):
+	#        pad = ''
+	#        for j in range (6):
+	#        	k += 1
+	#        	if   len (str (k)) == 1: pad = '   '
+	#        	elif len (str (k)) == 2: pad = '  '
+	#        	elif len (str (k)) == 3: pad = ' '
+        #
+	#        	label = ' ' + str (k) + pad
+	#        	print U.hi_color (label, foreground=16, background=k),
+	#        print ''
+        #
+        #
+	#print '\nTest effects -- U.effects (<[effect list]>, <text>)\n', line
+        #
+	#effects = ['blackf', 'bluef', 'cyanf', 'greenf', 'purplef', 'redf',
+	#        	   'whitef', 'yellowf', 'blackb', 'blueb', 'cyanb', 'greenb',
+	#        	   'purpleb', 'redb', 'whiteb', 'yellowb', 'boldon',
+	#        	   'italicon', 'ulon']
+        #
+	#for eff in effects:
+	#        print U.effects ([eff], eff)
+        #
+	#print ''
+	#print 'Combining effects:'
+	#for e in range (10):
+	#        U.randomize_sequence (effects)
+	#        print U.effects ([effects[0], effects[1], effects[2]],
+	#        				 '%s %s %s' % (effects[0], effects[1], effects[2]))
+        #
+        #
+        #
+	#print ''
+	#print U.effects (['boldon', 'ulon', 'greenf'],
+	#        			 'This text should have bold, underline, and green text')
 
 
 
