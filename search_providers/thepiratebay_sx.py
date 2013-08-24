@@ -57,19 +57,29 @@ class Provider (object):
 
             # for each row in search results table, (skipping thead)
             for tr in search_results.find_all('tr')[1:]:
-                tds = tr.find_all('td')[1:]
 
+                tds = tr.find_all('td')[1:]
                 name = tds[0].find('a', {'class':'detLink'}).string
 
-                details = tds[0].find('font').contents[0].split(', ')
-                date = details[0].replace('Uploaded ', '')
-                size = details[1].replace('Size ', '')
+                # when searching using 'nondbshow', sometimes the last
+                # tr gets mangled.  All that can be extracted is the
+                # torrent name and magnet url.  This only happends
+                # when using BeautifulSoup, not a browser.
+                try:
+                    details = tds[0].find('font').contents[0].split(', ')
+                    date = details[0].replace('Uploaded ', '')
+                    size = details[1].replace('Size ', '')
+                    seeds = tds[1].string
+                except AttributeError:
+                    date = 'unknown'
+                    size = 'unknown'
+                    seeds = 'unknown'
 
                 magnet = tds[0].find('a', href=re.compile('magnet:.*')).attrs['href']
-                seeds = tds[1].string
 
                 show_data.append([name, size, date, seeds, magnet])
 
+        show_data.sort(key=lambda torrent: int(torrent[3]), reverse=True)
         return [header] + [show_data]
 
 
