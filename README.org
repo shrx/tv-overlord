@@ -42,31 +42,31 @@ tv will search thetvdb.com for a match to your show name.  If the show
 it asks you is not the right one, it helps to add the year to the
 name: =tv addnew 'show name year';=.
 
-:tv showmissing
+=tv showmissing=
 
 This will list any shows that are ready to download.
 
-:tv download
+=tv download=
 
 For each show thats ready to download, it will ask you which one you
 want to download.
 
-:tv info
+=tv info=
 
 This will show you what shows are next, and how many days till they
 are broadcast
 
-:tv nondbshow "some search name"
+=tv nondbshow "some search name";=
 
 This will show you matches to your search.  Anything downloaded this
-way will not be put in your database.
+way will not be recorded in your database.
 
-:tv providers
+=tv providers=
 
 This will list search providers available to the program.  The default
 one is the provider at the top of the list in config.ini.
 
-:tv editdbinfo "show name"
+=tv editdbinfo "exact show name";=
 
 Edit the data in the database for show name.
 
