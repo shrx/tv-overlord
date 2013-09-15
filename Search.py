@@ -86,6 +86,11 @@ class Search (object):
                     Popen (["gvfs-open", chosen_show])
                 elif desktop == 'kde':
                     Popen (["kioclient", chosen_show])
+                elif desktop == 'ubuntu':
+                    Popen (['xdg-open', chosen_show])
+                else:
+                    unknown_enviroment = os.environ.get('DESKTOP_SESSION')
+                    print 'Unknown enviroment:', unknown_enviroment
             elif platform.system() == 'Darwin':
                 Popen (["open", chosen_show])
             else:
