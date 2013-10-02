@@ -573,8 +573,13 @@ def init (args):
                 str (series.db_last_episode).rjust (2,'0'),
                 )
             se = U.hi_color(se, foreground=48)
-            imdb_url = U.hi_color(   '\n    IMDB.com:    http://imdb.com/title/%s' % series.imdb_id, foreground=20)
-            thetvdb_url = U.hi_color('\n    TheTVDB.com: http://thetvdb.com/?tab=series&id=%s' % series.id, foreground=20)
+
+            if args.show_links:
+                imdb_url = U.hi_color(   '\n    IMDB.com:    http://imdb.com/title/%s' % series.imdb_id, foreground=20)
+                thetvdb_url = U.hi_color('\n    TheTVDB.com: http://thetvdb.com/?tab=series&id=%s' % series.id, foreground=20)
+            else:
+                imdb_url = ''
+                thetvdb_url = ''
 
             first_row_a = []
             for i in [title + ',', se, status, imdb_url, thetvdb_url]:
@@ -750,6 +755,11 @@ if __name__ == '__main__':
         action='store_true',
         help='Ask if shows that are ended, and all have been \
             downloaded, should they be set to INACTIVE'
+    )
+    par2.add_argument (
+        '-l', '--show-links',
+        action='store_true',
+        help='Show imdb and thetvdb links'
     )
 
     # showmissing
