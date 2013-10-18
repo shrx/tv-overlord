@@ -3,7 +3,7 @@
 r'''
 Usage:
   tv download    [-n] [-d DB-FILE] [-l LOCATION] [-p PROVIDER] [-i SERIES_ID]
-  tv showmissing [-n] [-d DB-FILE] [-l LOCATION] [-i SERIES_ID]
+  tv showmissing [-n] [-d DB-FILE] [-i SERIES_ID]
   tv info        [-n] [-d DB-FILE] [-a] [-x] [--ask-inactive] [--show-links]
   tv addnew SHOW_NAME [-d DB-FILE]
   tv nondbshow SEARCH_STRING [-l LOCATION] [-p PROVIDER]
