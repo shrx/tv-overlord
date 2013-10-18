@@ -4,7 +4,7 @@ r'''
 Usage:
   tv download    [-n] [-d DB-FILE] [-l LOCATION] [-p PROVIDER] [-i SERIES_ID]
   tv showmissing [-n] [-d DB-FILE] [-l LOCATION] [-i SERIES_ID]
-  tv info        [-n] [-d DB-FILE] [-a] [-x] [--ask-inactive]
+  tv info        [-n] [-d DB-FILE] [-a] [-x] [--ask-inactive] [--show-links]
   tv addnew SHOW_NAME [-d DB-FILE]
   tv nondbshow SEARCH_STRING [-l LOCATION] [-p PROVIDER]
   tv editdbinfo SHOW_NAME [-d DB-FILE]
@@ -600,7 +600,7 @@ def init (args):
                 )
             se = U.hi_color(se, foreground=48)
 
-            if args.show_links:
+            if args['--show-links']:
                 imdb_url = U.hi_color(   '\n    IMDB.com:    http://imdb.com/title/%s' % series.imdb_id, foreground=20)
                 thetvdb_url = U.hi_color('\n    TheTVDB.com: http://thetvdb.com/?tab=series&id=%s' % series.id, foreground=20)
             else:
