@@ -599,8 +599,13 @@ def init (args):
                 str (series.db_last_episode).rjust (2,'0'),
                 )
             se = U.hi_color(se, foreground=48)
-            imdb_url = U.hi_color(   '\n    IMDB.com:    http://imdb.com/title/%s' % series.imdb_id, foreground=20)
-            thetvdb_url = U.hi_color('\n    TheTVDB.com: http://thetvdb.com/?tab=series&id=%s' % series.id, foreground=20)
+
+            if args.show_links:
+                imdb_url = U.hi_color(   '\n    IMDB.com:    http://imdb.com/title/%s' % series.imdb_id, foreground=20)
+                thetvdb_url = U.hi_color('\n    TheTVDB.com: http://thetvdb.com/?tab=series&id=%s' % series.id, foreground=20)
+            else:
+                imdb_url = ''
+                thetvdb_url = ''
 
             first_row_a = []
             for i in [title + ',', se, status, imdb_url, thetvdb_url]:
