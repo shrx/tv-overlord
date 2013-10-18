@@ -70,6 +70,11 @@ class Provider (object):
                     date = details[0].replace('Uploaded ', '')
                     size = details[1].replace('Size ', '')
                     seeds = tds[1].string
+                except IndexError:
+                    # sometimes some fields are empty, so trying to
+                    # access them throws an IndexError.  We can safely
+                    # skip them.
+                    pass
                 except AttributeError:
                     date = 'unknown'
                     size = 'unknown'

@@ -40,8 +40,7 @@ full_dest=$shows_dir$dest
 echo "Destination dir: $full_dest" >> $log
 
 if [ ! -d "$full_dest" ]; then
-    if zenity --question --text="$full_dest does not exist.\nCreate new dir?"; then
-        mkdir "$full_dest";
+    if mkdir "$full_dest"; then
         echo "Creating dir: $dest" >> $log
     else
         echo "dir NOT created" >> $log
