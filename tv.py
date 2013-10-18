@@ -1,5 +1,31 @@
 #!/usr/bin/python
 
+r'''
+Usage:
+  tv download    [-n] [-d DB-FILE] [-l LOCATION] [-p PROVIDER] [-i SERIES_ID]
+  tv showmissing [-n] [-d DB-FILE] [-l LOCATION] [-i SERIES_ID]
+  tv info        [-n] [-d DB-FILE] [-a] [-x] [--ask-inactive]
+  tv addnew SHOW_NAME [-d DB-FILE]
+  tv nondbshow SEARCH_STRING [-l LOCATION] [-p PROVIDER]
+  tv editdbinfo SHOW_NAME [-d DB-FILE]
+  tv providers
+
+Options:
+  -h, --help
+  -d DB-FILE, --db-file DB-FILE  The db file to use instead of the
+                                 default one
+  -l DOWNLOAD_LOCATION, --location DOWNLOAD_LOCATION
+                                 download location
+  -n, --no-cache                 don't use localy cached info
+  -p SEARCH_PROVIDER, --search-provider SEARCH_PROVIDER
+                                 Specify a different search instead
+                                 of the one in the config file.
+  -i, SERIES_ID                  Not used
+  -a, --show-all
+  -x, --sort-by-next
+  --ask-inactive
+'''
+
 import StringIO
 import datetime
 from dateutil import parser as dateParser
@@ -8,7 +34,7 @@ import os
 import re
 import sqlite3
 import time
-from argparse import ArgumentParser
+from docopt import docopt
 import tvdb_api
 from tvrage import feeds
 import pprint
@@ -538,19 +564,19 @@ def edit_db (search_str):
 
 def init (args):
 
-    if args.db_file:
+    if args['--db-file']:
         config.db_file = args.db_file
-    if args.location:
+    if args['--location']:
         config.staging = args.location
-    if args.no_cache == False:
+    if args['--no-cache']:
         config.use_cache = False
 
-    if args.search_provider:
+    if args['--search-provider']:
         provider = args.search_provider
     else:
         provider = config.providers[0]
 
-    if args.action == t.info:
+    if args['info']:
         show_info = {}
         counter = 0
         for series in AllSeries(provider):
@@ -595,7 +621,7 @@ def init (args):
                     broadcast_date = datetime.datetime (
                         int (split_date[0]), int (split_date[1]), int (split_date[2]))
 
-                    if not args.show_all:
+                    if not args['--show-all']:
                         if broadcast_date < today:
                             continue
 
@@ -612,7 +638,7 @@ def init (args):
 
                     if first_time:
                         first_time = False
-                        if args.sort_by_next:
+                        if args['--sort-by-next']:
                             sort_key = str(diff.days).rjust(5, '0') + str(counter)
                         else:
                             sort_key = series.db_name.replace('The ', '')
@@ -631,7 +657,7 @@ def init (args):
                 else:
                     show_info[sort_key] = first_row
 
-            if args.ask_inactive:
+            if args['--ask-inactive']:
                 if series.status == 'Ended' and first_time:
                     set_status = ask (
                         '%s has ended, and all have been downloaded. Set as inactive? [y/n]: ' %
@@ -644,8 +670,7 @@ def init (args):
         for i in keys:
             print show_info[i]
 
-
-    if args.action == t.showmissing:
+    if args['showmissing']:
         fp = FancyPrint()
         for series in AllSeries(provider):
             if series.is_missing():
@@ -654,23 +679,22 @@ def init (args):
                 fp.fancy_print ('Show up to date: %s' % (series.db_name))
         fp.done()
 
-
-    if args.action == t.download:
+    if args['download']:
         for series in AllSeries(provider):
             series.download_missing()
 
-    if args.action == t.addnew:
+    if args['addnew']:
         newShow = Series (provider, show_type='new')
-        newShow.add_new (name=args.search_string)
+        newShow.add_new (name=args['SHOW_NAME'])
 
-    if args.action == t.nondbshow:
+    if args['nondbshow']:
         nons = Series (provider, show_type='nondb')
-        nons.non_db (args.search_string)
+        nons.non_db (args['SEARCH_STRING'])
 
-    if args.action == t.editdbinfo:
-        edit_db (args.search_string)
+    if args['editdbinfo']:
+        edit_db (args['SHOW_NAME'])
 
-    if args.action == t.providers:
+    if args['providers']:
         providers = config.providers
         for p in providers:
             print p, '  http://%s' % p.replace('_', '.')
@@ -678,129 +702,5 @@ def init (args):
 
 if __name__ == '__main__':
 
-    class t:
-        download = 'download'
-        info = 'info'
-        showmissing = 'showmissing'
-        addnew = 'addnew'
-        nondbshow = 'nondbshow'
-        editdbinfo = 'editdbinfo'
-        providers = 'providers'
-
-    parser = ArgumentParser (
-        description='Download and manage tv shows and movies'
-    )
-    parser.add_argument (
-        '-d', '--db-file',
-        metavar='db-file',
-        help='Use a different database than the default one',
-    )
-    parser.add_argument (
-        '-l', '--location',
-        metavar='download_location',
-        help='set the download location',
-    )
-    parser.add_argument (
-        '-n', '--no-cache',
-        action='store_false',
-        help='If set, do not use the local thetvdb cache'
-    )
-    parser.add_argument(
-        '-p', '--search-provider',
-        help='Use this search provider instead of the default one'
-    )
-    sub = parser.add_subparsers (
-        title='Command help',
-        description='Use one of the following commands.  For aditional help, \
-            use <command> -h for help with a specific command',
-        dest='action',
-    )
-
-    # download
-    par1 = sub.add_parser (
-        t.download,
-        help='Download any new shows available.  Optionally, \
-            download a single show',
-    )
-    par1.add_argument (
-        '-i', '--series-id',
-        help='The series id can be used to specify a single \
-            show to download'
-    )
-
-    # info
-    par2 = sub.add_parser (
-        t.info,
-        help='Display information stored in the local db; last \
-            episode downloaded, show status (canceled, etc...), \
-            episodes in current season, etc...'
-    )
-    par2.add_argument (
-        '-n', '--sort-by-next',
-        action='store_true',
-        help='Sort by upcoming instead of alphabetical'
-    )
-    par2.add_argument (
-        '-a', '--show-all',
-        action='store_true',
-        help='Show all shows, not just ones with upcoming episodes'
-    )
-    par2.add_argument (
-        '--ask-inactive',
-        action='store_true',
-        help='Ask if shows that are ended, and all have been \
-            downloaded, should they be set to INACTIVE'
-    )
-
-    # showmissing
-    par3 = sub.add_parser (
-        t.showmissing,
-        help='Display episodes ready to download',
-    )
-    par3.add_argument (
-        '-i', '--series-id',
-        help='The series id can be used to specify a single show'
-    )
-
-    # addnew
-    par4 = sub.add_parser (
-        t.addnew,
-        help='Add a new show to download',
-    )
-    par4.add_argument (
-        'search_string',
-        metavar='SEARCH_STRING',
-        help='The name of the show to add to the db',
-    )
-
-    # nondbshow
-    par5 = sub.add_parser (
-        t.nondbshow,
-        help='Download a show or movie not in the db',
-    )
-    par5.add_argument (
-        'search_string',
-        metavar='SEARCH_STRING',
-        help='The name of the show or movie to download',
-    )
-
-    # editdbinfo
-    par6 = sub.add_parser (
-        t.editdbinfo,
-        help='Edit the information in the db for a single show',
-    )
-    par6.add_argument (
-        'search_string',
-        metavar='SEARCH_STRING',
-        help= ('The name of the show to edit.  If more than one ' +
-               'show matches the SEARCH_STRING, edit multiple shows.'),
-    )
-
-    # providers
-    par7 = sub.add_parser(
-        t.providers,
-        help='List all available search providers'
-    )
-
-    args = parser.parse_args()
-    init (args)
+    args = docopt(__doc__, version='0.1')
+    init(args)
