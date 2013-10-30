@@ -2,9 +2,10 @@
 
 r'''
 Usage:
-  tv download    [-n] [-d DB-FILE] [-l LOCATION] [-p PROVIDER] [-i SERIES_ID]
-  tv showmissing [-n] [-d DB-FILE] [-i SERIES_ID]
+  tv download    [-n] [-d DB-FILE] [-l LOCATION] [-p PROVIDER]
+  tv showmissing [-n] [-d DB-FILE]
   tv info        [-n] [-d DB-FILE] [-a] [-x] [--ask-inactive] [--show-links]
+  tv calender
   tv addnew SHOW_NAME [-d DB-FILE]
   tv nondbshow SEARCH_STRING [-l LOCATION] [-p PROVIDER]
   tv editdbinfo SHOW_NAME [-d DB-FILE]
@@ -12,18 +13,19 @@ Usage:
 
 Options:
   -h, --help
-  -d DB-FILE, --db-file DB-FILE  The db file to use instead of the
-                                 default one
+  -d DB-FILE, --db-file DB-FILE
+                    The db file to use instead of the default one which is
+                    specified in config.ini
   -l DOWNLOAD_LOCATION, --location DOWNLOAD_LOCATION
-                                 download location
-  -n, --no-cache                 don't use localy cached info
+                    Location to download the nzb files to
+  -n, --no-cache    Re-download the show data instead of using the cached data
   -p SEARCH_PROVIDER, --search-provider SEARCH_PROVIDER
-                                 Specify a different search instead
-                                 of the one in the config file.
-  -i, SERIES_ID                  Not used
-  -a, --show-all
-  -x, --sort-by-next
-  --ask-inactive
+                    Specify a different search engine instead of the one
+                    in the config file.
+  -a, --show-all    Show all shows including the ones marked inactive
+  -x, --sort-by-next  Sort by release date instead of the default alphabetical
+  --ask-inactive    Ask to make inactive shows that are cancelled
+  --show-links      Show links to IMDB.com and TheTVDb.com for each show
 '''
 
 import StringIO
