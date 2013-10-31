@@ -5,7 +5,7 @@ Usage:
   tv download    [-n] [-d DB-FILE] [-l LOCATION] [-p PROVIDER]
   tv showmissing [-n] [-d DB-FILE]
   tv info        [-n] [-d DB-FILE] [-a] [-x] [--ask-inactive] [--show-links]
-  tv calender
+  tv calender    [-n] [-d DB-FILE] [--width]
   tv addnew SHOW_NAME [-d DB-FILE]
   tv nondbshow SEARCH_STRING [-l LOCATION] [-p PROVIDER]
   tv editdbinfo SHOW_NAME [-d DB-FILE]
@@ -676,6 +676,67 @@ def init (args):
         keys.sort()
         for i in keys:
             print show_info[i]
+
+    if args['calender']:
+
+        title_width = 20
+        console_columns = int(os.popen ('stty size', 'r').read().split()[1])
+        spacer = ' '
+        calender_columns = console_columns - (title_width + len(spacer))
+        today = datetime.datetime.today()
+        weekday = '.'
+        weekend = '-'
+        monthstart = '|'
+        marker = 'X'
+
+        months_row = today.strftime('%b') + (' ' * calender_columns)
+        days_row = ''
+        daybefore = today - datetime.timedelta(days=1)
+        today = datetime.datetime.today()
+        for days in range(calender_columns):
+            cur_date = today + datetime.timedelta(days=days)
+
+            if cur_date.month != daybefore.month:
+                days_row = days_row + monthstart
+                month = cur_date.strftime('%b')
+                month_len = len(month)
+                months_row = months_row[:days] + month + months_row[(days + month_len):]
+            elif cur_date.weekday() < 5:
+                days_row = days_row + weekday
+            else:
+                days_row = days_row + weekend
+
+            daybefore = cur_date
+
+        months_row = months_row[:calender_columns] # chop off any extra spaces created by adding the months
+        months_row = (' ' * title_width) + (' ' * len(spacer)) + months_row
+        days_row =  (' ' * title_width) + (' ' * len(spacer)) + days_row
+        print months_row
+        print days_row
+
+        counter = 0
+        for series in AllSeries(provider):
+            counter = counter + 1
+            if counter == 30:
+                counter = 0
+                print months_row
+                print days_row
+
+            broadcast_row = ' ' * calender_columns
+            title = U.snip(series.db_name, title_width).ljust(title_width)
+
+            for i in series.series: # season
+                for j in series.series[i]: # episode
+                    b_date = series.series[i][j]['firstaired']
+                    if not b_date: continue  # some episode have no broadcast date?
+                    split_date = b_date.split ('-')
+                    broadcast_date = datetime.datetime(
+                        int(split_date[0]), int(split_date[1]), int(split_date[2]))
+                    if broadcast_date >= today:
+                        days_away = (broadcast_date - today).days - 1
+                        broadcast_row = broadcast_row[:days_away] + marker + broadcast_row[(days_away + 1):]
+            row = title + spacer + broadcast_row[:calender_columns]
+            print row
 
     if args['showmissing']:
         fp = FancyPrint()
