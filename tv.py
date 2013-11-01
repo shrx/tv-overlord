@@ -5,7 +5,7 @@ Usage:
   tv download    [-n] [-d DB-FILE] [-l LOCATION] [-p PROVIDER]
   tv showmissing [-n] [-d DB-FILE]
   tv info        [-n] [-d DB-FILE] [-a] [-x] [--ask-inactive] [--show-links]
-  tv calender    [-n] [-d DB-FILE] [--width]
+  tv calender    [-n] [-d DB-FILE] [-a] [-x] [--width WIDTH]
   tv addnew SHOW_NAME [-d DB-FILE]
   tv nondbshow SEARCH_STRING [-l LOCATION] [-p PROVIDER]
   tv editdbinfo SHOW_NAME [-d DB-FILE]
@@ -26,6 +26,7 @@ Options:
   -x, --sort-by-next  Sort by release date instead of the default alphabetical
   --ask-inactive    Ask to make inactive shows that are cancelled
   --show-links      Show links to IMDB.com and TheTVDb.com for each show
+  --width WIDTH     The width of the calendar in characters
 '''
 
 import StringIO
@@ -678,9 +679,11 @@ def init (args):
             print show_info[i]
 
     if args['calender']:
-
         title_width = 20
-        console_columns = int(os.popen ('stty size', 'r').read().split()[1])
+        if args['--width']:
+            console_columns = int(args['--width'])
+        else:
+            console_columns = int(os.popen ('stty size', 'r').read().split()[1])
         spacer = ' '
         calender_columns = console_columns - (title_width + len(spacer))
         today = datetime.datetime.today()
@@ -689,6 +692,7 @@ def init (args):
         monthstart = '|'
         marker = 'X'
 
+        # build date title row
         months_row = today.strftime('%b') + (' ' * calender_columns)
         days_row = ''
         daybefore = today - datetime.timedelta(days=1)
@@ -714,6 +718,7 @@ def init (args):
         print months_row
         print days_row
 
+        # build shows rows
         counter = 0
         for series in AllSeries(provider):
             counter = counter + 1
@@ -725,6 +730,7 @@ def init (args):
             broadcast_row = ' ' * calender_columns
             title = U.snip(series.db_name, title_width).ljust(title_width)
 
+            has_episode = False
             for i in series.series: # season
                 for j in series.series[i]: # episode
                     b_date = series.series[i][j]['firstaired']
@@ -732,11 +738,16 @@ def init (args):
                     split_date = b_date.split ('-')
                     broadcast_date = datetime.datetime(
                         int(split_date[0]), int(split_date[1]), int(split_date[2]))
-                    if broadcast_date >= today:
-                        days_away = (broadcast_date - today).days - 1
-                        broadcast_row = broadcast_row[:days_away] + marker + broadcast_row[(days_away + 1):]
+                    if broadcast_date < today:
+                        continue
+                    days_away = (broadcast_date - today).days + 1
+                    broadcast_row = broadcast_row[:days_away] + marker + broadcast_row[(days_away + 1):]
+
+                    has_episode = True
+
             row = title + spacer + broadcast_row[:calender_columns]
-            print row
+            if has_episode or args['--show-all']:
+                print row
 
     if args['showmissing']:
         fp = FancyPrint()
