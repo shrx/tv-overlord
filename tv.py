@@ -687,10 +687,9 @@ def init (args):
         spacer = ' '
         calender_columns = console_columns - (title_width + len(spacer))
         today = datetime.datetime.today()
-        weekday = '.'
-        weekend = '-'
+        days_chars = '.....::' # first char is monday
         monthstart = '|'
-        marker = 'X'
+        marker = '+'
 
         # build date title row
         months_row = today.strftime('%b') + (' ' * calender_columns)
@@ -705,10 +704,8 @@ def init (args):
                 month = cur_date.strftime('%b')
                 month_len = len(month)
                 months_row = months_row[:days] + month + months_row[(days + month_len):]
-            elif cur_date.weekday() < 5:
-                days_row = days_row + weekday
             else:
-                days_row = days_row + weekend
+                days_row = days_row + days_chars[cur_date.weekday()]
 
             daybefore = cur_date
 
@@ -719,14 +716,7 @@ def init (args):
         print days_row
 
         # build shows rows
-        counter = 0
         for series in AllSeries(provider):
-            counter = counter + 1
-            if counter == 30:
-                counter = 0
-                print months_row
-                print days_row
-
             broadcast_row = ' ' * calender_columns
             title = U.snip(series.db_name, title_width).ljust(title_width)
 
