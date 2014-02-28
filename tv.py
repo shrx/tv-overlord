@@ -720,12 +720,18 @@ def init (args):
             daybefore = cur_date
 
         months_row = months_row[:calender_columns] # chop off any extra spaces created by adding the months
+        if use_color:
+            months_row = U.hi_color(months_row, 225, header_color)
+            days_row = U.hi_color(days_row, 225, header_color)
         months_row = (' ' * title_width) + (' ' * len(spacer)) + months_row
         days_row =  (' ' * title_width) + (' ' * len(spacer)) + days_row
         print months_row
         print days_row
 
         # build shows rows
+        step = 3
+        color_row = False
+        counter = 1
         for series in AllSeries(provider):
             broadcast_row = ' ' * calender_columns
             title = U.snip(series.db_name, title_width).ljust(title_width)
@@ -747,7 +753,21 @@ def init (args):
 
             row = title + spacer + broadcast_row[:calender_columns]
             if has_episode or args['--show-all']:
+                if use_color and color_row:
+                    title = U.hi_color(title, 225, title_color_1)
+                    broadcast_row = U.hi_color(broadcast_row, 225, date_color_1)
+                elif use_color and not color_row:
+                    title = U.hi_color(title, 225, title_color_2)
+                    broadcast_row = U.hi_color(broadcast_row, 225, date_color_2)
+                row = title + spacer + broadcast_row
                 print row
+
+                if counter >= step:
+                    counter = 0
+                    color_row = True
+                else:
+                    color_row = False
+                    counter = counter + 1
 
     if args['showmissing']:
         fp = FancyPrint()
