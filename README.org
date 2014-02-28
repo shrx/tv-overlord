@@ -24,14 +24,15 @@ TV Downloader requires two additional python libraries to be installed:
 Install steps:
   1. =easy_install tvdb_api=
   2. =easy_install beautifulsoup4=
-  3. Clone this repository
-  4. Put tv.py on your $PATH or call it directly
+  3. =easy_install feedparser=
+  4. Clone this repository
+  5. Put tv.py on your $PATH or call it directly
      (I have it symlinked to =tv= in a bin folder thats on the path)
-  5. type: =tv=
+  6. type: =tv=
      The first time its run, it will ask to create the
      config dir.  Type =Y= to allow it.  The config directory will be
      created in your home dir called =.tv-downloader/=
-  6. Type =tv addnew "someshow";= to start.
+  7. Type =tv addnew "someshow";= to start.
 
 
 ** How to use
