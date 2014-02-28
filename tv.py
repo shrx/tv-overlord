@@ -5,7 +5,7 @@ Usage:
   tv download    [-n] [-d DB-FILE] [-l LOCATION] [-p PROVIDER]
   tv showmissing [-n] [-d DB-FILE]
   tv info        [-n] [-d DB-FILE] [-a] [-x] [--ask-inactive] [--show-links]
-  tv calender    [-n] [-d DB-FILE] [-a] [-x] [--no-color] [--width WIDTH]
+  tv calendar    [-n] [-d DB-FILE] [-a] [-x] [--no-color] [--width WIDTH]
   tv addnew SHOW_NAME [-d DB-FILE]
   tv nondbshow SEARCH_STRING [-l LOCATION] [-p PROVIDER]
   tv editdbinfo SHOW_NAME [-d DB-FILE]
@@ -677,7 +677,7 @@ def init (args):
         for i in keys:
             print show_info[i]
 
-    if args['calender']:
+    if args['calendar']:
         if args['--no-color']:
             use_color = False
         else:
@@ -695,18 +695,18 @@ def init (args):
         else:
             console_columns = int(os.popen ('stty size', 'r').read().split()[1])
         spacer = ' '
-        calender_columns = console_columns - (title_width + len(spacer))
+        calendar_columns = console_columns - (title_width + len(spacer))
         today = datetime.datetime.today()
         days_chars = '.....::' # first char is monday
         monthstart = '|'
         marker = '+'
 
         # build date title row
-        months_row = today.strftime('%b') + (' ' * calender_columns)
+        months_row = today.strftime('%b') + (' ' * calendar_columns)
         days_row = ''
         daybefore = today - datetime.timedelta(days=1)
         today = datetime.datetime.today()
-        for days in range(calender_columns):
+        for days in range(calendar_columns):
             cur_date = today + datetime.timedelta(days=days)
 
             if cur_date.month != daybefore.month:
@@ -719,12 +719,12 @@ def init (args):
 
             daybefore = cur_date
 
-        months_row = months_row[:calender_columns] # chop off any extra spaces created by adding the months
+        months_row = months_row[:calendar_columns] # chop off any extra spaces created by adding the months
         if use_color:
             months_row = U.hi_color(months_row, 225, header_color)
             days_row = U.hi_color(days_row, 225, header_color)
         months_row = (' ' * title_width) + (' ' * len(spacer)) + months_row
-        days_row =  (' ' * title_width) + (' ' * len(spacer)) + days_row
+        days_row = (' ' * title_width) + (' ' * len(spacer)) + days_row
         print months_row
         print days_row
 
@@ -748,6 +748,7 @@ def init (args):
                     if broadcast_date < today:
                         continue  # don't include episodes before today
                     days_away = (broadcast_date - today).days + 1
+                    if days_away > calendar_columns:
                     broadcast_row = broadcast_row[:days_away] + marker + broadcast_row[(days_away + 1):]
 
                     has_episode = True
