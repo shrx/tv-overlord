@@ -41,7 +41,6 @@ import sqlite3
 import time
 from docopt import docopt
 import tvdb_api
-from tvrage import feeds
 import pprint
 import textwrap
 
@@ -145,7 +144,6 @@ class Series:
         '''
 
         tv = tvdb_api.Tvdb (apikey=config.thetvdb_apikey, cache=config.use_cache)
-
         try:
             series = tv[self.db_name]
         except tvdb_api.tvdb_shownotfound:
@@ -328,7 +326,6 @@ class Series:
         else:
             show_title = self.db_name
 
-        show_title = shows[0][0]
         print U.effects (['boldon'], U.hi_color (
             show_title.ljust (int (self.console_columns)),
             foreground=color.title_fg,
