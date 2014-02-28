@@ -740,12 +740,13 @@ def init (args):
             for i in series.series: # season
                 for j in series.series[i]: # episode
                     b_date = series.series[i][j]['firstaired']
-                    if not b_date: continue  # some episode have no broadcast date?
+                    if not b_date:
+                        continue  # some episode have no broadcast date?
                     split_date = b_date.split ('-')
                     broadcast_date = datetime.datetime(
                         int(split_date[0]), int(split_date[1]), int(split_date[2]))
                     if broadcast_date < today:
-                        continue
+                        continue  # don't include episodes before today
                     days_away = (broadcast_date - today).days + 1
                     broadcast_row = broadcast_row[:days_away] + marker + broadcast_row[(days_away + 1):]
 
