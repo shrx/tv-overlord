@@ -567,14 +567,14 @@ def edit_db (search_str):
 def init (args):
 
     if args['--db-file']:
-        config.db_file = args.db_file
+        config.db_file = args['--db-file']
     if args['--location']:
-        config.staging = args.location
+        config.staging = args['--location']
     if args['--no-cache']:
         config.use_cache = False
 
     if args['--search-provider']:
-        provider = args.search_provider
+        provider = args['--search-provider']
     else:
         provider = config.providers[0]
 
