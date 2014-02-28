@@ -5,7 +5,7 @@ Usage:
   tv download    [-n] [-d DB-FILE] [-l LOCATION] [-p PROVIDER]
   tv showmissing [-n] [-d DB-FILE]
   tv info        [-n] [-d DB-FILE] [-a] [-x] [--ask-inactive] [--show-links]
-  tv calender    [-n] [-d DB-FILE] [-a] [-x] [--width WIDTH]
+  tv calender    [-n] [-d DB-FILE] [-a] [-x] [--no-color] [--width WIDTH]
   tv addnew SHOW_NAME [-d DB-FILE]
   tv nondbshow SEARCH_STRING [-l LOCATION] [-p PROVIDER]
   tv editdbinfo SHOW_NAME [-d DB-FILE]
@@ -27,6 +27,8 @@ Options:
   --ask-inactive    Ask to make inactive shows that are cancelled
   --show-links      Show links to IMDB.com and TheTVDb.com for each show
   --width WIDTH     The width of the calendar in characters
+  --no-color        Don't use color in output, useful if output is to be
+                    used in email or text file.
 '''
 
 import StringIO
@@ -679,6 +681,17 @@ def init (args):
             print show_info[i]
 
     if args['calender']:
+        if args['--no-color']:
+            use_color = False
+        else:
+            use_color = True
+
+        header_color = 17
+        date_color_1 = 17
+        date_color_2 = 0
+        title_color_1 = 18
+        title_color_2 = 0
+
         title_width = 20
         if args['--width']:
             console_columns = int(args['--width'])
