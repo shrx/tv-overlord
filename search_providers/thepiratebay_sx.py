@@ -10,11 +10,13 @@ import re
 import pprint
 
 from Util import U
+from tv_config import config
 
 
 class Provider (object):
 
-    provider_url = 'http://thepiratebay.sx/'
+    provider_url = config.pirateurl
+
     name = 'The Pirate Bay'
 
     def se_ep(self, show_title, season, episode):
