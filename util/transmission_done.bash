@@ -1,10 +1,18 @@
 #!/usr/bin/env bash
 
-log=~/shows/deluge-dl.log
-torrentid=$1
-torrentname=$2
-torrentpath=$3
-shows_dir='/home/sm/net1/dl/TV Shows/'
+log=~/shows/transmission-dl.log
+torrentid=$TR_TORRENT_ID
+torrentname=$TR_TORRENT_NAME
+torrentpath=$TR_TORRENT_DIR
+# shows_dir='~/net1/dl/TV Shows/'
+shows_dir='/Volumes/Volume_1/dl/TV Shows/'
+
+#  TR_APP_VERSION
+#  TR_TIME_LOCALTIME
+#x TR_TORRENT_DIR
+#  TR_TORRENT_HASH
+#x TR_TORRENT_ID
+#x TR_TORRENT_NAME
 
 function msg
 {
@@ -20,6 +28,8 @@ function msg
 		notify-send --icon=$icon 'Video Mover' "$1"
 	elif kdialog --help &> /dev/null; then
 		kdialog --title 'Video Mover' --passivepopup "$1" 10;
+    elif type terminal-notifier; then
+        terminal-notifier -title 'Video Mover' -message "$1";
 	fi
 }
 
