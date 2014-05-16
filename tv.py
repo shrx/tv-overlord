@@ -2,7 +2,7 @@
 
 r'''
 Usage:
-  tv download    [-n] [-d DB-FILE] [-l LOCATION] [-p PROVIDER]
+  tv download    [-n] [-d DB-FILE] [-c COUNT] [-l LOCATION] [-p PROVIDER]
   tv showmissing [-n] [-d DB-FILE]
   tv info        [-n] [-d DB-FILE] [-a] [-x] [--ask-inactive] [--show-links]
   tv calendar    [-n] [-d DB-FILE] [-a] [-x] [--no-color] [--width WIDTH]
@@ -13,6 +13,8 @@ Usage:
 
 Options:
   -h, --help
+  -c COUNT, --count COUNT
+                    Count of search results to list. [default: 5]
   -d DB-FILE, --db-file DB-FILE
                     The db file to use instead of the default one which is
                     specified in config.ini
@@ -161,7 +163,7 @@ class Series:
         self.series = series
 
 
-    def download_missing (self):
+    def download_missing (self, episode_display_count):
         missing = self._get_missing()
         if self.db_search_engine_name:
             search_title = self.db_search_engine_name
@@ -183,8 +185,8 @@ class Series:
                 results = self.search_provider.search(
                         search_title,
                         season=episode['season'],
-                        episode=episode['episode'],
-                        )
+                        episode=episode['episode']
+                )
 
             except Search.SearchError as inst:
                     error_a = True
@@ -192,8 +194,10 @@ class Series:
             if results:
                 showid = self._ask (
                     results,
+                    display_count=episode_display_count,
                     season=episode['season'],
-                    episode=episode['episode'])
+                    episode=episode['episode']
+                )
             else:
                 print '"%s" is listed in TheTVDB, but not found at the search engine' % (
                     search_title)
@@ -306,7 +310,7 @@ class Series:
         return missing
 
 
-    def _ask (self, shows, season, episode):
+    def _ask (self, shows, season, episode, display_count):
         class color:
             title_bg = 19
             title_fg = None
@@ -349,7 +353,7 @@ class Series:
         alignments = ['>'] + shows[0][3]
         key = ('1','2','3','4','5','6','7','8','9','0','a','b','c','d','e','f','g','h','i',
                'j','k','l','n','o','p','q','r','s','t','u','v','w','x','y','z')
-        for row, counter in zip (shows[1], key):
+        for row, counter, display in zip (shows[1], key, display_count):
             full_row = [counter] + row
             for width, i, alignment in zip (header_widths,
                                             range(len(header_widths)),
@@ -781,8 +785,11 @@ def init (args):
         fp.done()
 
     if args['download']:
+        count = int(args['--count']) # convert --count to int
+        count = 'x' * count          # convert count into an iterable string of the length count
+        config.episode_display_count = count
         for series in AllSeries(provider):
-            series.download_missing()
+            series.download_missing(config.episode_display_count)
 
     if args['addnew']:
         newShow = Series (provider, show_type='new')
