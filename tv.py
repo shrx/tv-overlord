@@ -338,12 +338,6 @@ class Series:
         url = U.hi_color(url, foreground=27, background=color.title_bg)
         print '%s%s' % (show_title_color, url)
 
-        # print U.effects (['boldon'], U.hi_color (
-            # show_title.ljust (int (self.console_columns)),
-            # foreground=color.title_fg,
-            # background=color.title_bg,
-            # ))
-
         ### Header row ###
         num_w = 1
         header_titles = [' '] + shows[0][1]
