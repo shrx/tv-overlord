@@ -29,7 +29,7 @@ Options:
   --ask-inactive    Ask to make inactive shows that are cancelled
   --show-links      Show links to IMDB.com and TheTVDb.com for each show
   --width WIDTH     The width of the calendar in characters
-  --no-color        Don't use color in output, useful if output is to be
+  --no-color        Don't use color in output. Useful if output is to be
                     used in email or text file.
 '''
 
