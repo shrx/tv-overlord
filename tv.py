@@ -326,15 +326,23 @@ class Series:
         ### Title bar row ###
         print
         if season and episode:
-            show_title = '%s %s   %s' % (self.db_name, se_ep (season, episode), shows[0][0])
+            show_title = ' %s %s ' % (self.db_name, se_ep (season, episode))
+            url = ' %s' % (shows[0][0])
         else:
             show_title = self.db_name
+            url = ''
 
-        print U.effects (['boldon'], U.hi_color (
-            show_title.ljust (int (self.console_columns)),
-            foreground=color.title_fg,
-            background=color.title_bg,
-            ))
+        show_title_color = U.hi_color(show_title, foreground=color.title_fg, background=color.title_bg)
+        show_title_color = U.effects(['boldon'], show_title_color)
+        url = url.ljust(int(self.console_columns) - len(show_title))
+        url = U.hi_color(url, foreground=27, background=color.title_bg)
+        print '%s%s' % (show_title_color, url)
+
+        # print U.effects (['boldon'], U.hi_color (
+            # show_title.ljust (int (self.console_columns)),
+            # foreground=color.title_fg,
+            # background=color.title_bg,
+            # ))
 
         ### Header row ###
         num_w = 1
