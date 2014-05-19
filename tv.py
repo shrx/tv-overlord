@@ -5,7 +5,7 @@ Usage:
   tv download    [-n] [-d DB-FILE] [-c COUNT] [-l LOCATION] [-p PROVIDER]
   tv showmissing [-n] [-d DB-FILE]
   tv info        [-n] [-d DB-FILE] [-a] [-x] [--ask-inactive] [--show-links]
-  tv calendar    [-n] [-d DB-FILE] [-a] [-x] [--no-color] [--width WIDTH]
+  tv calendar    [-n] [-d DB-FILE] [-a] [-x] [--no-color] [--days DAYS]
   tv addnew SHOW_NAME [-d DB-FILE]
   tv nondbshow SEARCH_STRING [-l LOCATION] [-p PROVIDER]
   tv editdbinfo SHOW_NAME [-d DB-FILE]
@@ -28,7 +28,7 @@ Options:
   -x, --sort-by-next  Sort by release date instead of the default alphabetical
   --ask-inactive    Ask to make inactive shows that are cancelled
   --show-links      Show links to IMDB.com and TheTVDb.com for each show
-  --width WIDTH     The width of the calendar in characters
+  --days DAYS       The number of days to show in the calendar
   --no-color        Don't use color in output. Useful if output is to be
                     used in email or text file.
 '''
@@ -695,17 +695,16 @@ def init (args):
         title_color_2 = 0
 
         title_width = 20 # width of show titles column
-        if args['--width']:
-            console_columns = int(args['--width'])
-        else:
-            console_columns = int(os.popen ('stty size', 'r').read().split()[1])
+        console_columns = int(os.popen ('stty size', 'r').read().split()[1])
         spacer = ' ' # can be any string, any length
-        calendar_columns = console_columns - (title_width + len(spacer))
+        if args['--days']:
+            calendar_columns = int(args['--days'])
+        else:
+            calendar_columns = console_columns - (title_width + len(spacer))
         today = datetime.datetime.today()
         # Days_chars can be any string of seven chars. eg: 'mtwtfSS'
         days_chars = '.....::' # first char is monday
         monthstart = '|'       # marker used to indicate the begining of month
-        marker = '+'           # episode marker
 
         # build date title row
         months_row = today.strftime('%b') + (' ' * calendar_columns)
@@ -737,6 +736,7 @@ def init (args):
         step = 3
         color_row = False
         counter = 1
+        season_marker = '-'
         for series in AllSeries(provider):
             broadcast_row = ''
             title = series.db_name[:title_width].ljust(title_width)
@@ -764,14 +764,14 @@ def init (args):
 
                     if first_display_date:
                         if int(episode_number) > 1:
-                            before_first = '-' * days_away
+                            before_first = season_marker * days_away
                         else:
                             before_first = ' ' * days_away
                         broadcast_row = before_first + episode_number
                         first_display_date = False
                     else:
                         episode_char_len = len(str(int(episode_number) - 1))
-                        broadcast_row = broadcast_row + ('-' * (days_away - last_days_away - episode_char_len)) + episode_number  # marker
+                        broadcast_row = broadcast_row + (season_marker * (days_away - last_days_away - episode_char_len)) + episode_number
 
                     last_days_away = days_away
 
