@@ -687,29 +687,30 @@ def init (args):
         else:
             use_color = True
 
+        # set colors for ui elements
         header_color = 17
         date_color_1 = 17
         date_color_2 = 0
         title_color_1 = 18
         title_color_2 = 0
 
-        title_width = 20
+        title_width = 20 # width of show titles column
         if args['--width']:
             console_columns = int(args['--width'])
         else:
             console_columns = int(os.popen ('stty size', 'r').read().split()[1])
-        spacer = ' '
+        spacer = ' ' # can be any string, any length
         calendar_columns = console_columns - (title_width + len(spacer))
         today = datetime.datetime.today()
+        # Days_chars can be any string of seven chars. eg: 'mtwtfSS'
         days_chars = '.....::' # first char is monday
-        monthstart = '|'
-        marker = '+'
+        monthstart = '|'       # marker used to indicate the begining of month
+        marker = '+'           # episode marker
 
         # build date title row
         months_row = today.strftime('%b') + (' ' * calendar_columns)
         days_row = ''
         daybefore = today - datetime.timedelta(days=1)
-        today = datetime.datetime.today()
         for days in range(calendar_columns):
             cur_date = today + datetime.timedelta(days=days)
 
@@ -737,28 +738,47 @@ def init (args):
         color_row = False
         counter = 1
         for series in AllSeries(provider):
-            broadcast_row = ' ' * calender_columns
-            title = U.snip(series.db_name, title_width).ljust(title_width)
-
+            broadcast_row = ''
+            title = series.db_name[:title_width].ljust(title_width)
             has_episode = False
-            for i in series.series: # season
-                for j in series.series[i]: # episode
+            first_display_date = True
+            last_days_away = 0
+            last_date = 0
+            for i in series.series:         # season
+                for j in series.series[i]:  # episode
+                    episode_number = series.series[i][j]['episodenumber']
                     b_date = series.series[i][j]['firstaired']
                     if not b_date:
                         continue  # some episode have no broadcast date?
                     split_date = b_date.split ('-')
                     broadcast_date = datetime.datetime(
                         int(split_date[0]), int(split_date[1]), int(split_date[2]))
-                    if broadcast_date < today:
+                    if broadcast_date == last_date:
+                        continue  # sometimes multiple episodes have the same date, don't repeat them.
+                    last_date = broadcast_date
                     if broadcast_date.date() < today.date():
                         continue  # don't include episodes before today
                     days_away = (broadcast_date - today).days + 1
                     if days_away > calendar_columns:
-                    broadcast_row = broadcast_row[:days_away] + marker + broadcast_row[(days_away + 1):]
+                        continue  # don't include days after the width of the screen
+
+                    if first_display_date:
+                        if int(episode_number) > 1:
+                            before_first = '-' * days_away
+                        else:
+                            before_first = ' ' * days_away
+                        broadcast_row = before_first + episode_number
+                        first_display_date = False
+                    else:
+                        episode_char_len = len(str(int(episode_number) - 1))
+                        broadcast_row = broadcast_row + ('-' * (days_away - last_days_away - episode_char_len)) + episode_number  # marker
+
+                    last_days_away = days_away
 
                     has_episode = True
 
-            row = title + spacer + broadcast_row[:calender_columns]
+            broadcast_row = broadcast_row[:calendar_columns].ljust(calendar_columns)
+
             if has_episode or args['--show-all']:
                 if use_color and color_row:
                     title = U.hi_color(title, 225, title_color_1)
