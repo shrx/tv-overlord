@@ -326,7 +326,7 @@ class Series:
         ### Title bar row ###
         print
         if season and episode:
-            show_title = '%s %s' % (self.db_name, se_ep (season, episode))
+            show_title = '%s %s   %s' % (self.db_name, se_ep (season, episode), shows[0][0])
         else:
             show_title = self.db_name
 

@@ -61,7 +61,7 @@ class Search (object):
 
         search_results = self.engine.search(search_string, season, episode)
 
-        print '%s%s' % (backspace, overwrite)
+        print '%s%s' % (backspace, overwrite),
 
         return search_results
 

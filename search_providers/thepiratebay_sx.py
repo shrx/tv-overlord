@@ -35,11 +35,6 @@ class Provider (object):
 
     def search(self, search_string, season=False, episode=False):
 
-        header = [
-            '%s  (%s)' % (search_string, self.provider_url),
-            ['Name', 'Size', 'Date', 'Seeds'],
-            [0, 11, 12, 6],
-            ['<', '>', '<', '>']]
         show_data = []
 
         if season and episode:
@@ -47,9 +42,11 @@ class Provider (object):
         else:
             searches = [search_string]
 
+        urls = '%s/search/ ' % self.provider_url
         for search in searches:
             search_string = urllib.quote(search)
             url = '%s/search/%s/0/7/0' % (self.provider_url, search_string)
+            urls += '%s/0/7/0 ' % search_string
             html = urllib2.urlopen(url)
             soup = BeautifulSoup(html)
 
@@ -85,6 +82,12 @@ class Provider (object):
                 magnet = tds[0].find('a', href=re.compile('magnet:.*')).attrs['href']
 
                 show_data.append([name, size, date, seeds, magnet])
+
+        header = [
+            urls,
+            ['Name', 'Size', 'Date', 'Seeds'],
+            [0, 11, 12, 6],
+            ['<', '>', '<', '>']]
 
         show_data.sort(key=lambda torrent: int(torrent[3]), reverse=True)
         return [header] + [show_data]
