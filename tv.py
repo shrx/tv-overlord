@@ -750,6 +750,7 @@ def init (args):
                     broadcast_date = datetime.datetime(
                         int(split_date[0]), int(split_date[1]), int(split_date[2]))
                     if broadcast_date < today:
+                    if broadcast_date.date() < today.date():
                         continue  # don't include episodes before today
                     days_away = (broadcast_date - today).days + 1
                     if days_away > calendar_columns:
