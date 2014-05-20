@@ -761,7 +761,7 @@ def init (args):
                     if broadcast_date.date() < today.date():
                         continue  # don't include episodes before today
                     days_away = (broadcast_date - today).days + 1
-                    if days_away > calendar_columns:
+                    if days_away >= calendar_columns:
                         continue  # don't include days after the width of the screen
 
                     if first_display_date:

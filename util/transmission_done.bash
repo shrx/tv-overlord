@@ -33,7 +33,8 @@ function msg
 	fi
 }
 
-echo '\n' $(date) '==============' >> $log
+echo ' ' >> $log
+echo $(date) '==============' >> $log
 
 echo "torrentid:   $torrentid" >> $log
 echo "torrentname: $torrentname" >> $log
