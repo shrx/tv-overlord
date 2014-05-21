@@ -699,11 +699,20 @@ def init (args):
         title_width = 20 # width of show titles column
         console_columns = int(os.popen ('stty size', 'r').read().split()[1])
         spacer = ' ' # can be any string, any length
-        if args['--days']:
-            calendar_columns = int(args['--days'])
+        today = datetime.datetime.today()
+
+        days = args['--days']
+        if days:
+            days = days.split(',')
+            days = [int(x) for x in days]
+            if len(days) == 2:
+                today = today + datetime.timedelta(days=days[0])
+                calendar_columns = days[1]
+            if len(days) == 1:
+                calendar_columns = days[0]
         else:
             calendar_columns = console_columns - (title_width + len(spacer))
-        today = datetime.datetime.today()
+
         # Days_chars can be any string of seven chars. eg: 'mtwtfSS'
         days_chars = '.....::' # first char is monday
         monthstart = '|'       # marker used to indicate the begining of month
