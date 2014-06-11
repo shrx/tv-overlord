@@ -90,6 +90,7 @@ class Series:
         typelist = ('new', 'nondb', 'current')
         if show_type not in typelist:
             raise exception ('incorrect show type')
+
         if show_type == 'current':
             self._set_db_data (dbdata)
             self._get_thetvdb_series_data()
@@ -442,11 +443,10 @@ class Series:
             values (:network_status, :status, :thetvdb_id, :name, :season, :episode)'''
         values = {'network_status': self.status,
                   'status': 'active',
-                  'thetvdb_id': self.seriesid,
+                  'thetvdb_id': self.id,
                   'name': self.seriesname,
                   'season': season,
                   'episode': episode}
-        print values
         conn = sqlite3.connect (config.db_file)
         curs = conn.cursor()
         curs.execute (sql, values)
