@@ -5,7 +5,7 @@ import os
 from time import mktime
 from datetime import datetime
 from bs4 import BeautifulSoup
-import urllib2
+import requests
 import re
 import pprint
 
@@ -47,7 +47,8 @@ class Provider (object):
             search_string = urllib.quote(search)
             url = '%s/search/%s/0/7/0' % (self.provider_url, search_string)
             urls += '%s/0/7/0 ' % search_string
-            html = urllib2.urlopen(url)
+            r = requests.get(url)
+            html = r.content
             soup = BeautifulSoup(html)
 
             search_results = soup.find('table', id='searchResult')
