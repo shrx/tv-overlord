@@ -4,7 +4,7 @@ r'''
 Usage:
   tv download    [-n] [-d DB-FILE] [-c COUNT] [-l LOCATION] [-p PROVIDER]
   tv showmissing [-n] [-d DB-FILE]
-  tv info        [-n] [-d DB-FILE] [-a] [-x] [--ask-inactive] [--show-links]
+  tv info        [-n] [-d DB-FILE] [-a] [-x] [--ask-inactive] [--show-links] [--synopsis] [SHOW_NAME]
   tv calendar    [-n] [-d DB-FILE] [-a] [-x] [--no-color] [--days DAYS]
   tv addnew SHOW_NAME [-d DB-FILE]
   tv nondbshow SEARCH_STRING [-l LOCATION] [-p PROVIDER]
@@ -28,6 +28,7 @@ Options:
   -x, --sort-by-next  Sort by release date instead of the default alphabetical
   --ask-inactive    Ask to make inactive shows that are cancelled
   --show-links      Show links to IMDB.com and TheTVDb.com for each show
+  -s --synopsis     Display the show synopsis
   --days DAYS       The number of days to show in the calendar
   --no-color        Don't use color in output. Useful if output is to be
                     used in email or text file.
@@ -379,7 +380,7 @@ class Series:
                     full_row[i] = text.center(width)
                 else:
                     full_row[i] = text.ljust(width)
-            print bar.join(full_row[:-1])
+            print bar.join(full_row[:-1]).encode('ascii', 'ignore')
 
         # User Input
         choice = ''
@@ -593,7 +594,15 @@ def init (args):
     if args['info']:
         show_info = {}
         counter = 0
+        show_name = args['SHOW_NAME']
+
+        # When the user specifies a single show, turn on --show-all
+        # because the show they are asking for might an inactive show
+        if show_name:
+            args['--show-all'] = True
         for series in AllSeries(provider):
+            if show_name and show_name.lower() != series.db_name.lower():
+                continue
             title = series.db_name
 
             # check if the series object has a status attribute. if it
@@ -614,15 +623,20 @@ def init (args):
                 )
             se = U.hi_color(se, foreground=48)
 
+            imdb_url = thetvdb_url = ''
             if args['--show-links']:
                 imdb_url = U.hi_color(   '\n    IMDB.com:    http://imdb.com/title/%s' % series.imdb_id, foreground=20)
                 thetvdb_url = U.hi_color('\n    TheTVDB.com: http://thetvdb.com/?tab=series&id=%s' % series.id, foreground=20)
-            else:
-                imdb_url = ''
-                thetvdb_url = ''
+
+            synopsis = ''
+            if args['--synopsis'] and series.overview:
+                paragraph = series.overview.encode('ascii', 'ignore')
+                indent = '    '
+                paragraph = textwrap.fill(paragraph, width=80, initial_indent=indent, subsequent_indent=indent)
+                synopsis = '\n%s' % paragraph
 
             first_row_a = []
-            for i in [title + ',', se, status, imdb_url, thetvdb_url]:
+            for i in [title + ',', se, status, imdb_url, thetvdb_url, synopsis]:
                 if i: first_row_a.append(i)
             first_row = ' '.join(first_row_a)
 
