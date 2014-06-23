@@ -110,7 +110,6 @@ class Series:
         self.db_ragetv_series_id = dbdata['ragetv_series_id']
         self.db_current_season = dbdata['season']
         self.db_last_episode = dbdata['episode']
-        self.db_next_episode = dbdata['next_episode']
         # Sometimes the thetvdb name is slighly different than the
         # name to use for searching, thats why we use search_engine_name
         self.db_search_engine_name = dbdata['search_engine_name']
@@ -294,7 +293,6 @@ class Series:
         if not hasattr (self, 'series'):
             return
 
-        next_episode = True
         for i in self.series:           # for each season
             for j in self.series[i]:    # for each episode
                 b_date = self.series[i][j]['firstaired']
@@ -309,10 +307,6 @@ class Series:
                 last_episode = self.series[i][j]['episodenumber']
                 last_broadcast = se_ep (last_season, last_episode)
                 if (last_watched < last_broadcast):
-                    #if next_episode == True:
-                    #    # set next_episode field
-                    #    print last_season, last_episode
-                    #    next_episode = False
                     missing.append ({'season':last_season, 'episode':last_episode})
 
         return missing
@@ -479,7 +473,7 @@ class AllSeries:
 
     def _query_db (self):
         sql = "SELECT name, season, episode, thetvdb_series_id, \
-            ragetv_series_id, search_engine_name, status, next_episode \
+            ragetv_series_id, search_engine_name, status \
             FROM shows WHERE status='active' ORDER BY replace (name, 'The ', '');"
         conn = sqlite3.connect (config.db_file)
         conn.row_factory = dict_factory
