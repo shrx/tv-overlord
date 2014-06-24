@@ -592,8 +592,12 @@ def init (args):
 
         # When the user specifies a single show, turn on --show-all
         # because the show they are asking for might an inactive show
+        # and turn on --synopsis and --show-links since its only one
+        # show we may as well show everything
         if show_name:
             args['--show-all'] = True
+            args['--synopsis'] = True
+            args['--show-links'] = True
         for series in AllSeries(provider):
             if show_name and show_name.lower() != series.db_name.lower():
                 continue
