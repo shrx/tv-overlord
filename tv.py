@@ -790,6 +790,8 @@ def init (args):
                     days_away = (broadcast_date - today).days + 1
                     if days_away >= calendar_columns:
                         continue  # don't include days after the width of the screen
+                    if series.series[i][j]['seasonnumber'] == '0':
+                        continue  # not interested in season 0 episodes.
 
                     if first_display_date:
                         if int(episode_number) > 1:
