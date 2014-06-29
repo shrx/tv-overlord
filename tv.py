@@ -1,6 +1,7 @@
 #!/usr/bin/python
 
-r'''
+r'''Download and manage TV shows
+
 Usage:
   tv download    [-n] [-c COUNT] [-l LOCATION] [-p PROVIDER] [SHOW_NAME]
   tv showmissing [-n]
@@ -10,6 +11,11 @@ Usage:
   tv nondbshow SEARCH_STRING [-l LOCATION] [-p PROVIDER]
   tv editdbinfo SHOW_NAME [-d DB-FILE]
   tv providers
+
+  SHOW_NAME is a full or partial name of a tv show.  If SHOW_NAME is
+  specified, tv will only act on matches to that name.  For example,
+  if "fam" is used, "Family Guy" and "Modern Family" will be
+  displayed.
 
 Options:
   -h, --help

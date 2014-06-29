@@ -11,33 +11,54 @@ There are two NZB search providers, nzbclub.com and nzbindex.com.
 Also, there are two bittorent search providers, kickass.to and
 thepiratebay.sx.
 
+
+** Features
+
++ Keeps track of watched shows
++ Show a list of shows available for download
++ Gives you a list of torrents or nzbs you can choose from
++ You can add new shows from the command line
++ Will display info showing what show will be next and how many days
+  till broadcast
++ Displays a calendar of upcoming episodes
+
+
 ** Install
 
 TV Downloader has been tested on Linux and Mac.  It would probably not
 be to hard to make it work on windows, and if anyone is interested, I
 can take a look at making it work or alternatively send me a pull request.
 
-TV Downloader requires two additional python libraries to be installed:
-  1. tvdb_api - [[https://github.com/dbr/tvdb_api]]
-  2. Beautiful Soup - http://www.crummy.com/software/BeautifulSoup/
+TV Downloader requires four additional python libraries to be installed:
+  1. tvdb_api - [[https://github.com/dbr/tvdb_api]] \\
+     Python library to access the thetvdb.com api
+  2. Beautiful Soup - http://www.crummy.com/software/BeautifulSoup/bs4/doc/ \\
+     Python library used to scrap thepiratebay.org since they don't have an api
+  4. Requests - http://docs.python-requests.org/en/latest/  \\
+     Library to download html pages
+  5. Feedparser - https://pypi.python.org/pypi/feedparser \\
+     For sites that provide an xml api this library is used to parse them
 
 Install steps:
   1. =easy_install tvdb_api=
   2. =easy_install beautifulsoup4=
   3. =easy_install feedparser=
-  4. Clone this repository
-  5. Put tv.py on your $PATH or call it directly
+  4. =pip install requests=
+  5. Create a dir somewhere and clone this repository: \\
+     =git clone https://github.com/smmcg/tv-downloader.git=
+  6. Put tv.py on your $PATH or call it directly
      (I have it symlinked to =tv= in a bin folder thats on the path)
-  6. type: =tv=
+  7. type: =tv= \\
      The first time its run, it will ask to create the
      config dir.  Type =Y= to allow it.  The config directory will be
      created in your home dir called =.tv-downloader/=
-  7. Type =tv addnew "someshow";= to start.
+  8. Type =tv addnew "someshow";= to start. \\
+     For example: =tv addnew 'game of thrones';=
 
 
 ** How to use
 
-:tv addnew "show name"
+=tv addnew "show name";=
 
 tv will search thetvdb.com for a match to your show name.  If the show
 it asks you is not the right one, it helps to add the year to the
@@ -52,7 +73,11 @@ This will list any shows that are ready to download.
 For each show thats ready to download, it will ask you which one you
 want to download.
 
-=tv info=
+=tv calendar;=
+
+Display a calendar of all the current shows in your database
+
+=tv info;=
 
 This will show you what shows are next, and how many days till they
 are broadcast
@@ -62,7 +87,7 @@ are broadcast
 This will show you matches to your search.  Anything downloaded this
 way will not be recorded in your database.
 
-=tv providers=
+=tv providers;=
 
 This will list search providers available to the program.  The default
 one is the provider at the top of the list in config.ini.
@@ -82,18 +107,11 @@ an NZB search provider.
 [[http://i.imgur.com/umS1DqH.gif]]
 This shows using a bittorrent search provider to download.
 
+[[http://i.imgur.com/sBFl5sg.gif]]
+This shows the calendar.
+
 [[http://i.imgur.com/eg0Ui7U.gif]]
 This show the info command.
-
-
-** Features
-
-+ Keeps track of watched shows
-+ Show a list of shows available for download
-+ Gives you a list of torrents or nzbs you can choose from
-+ You can add new shows from the command line
-+ Will display info showing what show will be next and how many days
-  till broadcast
 
 ** Configure
 
@@ -105,27 +123,39 @@ to create it for you.
 
 =$ tv --help=
 #+BEGIN_EXAMPLE
+Download and manage TV shows
+
 Usage:
-  tv download    [-n] [-d DB-FILE] [-l LOCATION] [-p PROVIDER] [-i SERIES_ID]
-  tv showmissing [-n] [-d DB-FILE] [-i SERIES_ID]
-  tv info        [-n] [-d DB-FILE] [-a] [-x] [--ask-inactive] [--show-links]
-  tv addnew SHOW_NAME [-d DB-FILE]
+  tv download    [-n] [-c COUNT] [-l LOCATION] [-p PROVIDER] [SHOW_NAME]
+  tv showmissing [-n]
+  tv info        [-n] [-a] [-x] [--ask-inactive] [--show-links] [--synopsis] [SHOW_NAME]
+  tv calendar    [-n] [-a] [-x] [--no-color] [--days DAYS] [SHOW_NAME]
+  tv addnew SHOW_NAME
   tv nondbshow SEARCH_STRING [-l LOCATION] [-p PROVIDER]
   tv editdbinfo SHOW_NAME [-d DB-FILE]
   tv providers
 
+  SHOW_NAME is a full or partial name of a tv show.  If SHOW_NAME is
+  specified, tv will only act on matches to that name.  For example,
+  if "fam" is used, "Family Guy" and "Modern Family" will be
+  displayed.
+
 Options:
   -h, --help
-  -d DB-FILE, --db-file DB-FILE  The db file to use instead of the
-                                 default one
+  -c COUNT, --count COUNT
+                    Count of search results to list. [default: 5]
   -l DOWNLOAD_LOCATION, --location DOWNLOAD_LOCATION
-                                 download location
-  -n, --no-cache                 don't use localy cached info
+                    Location to download the nzb files to
+  -n, --no-cache    Re-download the show data instead of using the cached data
   -p SEARCH_PROVIDER, --search-provider SEARCH_PROVIDER
-                                 Specify a different search instead
-                                 of the one in the config file.
-  -i, SERIES_ID                  Not used
-  -a, --show-all
-  -x, --sort-by-next
-  --ask-inactive
+                    Specify a different search engine instead of the one
+                    in the config file.
+  -a, --show-all    Show all shows including the ones marked inactive
+  -x, --sort-by-next  Sort by release date instead of the default alphabetical
+  --ask-inactive    Ask to make inactive shows that are cancelled
+  --show-links      Show links to IMDB.com and TheTVDb.com for each show
+  -s --synopsis     Display the show synopsis
+  --days DAYS       The number of days to show in the calendar
+  --no-color        Don't use color in output. Useful if output is to be
+                    used in email or text file.
 #+END_EXAMPLE
