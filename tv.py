@@ -2,11 +2,11 @@
 
 r'''
 Usage:
-  tv download    [-n] [-d DB-FILE] [-c COUNT] [-l LOCATION] [-p PROVIDER]
-  tv showmissing [-n] [-d DB-FILE]
-  tv info        [-n] [-d DB-FILE] [-a] [-x] [--ask-inactive] [--show-links] [--synopsis] [SHOW_NAME]
-  tv calendar    [-n] [-d DB-FILE] [-a] [-x] [--no-color] [--days DAYS]
-  tv addnew SHOW_NAME [-d DB-FILE]
+  tv download    [-n] [-c COUNT] [-l LOCATION] [-p PROVIDER] [SHOW_NAME]
+  tv showmissing [-n]
+  tv info        [-n] [-a] [-x] [--ask-inactive] [--show-links] [--synopsis] [SHOW_NAME]
+  tv calendar    [-n] [-a] [-x] [--no-color] [--days DAYS] [SHOW_NAME]
+  tv addnew SHOW_NAME
   tv nondbshow SEARCH_STRING [-l LOCATION] [-p PROVIDER]
   tv editdbinfo SHOW_NAME [-d DB-FILE]
   tv providers
@@ -15,9 +15,6 @@ Options:
   -h, --help
   -c COUNT, --count COUNT
                     Count of search results to list. [default: 5]
-  -d DB-FILE, --db-file DB-FILE
-                    The db file to use instead of the default one which is
-                    specified in config.ini
   -l DOWNLOAD_LOCATION, --location DOWNLOAD_LOCATION
                     Location to download the nzb files to
   -n, --no-cache    Re-download the show data instead of using the cached data
@@ -573,7 +570,7 @@ def edit_db (search_str):
 
 def init (args):
 
-    if args['--db-file']:
+    if '--db-file' in args:
         config.db_file = args['--db-file']
     if args['--location']:
         config.staging = args['--location']
