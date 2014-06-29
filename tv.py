@@ -453,14 +453,27 @@ class Series:
 
 
 class AllSeries:
-    '''Return an iterable class of Series'''
+    '''
+    Return an iterable class of Series
+
+    Methods
+    -------
+    nameFilter(name)
+      A string that used in the sql query to
+      select LIKE matches on the show "name" field
+
+    '''
+
     def __init__ (self, provider):
-        self.dbdata = self._query_db()
+        self.provider = provider
+        self.sqlfilter = ''
+
+    def __iter__ (self):
+        self.dbdata = self._query_db(self.sqlfilter)
         self.index = len (self.dbdata)
         self.i = 0
-        self.provider = provider
-    def __iter__ (self):
         return self
+
     def next (self):
         if self.i == len (self.dbdata):
             raise StopIteration
@@ -468,10 +481,32 @@ class AllSeries:
         self.i = self.i + 1
         return series
 
-    def _query_db (self):
-        sql = "SELECT name, season, episode, thetvdb_series_id, \
-            ragetv_series_id, search_engine_name, status \
-            FROM shows WHERE status='active' ORDER BY replace (name, 'The ', '');"
+    def nameFilter(self, name):
+        show_name = 'name LIKE "%%%s%%"' % name
+        self.sqlfilter = show_name
+
+    def _query_db (self, sqlfilter=''):
+        if sqlfilter:
+            sqlfilter = 'AND %s' % sqlfilter
+        sql = """
+            SELECT
+                name,
+                season,
+                episode,
+                thetvdb_series_id,
+                ragetv_series_id,
+                search_engine_name,
+                status
+            FROM
+                shows
+            WHERE
+                status='active'
+                %s
+            ORDER BY
+                replace (name, 'The ', '');""" % (
+            sqlfilter,
+        )
+
         conn = sqlite3.connect (config.db_file)
         conn.row_factory = dict_factory
         curs = conn.cursor()
@@ -586,6 +621,7 @@ def init (args):
         show_info = {}
         counter = 0
         show_name = args['SHOW_NAME']
+        all_shows = AllSeries(provider)
 
         # When the user specifies a single show, turn on --show-all
         # because the show they are asking for might an inactive show
@@ -595,9 +631,9 @@ def init (args):
             args['--show-all'] = True
             args['--synopsis'] = True
             args['--show-links'] = True
-        for series in AllSeries(provider):
-            if show_name and show_name.lower() != series.db_name.lower():
-                continue
+            all_shows.nameFilter(show_name)
+
+        for series in all_shows:
             title = series.db_name
 
             # check if the series object has a status attribute. if it
@@ -627,11 +663,15 @@ def init (args):
             if args['--synopsis'] and series.overview:
                 paragraph = series.overview.encode('ascii', 'ignore')
                 indent = '    '
-                paragraph = textwrap.fill(paragraph, width=80, initial_indent=indent, subsequent_indent=indent)
+                fill_width = 80
+                if int(series.console_columns) < fill_width:
+                    fill_width = series.console_columns
+                paragraph = textwrap.fill(paragraph, width=int(fill_width), initial_indent=indent, subsequent_indent=indent)
                 synopsis = '\n%s' % paragraph
 
             first_row_a = []
-            for i in [title + ',', se, status, imdb_url, thetvdb_url, synopsis]:
+            fancy_title = U.effects(['boldon'], title)
+            for i in [fancy_title + ',', se, status, imdb_url, thetvdb_url, synopsis]:
                 if i: first_row_a.append(i)
             first_row = ' '.join(first_row_a)
 
@@ -763,7 +803,11 @@ def init (args):
         color_row = False
         counter = 1
         season_marker = '-'
-        for series in AllSeries(provider):
+        all_series = AllSeries(provider)
+        show_name = args['SHOW_NAME']
+        if show_name:
+            all_series.nameFilter(show_name)
+        for series in all_series:
             broadcast_row = ''
             title = series.db_name[:title_width].ljust(title_width)
             has_episode = False
@@ -837,7 +881,12 @@ def init (args):
         count = int(args['--count']) # convert --count to int
         count = 'x' * count          # convert count into an iterable string of the length count
         config.episode_display_count = count
-        for series in AllSeries(provider):
+
+        all_series = AllSeries(provider)
+        show_name = args['SHOW_NAME']
+        if show_name:
+            all_series.nameFilter(show_name)
+        for series in all_series:
             series.download_missing(config.episode_display_count)
 
     if args['addnew']:
