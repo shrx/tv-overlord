@@ -9,7 +9,7 @@ Usage:
   tv calendar    [-n] [-a] [-x] [--no-color] [--days DAYS] [SHOW_NAME]
   tv addnew SHOW_NAME
   tv nondbshow SEARCH_STRING [-l LOCATION] [-p PROVIDER]
-  tv editdbinfo SHOW_NAME [-d DB-FILE]
+  tv editdbinfo SHOW_NAME
   tv providers
 
   SHOW_NAME is a full or partial name of a tv show.  If SHOW_NAME is
@@ -512,7 +512,7 @@ class AllSeries:
                 replace (name, 'The ', '');""" % (
             sqlfilter,
         )
-
+        # print sql
         conn = sqlite3.connect (config.db_file)
         conn.row_factory = dict_factory
         curs = conn.cursor()
@@ -609,24 +609,55 @@ def edit_db (search_str):
     conn.close()
 
 
-def init (args):
+def init (docopt_args):
 
-    if '--db-file' in args:
-        config.db_file = args['--db-file']
-    if args['--location']:
+    class args:
+        '''Mapping from docopt args to object
+
+        Makes it easier to change command line options.
+
+        Instead of: args['--search-provider']
+        write as:   args.search_provider
+        '''
+        # subgroups
+        download    = docopt_args['download']
+        showmissing = docopt_args['showmissing']
+        info        = docopt_args['info']
+        calendar    = docopt_args['calendar']
+        addnew      = docopt_args['addnew']
+        nondbshow   = docopt_args['nondbshow']
+        editdbinfo  = docopt_args['editdbinfo']
+        providers   = docopt_args['providers']
+        # arguments
+        search_string = docopt_args['SEARCH_STRING']
+        show_name     = docopt_args['SHOW_NAME']
+        # options
+        count           = docopt_args['--count']
+        location        = docopt_args['--location']
+        no_cache        = docopt_args['--no-cache']
+        search_provider = docopt_args['--search-provider']
+        show_all        = docopt_args['--show-all']
+        sort_by_next    = docopt_args['--sort-by-next']
+        ask_inactive    = docopt_args['--ask-inactive']
+        show_links      = docopt_args['--show-links']
+        synopsis        = docopt_args['--synopsis']
+        days            = docopt_args['--days']
+        no_color        = docopt_args['--no-color']
+
+    if args.location:
         config.staging = args['--location']
-    if args['--no-cache']:
+    if args.no_cache:
         config.use_cache = False
 
-    if args['--search-provider']:
-        provider = args['--search-provider']
+    if args.search_provider:
+        provider = args.search_provider
     else:
         provider = config.providers[0]
 
-    if args['info']:
+    if args.info:
         show_info = {}
         counter = 0
-        show_name = args['SHOW_NAME']
+        show_name = args.show_name
         all_shows = AllSeries(provider)
 
         # When the user specifies a single show, turn on --show-all
@@ -634,9 +665,9 @@ def init (args):
         # and turn on --synopsis and --show-links since its only one
         # show we may as well show everything
         if show_name:
-            args['--show-all'] = True
-            args['--synopsis'] = True
-            args['--show-links'] = True
+            args.show_all = True
+            args.synopsys = True
+            args.show_links = True
             all_shows.nameFilter(show_name)
 
         for series in all_shows:
@@ -661,12 +692,12 @@ def init (args):
             se = U.hi_color(se, foreground=48)
 
             imdb_url = thetvdb_url = ''
-            if args['--show-links']:
+            if args.show_links:
                 imdb_url = U.hi_color(   '\n    IMDB.com:    http://imdb.com/title/%s' % series.imdb_id, foreground=20)
                 thetvdb_url = U.hi_color('\n    TheTVDB.com: http://thetvdb.com/?tab=series&id=%s' % series.id, foreground=20)
 
             synopsis = ''
-            if args['--synopsis'] and series.overview:
+            if args.synopsis and series.overview:
                 paragraph = series.overview.encode('ascii', 'ignore')
                 indent = '    '
                 fill_width = 80
@@ -691,11 +722,12 @@ def init (args):
                 for j in series.series[i]: # episode
                     b_date = series.series[i][j]['firstaired']
                     if not b_date: continue  # some episode have no broadcast date?
+
                     split_date = b_date.split ('-')
                     broadcast_date = datetime.datetime (
                         int (split_date[0]), int (split_date[1]), int (split_date[2]))
 
-                    if not args['--show-all']:
+                    if not args.show_all:
                         if broadcast_date < today:
                             continue
 
@@ -712,7 +744,7 @@ def init (args):
 
                     if first_time:
                         first_time = False
-                        if args['--sort-by-next']:
+                        if args.sort_by_next:
                             sort_key = str(diff.days).rjust(5, '0') + str(counter)
                         else:
                             sort_key = series.db_name.replace('The ', '')
@@ -731,7 +763,7 @@ def init (args):
                 else:
                     show_info[sort_key] = first_row
 
-            if args['--ask-inactive']:
+            if args.ask_inactive:
                 if series.status == 'Ended' and first_time:
                     set_status = ask (
                         '%s has ended, and all have been downloaded. Set as inactive? [y/n]: ' %
@@ -744,8 +776,8 @@ def init (args):
         for i in keys:
             print show_info[i]
 
-    if args['calendar']:
-        if args['--no-color']:
+    if args.calendar:
+        if args.no_color:
             use_color = False
         else:
             use_color = True
@@ -762,7 +794,7 @@ def init (args):
         spacer = ' ' # can be any string, any length
         today = datetime.datetime.today()
 
-        days = args['--days']
+        days = args.days
         if days:
             days = days.split(',')
             days = [int(x) for x in days]
@@ -810,7 +842,7 @@ def init (args):
         counter = 1
         season_marker = '-'
         all_series = AllSeries(provider)
-        show_name = args['SHOW_NAME']
+        show_name = args.show_name
         if show_name:
             all_series.nameFilter(show_name)
         for series in all_series:
@@ -857,7 +889,7 @@ def init (args):
 
             broadcast_row = broadcast_row[:calendar_columns].ljust(calendar_columns)
 
-            if has_episode or args['--show-all']:
+            if has_episode or args.show_all:
                 if use_color and color_row:
                     title = U.hi_color(title, 225, title_color_1)
                     broadcast_row = U.hi_color(broadcast_row, 225, date_color_1)
@@ -874,7 +906,7 @@ def init (args):
                     color_row = False
                     counter = counter + 1
 
-    if args['showmissing']:
+    if args.showmissing:
         fp = FancyPrint()
         for series in AllSeries(provider):
             if series.is_missing():
@@ -883,30 +915,30 @@ def init (args):
                 fp.fancy_print ('Show up to date: %s' % (series.db_name))
         fp.done()
 
-    if args['download']:
-        count = int(args['--count']) # convert --count to int
-        count = 'x' * count          # convert count into an iterable string of the length count
+    if args.download:
+        count = int(args.count)  # convert --count to int
+        count = 'x' * count # convert count into an iterable string of the length count
         config.episode_display_count = count
 
         all_series = AllSeries(provider)
-        show_name = args['SHOW_NAME']
+        show_name = args.show_name
         if show_name:
             all_series.nameFilter(show_name)
         for series in all_series:
             series.download_missing(config.episode_display_count)
 
-    if args['addnew']:
+    if args.addnew:
         newShow = Series (provider, show_type='new')
-        newShow.add_new (name=args['SHOW_NAME'])
+        newShow.add_new (name=args.show_name)
 
-    if args['nondbshow']:
+    if args.nondbshow:
         nons = Series (provider, show_type='nondb')
-        nons.non_db (args['SEARCH_STRING'])
+        nons.non_db (args.search_string)
 
-    if args['editdbinfo']:
+    if args.editdbinfo:
         edit_db (args['SHOW_NAME'])
 
-    if args['providers']:
+    if args.providers:
         providers = config.providers
         for p in providers:
             print p, '  http://%s' % p.replace('_', '.')
@@ -914,5 +946,5 @@ def init (args):
 
 if __name__ == '__main__':
 
-    args = docopt(__doc__, version='0.1')
-    init(args)
+    docopt_args = docopt(__doc__, version='0.1')
+    init(docopt_args)
