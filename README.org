@@ -91,7 +91,8 @@ And finally, you can specify a single show to only download that show
 instead of downloading all.
 
 
-=tv.py calendar;= \\
+=tv.py calendar;=
+
 =tv.py calendar --days DAYS;= \\
 =tv.py calendar --days DAYS,AFTER;=
 
@@ -142,16 +143,20 @@ show as 'inactive' here if you wish.
 ** Screenshots
 
 [[http://i.imgur.com/jMP4T3h.gif]]
+
 This screenshot shows the providers list command and downloading using
 an NZB search provider.
 
 [[http://i.imgur.com/umS1DqH.gif]]
+
 This shows using a bittorrent search provider to download.
 
 [[http://i.imgur.com/sBFl5sg.gif]]
+
 This shows the calendar.
 
 [[http://i.imgur.com/eg0Ui7U.gif]]
+
 This show the info command.
 
 
