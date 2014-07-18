@@ -35,7 +35,8 @@ class config:
                 CREATE TABLE shows (
                     search_engine_name TEXT,
                     network_status TEXT,
-                    status TEXT, thetvdb_series_id TEXT,
+                    status TEXT,
+                    thetvdb_series_id TEXT,
                     name TEXT,
                     season NUMERIC,
                     episode NUMERIC,

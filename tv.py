@@ -8,7 +8,7 @@ Usage:
   tv info        [-n] [-a] [-x] [--ask-inactive] [--show-links] [--synopsis] [SHOW_NAME]
   tv calendar    [-n] [-a] [-x] [--no-color] [--days DAYS] [SHOW_NAME]
   tv addnew SHOW_NAME
-  tv nondbshow SEARCH_STRING [-l LOCATION] [-p PROVIDER]
+  tv nondbshow SEARCH_STRING [-c COUNT] [-l LOCATION] [-p PROVIDER]
   tv editdbinfo SHOW_NAME
   tv providers
 
@@ -273,10 +273,10 @@ class Series:
             self._add_new_db()
 
 
-    def non_db (self, search_str):
+    def non_db (self, search_str, display_count):
         self.db_name = search_str
         try:
-            show_data = self._ask(self.search_provider.search(search_str), None, None)
+            show_data = self._ask(self.search_provider.search(search_str), None, None, display_count)
             if not show_data: return
         except Search.SearchError:
             print 'No matches'
@@ -654,6 +654,10 @@ def init (docopt_args):
     else:
         provider = config.providers[0]
 
+    count = int(args.count)  # convert --count to int
+    count = 'x' * count # convert count into an iterable string of the length count
+    config.episode_display_count = count
+
     if args.info:
         show_info = {}
         counter = 0
@@ -916,10 +920,6 @@ def init (docopt_args):
         fp.done()
 
     if args.download:
-        count = int(args.count)  # convert --count to int
-        count = 'x' * count # convert count into an iterable string of the length count
-        config.episode_display_count = count
-
         all_series = AllSeries(provider)
         show_name = args.show_name
         if show_name:
@@ -933,7 +933,7 @@ def init (docopt_args):
 
     if args.nondbshow:
         nons = Series (provider, show_type='nondb')
-        nons.non_db (args.search_string)
+        nons.non_db (args.search_string, config.episode_display_count)
 
     if args.editdbinfo:
         edit_db (args['SHOW_NAME'])
