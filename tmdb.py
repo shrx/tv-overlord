@@ -68,15 +68,14 @@ def opensubtitleHashFile(name):
         buf = f.read(bytesize)
         (l_value,)= struct.unpack(longlongformat, buf)
         fhash += l_value
-        fhash = fhash & 0xFFFFFFFFFFFFFFFF # to remain as 64bit number
-
+        fhash &= 0xFFFFFFFFFFFFFFFF  # to remain as 64bit number
 
     f.seek(max(0,filesize-65536),0)
     for x in range(65536/bytesize):
         buf = f.read(bytesize)
         (l_value,)= struct.unpack(longlongformat, buf)
         fhash += l_value
-        fhash = fhash & 0xFFFFFFFFFFFFFFFF
+        fhash &= 0xFFFFFFFFFFFFFFFF
 
     f.close()
     return  "%016x" % fhash

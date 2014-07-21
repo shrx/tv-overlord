@@ -1,42 +1,43 @@
 #!/usr/bin/env python
 
-import feedparser
 import urllib
 import os
 from time import mktime
 from datetime import datetime
 
+import feedparser
+
 from Util import U
 
 
-class ProviderError (Exception):
-
-    def __init__ (self, value):
+class ProviderError(Exception):
+    def __init__(self, value):
         self.value = value
 
-    def __str__ (self):
+
+    def __str__(self):
         return repr(self.value)
 
 
-class Provider (object):
-
+class Provider(object):
     # def __init__ (self):
-        # pass
+    # pass
 
     provider_url = 'http://nzbindex.com'
     name = 'NZBIndex'
 
 
-    def se_ep (self, season, episode, show_title):
-        season_just = str (season).rjust (2, '0')
-        episode = str (episode).rjust (2, '0')
+    @staticmethod
+    def se_ep(season, episode, show_title):
+        season_just = str(season).rjust(2, '0')
+        episode = str(episode).rjust(2, '0')
         fixed = '%s S%sE%s | %sx%s' % (
             show_title, season_just, episode, season, episode)
         return fixed
 
 
-    def search  (self, search_string, season=False, episode=False):
-        '''
+    def search(self, search_string, season=False, episode=False):
+        """
         Search options:
         ---------------
         Minimum age:	 days
@@ -170,37 +171,37 @@ class Provider (object):
           http://nzbindex.com/release/80986743/TOWNwww.town.ag-partner-of-www.ssl-news.info-American.Horror.Story.S02E09.720p.HDTV.X264-DIMENSION-0116-American.Horror.Story.S02E09.720p.HDTV.X2.nzb
 
 
-          '''
+          """
 
         # search_template = ('nzbindex.com/rss/?q=%s&minage=%s&sort=%s' +
-        #                    '&minsize=%s&maxsize=%s&complete=%s&max=%s&more=1')
+        # '&minsize=%s&maxsize=%s&complete=%s&max=%s&more=1')
 
-        if (season and episode):
+        if season and episode:
             search_string = '%s' % (
                 self.se_ep(
                     season, episode, search_string))
 
         search_term = ''
         min_age = '0'
-        sort = 'agedesc'    # age, agedesc, size, sizedesc
-        min_size = '100'    # mb
-        max_size = '1000'   # mb
-        complete_only = '1' # return only complete posts
+        sort = 'agedesc'  # age, agedesc, size, sizedesc
+        min_size = '100'  # mb
+        max_size = '1000'  # mb
+        complete_only = '1'  # return only complete posts
         max_results = '100'
 
         url = 'http://nzbindex.com/rss/?'
         query = {
-              'q': search_string
+            'q': search_string
             , 'minage': '0'
             , 'sort': 'agedesc'
             , 'minsize': '100'
             , 'maxsize': '5000'
             , 'complete': '1'
-            , 'max': '100' # results per page
+            , 'max': '100'  # results per page
             , 'more': '1'
         }
 
-        full_url = url + urllib.urlencode (query)
+        full_url = url + urllib.urlencode(query)
 
         # print 'searching...'
         parsed = feedparser.parse(full_url)
@@ -210,7 +211,7 @@ class Provider (object):
             dt = datetime.fromtimestamp(mktime(show['published_parsed']))
             date = dt.strftime('%b %d/%Y')
 
-            size = U.pretty_filesize (show['links'][1]['length'])
+            size = U.pretty_filesize(show['links'][1]['length'])
 
             show_data.append([
                 show['title'],
@@ -229,9 +230,9 @@ class Provider (object):
         return [header] + [show_data]
 
 
-    def download (self, chosen_show, destination, final_name):
-        if not os.path.isdir (destination):
-            raise ProviderError ('%s is not a dir' % (dest))
+    def download(self, chosen_show, destination, final_name):
+        if not os.path.isdir(destination):
+            raise ProviderError('%s is not a dir' % dest)
 
         href = chosen_show['nzbid']
         filename = href.split('/')[-1]
@@ -250,6 +251,6 @@ class Provider (object):
 
         return filename
 
-if __name__ == '__main__':
 
+if __name__ == '__main__':
     pass

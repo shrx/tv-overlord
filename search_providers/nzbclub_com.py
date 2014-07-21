@@ -1,23 +1,24 @@
 #!/usr/bin/env python
 
-import feedparser
 import urllib
 import os
 from time import mktime
 from datetime import datetime
-import pprint
+
+import feedparser
+
 from Util import U
 
 
-class Provider (object):
-
+class Provider(object):
     provider_url = 'http://www.nzbclub.com/'
     name = 'NZBClub'
 
 
-    def se_ep (self, season, episode, show_title):
-        season_just = str (season).rjust (2, '0')
-        episode = str (episode).rjust (2, '0')
+    @staticmethod
+    def se_ep(season, episode, show_title):
+        season_just = str(season).rjust(2, '0')
+        episode = str(episode).rjust(2, '0')
         fixed = '%s S%sE%s or %s %sx%s' % (
             show_title, season_just, episode, show_title, season, episode)
         return fixed
@@ -25,7 +26,7 @@ class Provider (object):
 
     def search(self, search_string, season=False, episode=False):
 
-        '''
+        """
         Default Search: Our default is prefix match
         Search 123 will match 123, 1234, 1234abcdefg
         Search 123 will not match 0123, ab123, ab123yz
@@ -55,9 +56,9 @@ class Provider (object):
         ---------
         the exact phrase hello world:
         "hello world"
-        '''
+        """
 
-        if (season and episode):
+        if season and episode:
             search_string = '%s' % (
                 self.se_ep(
                     season, episode, search_string))
@@ -66,15 +67,15 @@ class Provider (object):
         url = 'http://www.nzbclub.com/nzbfeed.aspx?'
         query = {
             'q': search_string
-            , 'ig': 2       # hide adult: 1=yes, 2=no
-            , 'szs': 15     # min size: 15=75m, 16=100m,
-            , 'sze': 24     # max size: 24=2gig
-            , 'st': 5       # sort.  5=relevence, 4=size (smallest first)
-            , 'ns': 1       # no spam
-            , 'sp': 1       # don't show passworded files
-            , 'nfo': 0      # has to have nfo  1=yes, 0=no
-            }
-        full_url = url + urllib.urlencode (query)
+            , 'ig': 2  # hide adult: 1=yes, 2=no
+            , 'szs': 15  # min size: 15=75m, 16=100m,
+            , 'sze': 24  # max size: 24=2gig
+            , 'st': 5  # sort.  5=relevence, 4=size (smallest first)
+            , 'ns': 1  # no spam
+            , 'sp': 1  # don't show passworded files
+            , 'nfo': 0  # has to have nfo  1=yes, 0=no
+        }
+        full_url = url + urllib.urlencode(query)
         parsed = feedparser.parse(full_url)
 
         header = [
@@ -86,29 +87,28 @@ class Provider (object):
 
         show_data = []
         for show in parsed['entries']:
-
             dt = datetime.fromtimestamp(mktime(show['published_parsed']))
             date = dt.strftime('%b %d/%Y')
 
-            size = U.pretty_filesize (show['links'][0]['length'])
+            size = U.pretty_filesize(show['links'][0]['length'])
 
             show_data.append([
                 show['title'],
                 date,
                 size,
-                show['links'][0]['href'] # id
-                ])
+                show['links'][0]['href']  # id
+            ])
 
         return [header] + [show_data]
 
 
-    def download (self, chosen_show, destination, final_name):
-        '''
+    def download(self, chosen_show, destination, final_name):
+        """
 
-        '''
+        """
 
-        if not os.path.isdir (destination):
-            raise ProviderError ('%s is not a dir' % (dest))
+        if not os.path.isdir(destination):
+            raise ProviderError('%s is not a dir' % dest)
 
         href = chosen_show
         filename = href.split('/')[-1]
@@ -127,6 +127,6 @@ class Provider (object):
 
         return filename
 
-if __name__ == '__main__':
 
+if __name__ == '__main__':
     pass

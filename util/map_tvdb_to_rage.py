@@ -1,17 +1,15 @@
 #!/usr/bin/env python
 
-from tvrage import feeds
-import tvrage.api
-from xml.etree.ElementTree import tostring
 import sqlite3
-from ConsoleInput import ask_user as ask
+
+from tvrage import feeds
 
 
-def dict_factory (cursor, row):
-    '''Changes the data returned from the db from a
-    tupple to a dictionary'''
+def dict_factory(cursor, row):
+    """Changes the data returned from the db from a
+    tupple to a dictionary"""
     d = {}
-    for idx, col in enumerate (cursor.description):
+    for idx, col in enumerate(cursor.description):
         d[col[0]] = row[idx]
     return d
 
@@ -19,7 +17,7 @@ def dict_factory (cursor, row):
 db_file = '/home/sm/.nzb/shows.v2.sqlite3'
 sql = "SELECT name, season, episode, thetvdb_series_id, search_engine_name, ragetv_series_id, status \
     FROM shows ORDER BY replace (name, 'The ', '');"
-conn = sqlite3.connect (db_file)
+conn = sqlite3.connect(db_file)
 conn.row_factory = dict_factory
 curs = conn.cursor()
 # ddata = curs.execute(sql)
@@ -33,7 +31,7 @@ for x in ddata:
     print x['name'], '---', rage_name
     # print x['thetvdb_series_id'], rage_id
 
-    #for title in s:
+    # for title in s:
     #    print '    ', title.getchildren()[1].text,
     #    print '-', title.getchildren()[0].text
 

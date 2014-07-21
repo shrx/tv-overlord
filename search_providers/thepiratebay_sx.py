@@ -1,25 +1,22 @@
 #!/usr/bin/env python
 
 import urllib
-import os
-from time import mktime
-from datetime import datetime
+import re
+
 from bs4 import BeautifulSoup
 import requests
-import re
-import pprint
 
-from Util import U
-from tv_config import config
+from tv_config import Config
 
 
 class Provider (object):
 
-    provider_url = config.pirateurl
+    provider_url = Config.pirateurl
 
     name = 'The Pirate Bay'
 
-    def se_ep(self, show_title, season, episode):
+    @staticmethod
+    def se_ep(show_title, season, episode):
         search_one = '%s S%sE%s' % (
             show_title,
             season.rjust(2, '0'),

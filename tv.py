@@ -1,6 +1,6 @@
 #!/usr/bin/python
 
-r'''Download and manage TV shows
+r"""Download and manage TV shows
 
 Usage:
   tv download    [-n] [-c COUNT] [-l LOCATION] [-p PROVIDER] [SHOW_NAME]
@@ -35,39 +35,35 @@ Options:
   --days DAYS       The number of days to show in the calendar
   --no-color        Don't use color in output. Useful if output is to be
                     used in email or text file.
-'''
+"""
 
-import StringIO
 import datetime
-from dateutil import parser as dateParser
-import gzip
 import os
-import re
 import sqlite3
-import time
+import textwrap
+import sys
+
+from dateutil import parser as date_parser
 from docopt import docopt
 import tvdb_api
-import pprint
-import textwrap
 
-import sys
 from ConsoleInput import ask_user as ask
 import Search
-from tv_config import config
+from tv_config import Config
 from tv_util import FancyPrint
 from Util import U
 
 
-def se_ep (season, episode):
-    season_just = str (season).rjust (2, '0')
-    episode = str (episode).rjust (2, '0')
+def se_ep(season, episode):
+    season_just = str(season).rjust(2, '0')
+    episode = str(episode).rjust(2, '0')
     fixed = 'S%sE%s' % (season_just, episode)
 
     return fixed
 
 
 class Series:
-    '''
+    """
     Local db fields added:
     ----------------------
     db_current_season, db_last_episode, db_name, db_thetvdb_series_id
@@ -88,26 +84,30 @@ class Series:
     combined_season, imdb_id, director, dvd_chapter, dvd_season,
     gueststars, seriesid, language, productioncode, firstaired,
     episodename
-    '''
+    """
 
-    def __init__ (self, provider, dbdata=[], show_type='current'):
+
+    def __init__(self, provider, dbdata, show_type='current'):
         typelist = ('new', 'nondb', 'current')
         if show_type not in typelist:
-            raise exception ('incorrect show type')
+            raise Exception('incorrect show type')
+
+        if not dbdata:
+            dbdata = []
 
         if show_type == 'current':
-            self._set_db_data (dbdata)
+            self._set_db_data(dbdata)
             self._get_thetvdb_series_data()
             self.search_provider = Search.Search(provider)
 
         if show_type == 'nondb':
             self.search_provider = Search.Search(provider)
 
-        self.console_rows, self.console_columns = os.popen ('stty size', 'r').read().split()
+        self.console_rows, self.console_columns = os.popen('stty size', 'r').read().split()
 
 
-    def _set_db_data (self, dbdata):
-        '''Add the data from the local db'''
+    def _set_db_data(self, dbdata):
+        """Add the data from the local db"""
         self.db_name = dbdata['name']
         self.db_thetvdb_series_id = dbdata['thetvdb_series_id']
         self.db_ragetv_series_id = dbdata['ragetv_series_id']
@@ -119,8 +119,8 @@ class Series:
         self.db_status = dbdata['status']
 
 
-    def _get_thetvdb_series_data (self):
-        '''Dynamicaly add all the data from Thetvdb.com
+    def _get_thetvdb_series_data(self):
+        """Dynamicaly add all the data from Thetvdb.com
 
         networkid      - None
         rating         - 8.6
@@ -148,27 +148,27 @@ class Series:
         runtime        - 30
         overview       - Emmy Award Winner Tina Fey writ...
 
-        '''
+        """
 
-        tv = tvdb_api.Tvdb (apikey=config.thetvdb_apikey, cache=config.use_cache)
+        tv = tvdb_api.Tvdb(apikey=Config.thetvdb_apikey, cache=Config.use_cache)
         try:
             series = tv[self.db_name]
         except tvdb_api.tvdb_shownotfound:
-            print 'Show not found: %s' % (self.db_name)
+            print 'Show not found: %s' % self.db_name
             return
         except tvdb_api.tvdb_error as e_msg:
             print '\n'
-            print 'Error: %s' % (self.db_name)
+            print 'Error: %s' % self.db_name
             print '-----------------------------'
             print e_msg
             return
 
         for i in series.data:
-            setattr (self, i, series.data[i])
+            setattr(self, i, series.data[i])
         self.series = series
 
 
-    def download_missing (self, episode_display_count):
+    def download_missing(self, episode_display_count):
         missing = self._get_missing()
         if self.db_search_engine_name:
             search_title = self.db_search_engine_name
@@ -178,26 +178,20 @@ class Series:
         # if self does not have the attirbute series
         # its because of an error in the xml downloaded
         # from thetvdb site
-        if not hasattr (self, 'series'):
+        if not hasattr(self, 'series'):
             return
 
         for episode in missing:
             showid = None
 
-            showlist = []
-            error_a = error_b = False
-            try:
-                results = self.search_provider.search(
-                        search_title,
-                        season=episode['season'],
-                        episode=episode['episode']
-                )
-
-            except Search.SearchError as inst:
-                    error_a = True
+            results = self.search_provider.search(
+                search_title,
+                season=episode['season'],
+                episode=episode['episode']
+            )
 
             if results:
-                showid = self._ask (
+                showid = self._ask(
                     results,
                     display_count=episode_display_count,
                     season=episode['season'],
@@ -212,23 +206,23 @@ class Series:
 
             if showid == 'mark':
                 # mark the episode as watched, but don't download it
-                self._update_db (season=episode['season'], episode=episode['episode'])
+                self._update_db(season=episode['season'], episode=episode['episode'])
                 continue
 
             if not showid:
                 continue
 
-            self._download (showid)
-            self._update_db (season=episode['season'], episode=episode['episode'])
+            self._download(showid)
+            self._update_db(season=episode['season'], episode=episode['episode'])
 
 
-    def is_missing (self):
+    def is_missing(self):
         missing = self._get_missing()
         self.missing = missing
 
         ret = True
         try:
-            if len (missing) == 0:
+            if len(missing) == 0:
                 ret = False
         except:
             ret = False
@@ -236,135 +230,138 @@ class Series:
         return ret
 
 
-    def show_missing (self):
+    def show_missing(self):
         missing = self.missing
-        if len (missing) == 0:
+        if len(missing) == 0:
             return False
-        ret = '%s' % (U.effects (['boldon', 'greenf'], self.db_name))
+        ret = '%s' % (U.effects(['boldon', 'greenf'], self.db_name))
         ret += '\n'
         indent = '    '
         missing_list = []
         for s in missing:
             se = 'S%sE%s' % (s['season'].rjust(2, '0'), s['episode'].rjust(2, '0'))
-            missing_list.append (se)
-        ret += textwrap.fill (', '.join (missing_list), width=int(self.console_columns),
-                              initial_indent=indent, subsequent_indent=indent)
+            missing_list.append(se)
+        ret += textwrap.fill(', '.join(missing_list), width=int(self.console_columns),
+                             initial_indent=indent, subsequent_indent=indent)
         return ret
 
 
-    def add_new (self, name):
+    def add_new(self, name):
         self.db_name = name
         self._get_thetvdb_series_data()
         indent = '  '
 
         print
         print self.seriesname
-        print '-' * len (self.seriesname)
-        print textwrap.fill (self.overview, width=int (self.console_columns),
-                             initial_indent=indent, subsequent_indent=indent)
+        print '-' * len(self.seriesname)
+        print textwrap.fill(self.overview, width=int(self.console_columns),
+                            initial_indent=indent, subsequent_indent=indent)
         print
         print '%sFirst aired: %s' % (indent, self.firstaired)
         print '%sStatus: %s' % (indent, self.status)
         print
 
-        correct = ask ('Is this the correct show? [y/n]')
+        correct = ask('Is this the correct show? [y/n]')
 
         if correct == 'y':
             self._add_new_db()
 
 
-    def non_db (self, search_str, display_count):
+    def non_db(self, search_str, display_count):
         self.db_name = search_str
         try:
             show_data = self._ask(self.search_provider.search(search_str), None, None, display_count)
-            if not show_data: return
+            if not show_data:
+                return
         except Search.SearchError:
             print 'No matches'
             return
-        self._download (show_data)
+        self._download(show_data)
 
 
-    def _get_missing (self):
-        '''Returns a list of missing episodes'''
+    def _get_missing(self):
+        """Returns a list of missing episodes"""
         missing = []
         today = datetime.date.today()
-        last_watched = se_ep (self.db_current_season, self.db_last_episode)
+        last_watched = se_ep(self.db_current_season, self.db_last_episode)
 
         # if SELF does not have the attribute: 'series'
         # it's because of an error in the xml downloaded
         # from thetvdb site
-        if not hasattr (self, 'series'):
+        if not hasattr(self, 'series'):
             return
 
-        for i in self.series:           # for each season
-            for j in self.series[i]:    # for each episode
+        for i in self.series:  # for each season
+            for j in self.series[i]:  # for each episode
                 b_date = self.series[i][j]['firstaired']
-                if not b_date: continue  # some episode have no broacast date?
-                split_date = b_date.split ('-')
-                broadcast_date = datetime.date (
-                    int (split_date[0]), int (split_date[1]), int (split_date[2]))
+                if not b_date:
+                    continue  # some episode have no broacast date?
+                split_date = b_date.split('-')
+                broadcast_date = datetime.date(
+                    int(split_date[0]), int(split_date[1]), int(split_date[2]))
                 if broadcast_date >= today:  # unaired future date
                     break
 
                 last_season = self.series[i][j]['seasonnumber']
                 last_episode = self.series[i][j]['episodenumber']
-                last_broadcast = se_ep (last_season, last_episode)
-                if (last_watched < last_broadcast):
-                    missing.append ({'season':last_season, 'episode':last_episode})
+                last_broadcast = se_ep(last_season, last_episode)
+                if last_watched < last_broadcast:
+                    missing.append({'season': last_season, 'episode': last_episode})
 
         return missing
 
 
-    def _ask (self, shows, season, episode, display_count):
-        class color:
+    def _ask(self, shows, season, episode, display_count):
+        class Color:
             title_bg = 19
             title_fg = None
-            tb_header_fg = None #39
+            tb_header_fg = None  # 39
             tb_header_bg = 17
             tb_body_fg = 'white'
             tb_body_bg = None
             bar = title_bg
 
-        title_bar = U.hi_color ('|', foreground=color.bar, background=color.tb_header_bg)
-        bar =       U.hi_color ('|', foreground=color.bar)
 
-        ### Title bar row ###
+        title_bar = U.hi_color('|', foreground=Color.bar, background=Color.tb_header_bg)
+        bar = U.hi_color('|', foreground=Color.bar)
+
+        # ## Title bar row ###
         print
         if season and episode:
-            show_title = ' %s %s ' % (self.db_name, se_ep (season, episode))
+            show_title = ' %s %s ' % (self.db_name, se_ep(season, episode))
             url = ' %s' % (shows[0][0])
         else:
             show_title = self.db_name
             url = ''
 
-        show_title_color = U.hi_color(show_title, foreground=color.title_fg, background=color.title_bg)
+        show_title_color = U.hi_color(show_title, foreground=Color.title_fg, background=Color.title_bg)
         show_title_color = U.effects(['boldon'], show_title_color)
         url = url.ljust(int(self.console_columns) - len(show_title))
-        url = U.hi_color(url, foreground=27, background=color.title_bg)
+        url = U.hi_color(url, foreground=27, background=Color.title_bg)
         print '%s%s' % (show_title_color, url)
 
-        ### Header row ###
+        # ## Header row ###
         num_w = 1
         header_titles = [' '] + shows[0][1]
-        all_length = num_w + sum(shows[0][2]) + 4 # width of first column: 1...Z
-        title_w = int (self.console_columns) - all_length
+        all_length = num_w + sum(shows[0][2]) + 4  # width of first column: 1...Z
+        title_w = int(self.console_columns) - all_length
         header_widths = [num_w] + [title_w if x is 0 else x for x in shows[0][2]]
         head_row = []
         for header_title, header_width in zip(header_titles, header_widths):
             head_row.append(
-                U.hi_color(header_title.ljust (header_width),
-                           background=color.tb_header_bg))
+                U.hi_color(header_title.ljust(header_width),
+                           background=Color.tb_header_bg))
         print title_bar.join(head_row)
 
-        ### Matched episodes ###
+        # ## Matched episodes ###
         alignments = ['>'] + shows[0][3]
-        key = ('1','2','3','4','5','6','7','8','9','0','a','b','c','d','e','f','g','h','i',
-               'j','k','l','n','o','p','q','r','s','t','u','v','w','x','y','z')
-        for row, counter, display in zip (shows[1], key, display_count):
+        key = ('1', '2', '3', '4', '5', '6', '7', '8', '9', '0', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i',
+               'j', 'k', 'l', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z')
+        for row, counter, display in zip(shows[1], key, display_count):
             full_row = [counter] + row
-            for width, i, alignment in zip (header_widths,
-                                            range(len(header_widths)),
-                                            alignments):
+            for width, i, alignment in zip(header_widths,
+                                           range(len(header_widths)),
+                                           alignments):
                 text = full_row[i]
                 if len(text) >= width:
                     text = U.snip(text, width)
@@ -381,22 +378,22 @@ class Series:
 
         # User Input
         choice = ''
-        get = ask ('\nNumber, [s]kip, skip [r]est of show, [q]uit, [m]ark as watched, or [enter] for #1.\nChoice: ')
+        get = ask('\nNumber, [s]kip, skip [r]est of show, [q]uit, [m]ark as watched, or [enter] for #1.\nChoice: ')
 
-        if get == 'q':      # quit
+        if get == 'q':  # quit
             exit()
-        elif get == 's':    # skip
+        elif get == 's':  # skip
             return
-        elif get == 'r':    # skip rest of series
+        elif get == 'r':  # skip rest of series
             skip_rest = True
             return 'skip_rest'
-        elif get in key:    # number choice
-            choice_num = [i for i,j in enumerate (key) if j == get][0]
-            choice = int (choice_num)
-            if choice not in range (len (shows[1])):
-                U.wr ('Number not between 1 and %s' % (len (shows[1])))
+        elif get in key:  # number choice
+            choice_num = [i for i, j in enumerate(key) if j == get][0]
+            choice = int(choice_num)
+            if choice not in range(len(shows[1])):
+                U.wr('Number not between 1 and %s' % (len(shows[1])))
                 return
-        elif get == 'm':    # mark show as watched, but don't download it
+        elif get == 'm':  # mark show as watched, but don't download it
             return 'mark'
         elif get == '[enter]':  # default #1
             choice = 0
@@ -407,41 +404,41 @@ class Series:
         return shows[1][choice][-1:][0]
 
 
-    def _download (self, show_data):
-        msg = U.hi_color ('Downloading...', foreground=16, background=184)
-        sys.stdout.write (msg)
+    def _download(self, show_data):
+        msg = U.hi_color('Downloading...', foreground=16, background=184)
+        sys.stdout.write(msg)
         sys.stdout.flush()
 
-        filename = self.search_provider.download(chosen_show=show_data, destination=config.staging)
+        filename = self.search_provider.download(chosen_show=show_data, destination=Config.staging)
 
-        backspace = '\b' * len (msg)
-        done = U.hi_color (filename.ljust (len (msg)), foreground=34)
+        backspace = '\b' * len(msg)
+        done = U.hi_color(filename.ljust(len(msg)), foreground=34)
         print '%s%s' % (backspace, done)
 
 
-    def set_inactive (self):
+    def set_inactive(self):
         sql = 'UPDATE shows SET status="inactive" WHERE thetvdb_series_id=:tvdb_id'
-        conn = sqlite3.connect (config.db_file)
+        conn = sqlite3.connect(Config.db_file)
         curs = conn.cursor()
-        values = {'tvdb_id':self.db_thetvdb_series_id}
-        curs.execute (sql, values)
+        values = {'tvdb_id': self.db_thetvdb_series_id}
+        curs.execute(sql, values)
 
         conn.commit()
         conn.close()
 
 
-    def _update_db (self, season, episode):
+    def _update_db(self, season, episode):
         sql = "UPDATE shows SET season=:season, episode=:episode WHERE thetvdb_series_id=:tvdb_id"
-        conn = sqlite3.connect (config.db_file)
+        conn = sqlite3.connect(Config.db_file)
         curs = conn.cursor()
-        values = {'season':season, 'episode':episode, 'tvdb_id':self.db_thetvdb_series_id}
-        curs.execute (sql, values)
+        values = {'season': season, 'episode': episode, 'tvdb_id': self.db_thetvdb_series_id}
+        curs.execute(sql, values)
 
         conn.commit()
         conn.close()
 
 
-    def _add_new_db (self, season=0, episode=0):
+    def _add_new_db(self, season=0, episode=0):
         sql = '''insert into shows (
             network_status, status, thetvdb_series_id, name, season, episode)
             values (:network_status, :status, :thetvdb_id, :name, :season, :episode)'''
@@ -451,15 +448,15 @@ class Series:
                   'name': self.seriesname,
                   'season': season,
                   'episode': episode}
-        conn = sqlite3.connect (config.db_file)
+        conn = sqlite3.connect(Config.db_file)
         curs = conn.cursor()
-        curs.execute (sql, values)
+        curs.execute(sql, values)
         conn.commit()
         conn.close()
 
 
 class AllSeries:
-    '''
+    """
     Return an iterable class of Series
 
     Methods
@@ -468,30 +465,35 @@ class AllSeries:
       A string that used in the sql query to
       select LIKE matches on the show "name" field
 
-    '''
+    """
 
-    def __init__ (self, provider):
+
+    def __init__(self, provider):
         self.provider = provider
         self.sqlfilter = ''
 
-    def __iter__ (self):
+
+    def __iter__(self):
         self.dbdata = self._query_db(self.sqlfilter)
-        self.index = len (self.dbdata)
+        self.index = len(self.dbdata)
         self.i = 0
         return self
 
-    def next (self):
-        if self.i == len (self.dbdata):
+
+    def next(self):
+        if self.i == len(self.dbdata):
             raise StopIteration
-        series = Series (self.provider, dbdata=self.dbdata[self.i])
-        self.i = self.i + 1
+        series = Series(self.provider, dbdata=self.dbdata[self.i])
+        self.i += 1
         return series
 
-    def nameFilter(self, name):
+
+    def name_filter(self, name):
         show_name = 'name LIKE "%%%s%%"' % name
         self.sqlfilter = show_name
 
-    def _query_db (self, sqlfilter=''):
+
+    def _query_db(self, sqlfilter=''):
         if sqlfilter:
             sqlfilter = 'AND %s' % sqlfilter
         sql = """
@@ -513,34 +515,34 @@ class AllSeries:
             sqlfilter,
         )
         # print sql
-        conn = sqlite3.connect (config.db_file)
+        conn = sqlite3.connect(Config.db_file)
         conn.row_factory = dict_factory
         curs = conn.cursor()
-        ddata = curs.execute (sql)
+        ddata = curs.execute(sql)
         data = []
         for i in ddata:
-            data.append (i)
+            data.append(i)
         conn.commit()
         conn.close()
         return data
 
 
-def dict_factory (cursor, row):
-    '''Changes the data returned from the db from a
-    tupple to a dictionary'''
+def dict_factory(cursor, row):
+    """Changes the data returned from the db from a
+    tupple to a dictionary"""
     d = {}
-    for idx, col in enumerate (cursor.description):
+    for idx, col in enumerate(cursor.description):
         d[col[0]] = row[idx]
     return d
 
 
-def edit_db (search_str):
+def edit_db(search_str):
     sql = 'SELECT * FROM shows WHERE name=:search'
-    conn = sqlite3.connect (config.db_file)
+    conn = sqlite3.connect(Config.db_file)
     conn.row_factory = dict_factory
     curs = conn.cursor()
     values = {'search': search_str}
-    curs.execute (sql, values)
+    curs.execute(sql, values)
     row = curs.fetchone()
 
     if not row:
@@ -552,23 +554,23 @@ def edit_db (search_str):
     print 'While editing a field, hit <enter> to leave it unchanged.'
     print 'Type "<ctrl> c" to cancel all edits.\n'
     try:
-        new_name = raw_input ('Name: (%s) ' % (row['name']))
+        new_name = raw_input('Name: (%s) ' % (row['name']))
         if not new_name:
             new_name = row['name']
 
-        new_search_engine_name = raw_input ('Search engine title: (%s) ' % (row['search_engine_name']))
+        new_search_engine_name = raw_input('Search engine title: (%s) ' % (row['search_engine_name']))
         if not new_search_engine_name:
             new_search_engine_name = row['search_engine_name']
 
-        new_season = raw_input ('Current season: (%s) ' % (row['season']))
+        new_season = raw_input('Current season: (%s) ' % (row['season']))
         if not new_season:
             new_season = str(row['season'])
 
-        new_episode = raw_input ('Last episode: (%s) ' % (row['episode']))
+        new_episode = raw_input('Last episode: (%s) ' % (row['episode']))
         if not new_episode:
             new_episode = str(row['episode'])
 
-        new_status = raw_input ('Status: (%s) ' % (row['status']))
+        new_status = raw_input('Status: (%s) ' % (row['status']))
         if not new_status:
             new_status = row['status']
 
@@ -597,11 +599,11 @@ def edit_db (search_str):
         episode=:episode, status=:status, search_engine_name=:search_engine_name
         WHERE thetvdb_series_id=:tvdb_id'''
 
-    row_values = {'name':new_name, 'season':new_season, 'episode':new_episode,
-                  'status':new_status, 'search_engine_name':new_search_engine_name,
-                  'tvdb_id':row['thetvdb_series_id']}
+    row_values = {'name': new_name, 'season': new_season, 'episode': new_episode,
+                  'status': new_status, 'search_engine_name': new_search_engine_name,
+                  'tvdb_id': row['thetvdb_series_id']}
 
-    curs.execute (sql, row_values)
+    curs.execute(sql, row_values)
 
     print 'Database updated'
 
@@ -609,59 +611,59 @@ def edit_db (search_str):
     conn.close()
 
 
-def init (docopt_args):
-
-    class args:
-        '''Mapping from docopt args to object
+def init(docopt_args):
+    class Args:
+        """Mapping from docopt args to object
 
         Makes it easier to change command line options.
 
         Instead of: args['--search-provider']
         write as:   args.search_provider
-        '''
+        """
         # subgroups
-        download    = docopt_args['download']
+        download = docopt_args['download']
         showmissing = docopt_args['showmissing']
-        info        = docopt_args['info']
-        calendar    = docopt_args['calendar']
-        addnew      = docopt_args['addnew']
-        nondbshow   = docopt_args['nondbshow']
-        editdbinfo  = docopt_args['editdbinfo']
-        providers   = docopt_args['providers']
+        info = docopt_args['info']
+        calendar = docopt_args['calendar']
+        addnew = docopt_args['addnew']
+        nondbshow = docopt_args['nondbshow']
+        editdbinfo = docopt_args['editdbinfo']
+        providers = docopt_args['providers']
         # arguments
         search_string = docopt_args['SEARCH_STRING']
-        show_name     = docopt_args['SHOW_NAME']
+        show_name = docopt_args['SHOW_NAME']
         # options
-        count           = docopt_args['--count']
-        location        = docopt_args['--location']
-        no_cache        = docopt_args['--no-cache']
+        count = docopt_args['--count']
+        location = docopt_args['--location']
+        no_cache = docopt_args['--no-cache']
         search_provider = docopt_args['--search-provider']
-        show_all        = docopt_args['--show-all']
-        sort_by_next    = docopt_args['--sort-by-next']
-        ask_inactive    = docopt_args['--ask-inactive']
-        show_links      = docopt_args['--show-links']
-        synopsis        = docopt_args['--synopsis']
-        days            = docopt_args['--days']
-        no_color        = docopt_args['--no-color']
+        show_all = docopt_args['--show-all']
+        sort_by_next = docopt_args['--sort-by-next']
+        ask_inactive = docopt_args['--ask-inactive']
+        show_links = docopt_args['--show-links']
+        synopsis = docopt_args['--synopsis']
+        days = docopt_args['--days']
+        no_color = docopt_args['--no-color']
 
-    if args.location:
-        config.staging = args['--location']
-    if args.no_cache:
-        config.use_cache = False
 
-    if args.search_provider:
-        provider = args.search_provider
+    if Args.location:
+        Config.staging = Args['--location']
+    if Args.no_cache:
+        Config.use_cache = False
+
+    if Args.search_provider:
+        provider = Args.search_provider
     else:
-        provider = config.providers[0]
+        provider = Config.providers[0]
 
-    count = int(args.count)  # convert --count to int
-    count = 'x' * count # convert count into an iterable string of the length count
-    config.episode_display_count = count
+    count = int(Args.count)  # convert --count to int
+    count = 'x' * count  # convert count into an iterable string of the length count
+    Config.episode_display_count = count
 
-    if args.info:
+    if Args.info:
         show_info = {}
         counter = 0
-        show_name = args.show_name
+        show_name = Args.show_name
         all_shows = AllSeries(provider)
 
         # When the user specifies a single show, turn on --show-all
@@ -669,10 +671,10 @@ def init (docopt_args):
         # and turn on --synopsis and --show-links since its only one
         # show we may as well show everything
         if show_name:
-            args.show_all = True
-            args.synopsys = True
-            args.show_links = True
-            all_shows.nameFilter(show_name)
+            Args.show_all = True
+            Args.synopsys = True
+            Args.show_links = True
+            all_shows.name_filter(show_name)
 
         for series in all_shows:
             title = series.db_name
@@ -684,30 +686,32 @@ def init (docopt_args):
                 continue
 
             if series.status == 'Ended':
-                status = U.hi_color (series.status, foreground=196)
+                status = U.hi_color(series.status, foreground=196)
             else:
                 status = ''
 
             # build first row of info for each show
             se = 'Last downloaded: S%sE%s' % (
-                str (series.db_current_season).rjust (2, '0'),
-                str (series.db_last_episode).rjust (2,'0'),
-                )
+                str(series.db_current_season).rjust(2, '0'),
+                str(series.db_last_episode).rjust(2, '0'),
+            )
             se = U.hi_color(se, foreground=48)
 
             imdb_url = thetvdb_url = ''
-            if args.show_links:
-                imdb_url = U.hi_color(   '\n    IMDB.com:    http://imdb.com/title/%s' % series.imdb_id, foreground=20)
-                thetvdb_url = U.hi_color('\n    TheTVDB.com: http://thetvdb.com/?tab=series&id=%s' % series.id, foreground=20)
+            if Args.show_links:
+                imdb_url = U.hi_color('\n    IMDB.com:    http://imdb.com/title/%s' % series.imdb_id, foreground=20)
+                thetvdb_url = U.hi_color('\n    TheTVDB.com: http://thetvdb.com/?tab=series&id=%s' % series.id,
+                                         foreground=20)
 
             synopsis = ''
-            if args.synopsis and series.overview:
+            if Args.synopsis and series.overview:
                 paragraph = series.overview.encode('ascii', 'ignore')
                 indent = '    '
                 fill_width = 80
                 if int(series.console_columns) < fill_width:
                     fill_width = series.console_columns
-                paragraph = textwrap.fill(paragraph, width=int(fill_width), initial_indent=indent, subsequent_indent=indent)
+                paragraph = textwrap.fill(paragraph, width=int(fill_width), initial_indent=indent,
+                                          subsequent_indent=indent)
                 synopsis = '\n%s' % paragraph
 
             first_row_a = []
@@ -721,34 +725,33 @@ def init (docopt_args):
             first_time = True
             episodes_list = []
             counter += 1
-            next_episode_days = 0
-            for i in series.series: # season
-                for j in series.series[i]: # episode
+            for i in series.series:  # season
+                for j in series.series[i]:  # episode
                     b_date = series.series[i][j]['firstaired']
                     if not b_date: continue  # some episode have no broadcast date?
 
-                    split_date = b_date.split ('-')
-                    broadcast_date = datetime.datetime (
-                        int (split_date[0]), int (split_date[1]), int (split_date[2]))
+                    split_date = b_date.split('-')
+                    broadcast_date = datetime.datetime(
+                        int(split_date[0]), int(split_date[1]), int(split_date[2]))
 
-                    if not args.show_all:
+                    if not Args.show_all:
                         if broadcast_date < today:
                             continue
 
-                    future_date = dateParser.parse (b_date)
+                    future_date = date_parser.parse(b_date)
                     diff = future_date - today
-                    fancy_date = future_date.strftime ('%b %-d')
+                    fancy_date = future_date.strftime('%b %-d')
                     if broadcast_date >= today:
-                        episodes_list.append ('S%sE%s, %s (%s)' % (
-                            series.series[i][j]['seasonnumber'].rjust (2, '0'),
-                            series.series[i][j]['episodenumber'].rjust (2, '0'),
+                        episodes_list.append('S%sE%s, %s (%s)' % (
+                            series.series[i][j]['seasonnumber'].rjust(2, '0'),
+                            series.series[i][j]['episodenumber'].rjust(2, '0'),
                             fancy_date,
                             diff.days + 1,
                         ))
 
                     if first_time:
                         first_time = False
-                        if args.sort_by_next:
+                        if Args.sort_by_next:
                             sort_key = str(diff.days).rjust(5, '0') + str(counter)
                         else:
                             sort_key = series.db_name.replace('The ', '')
@@ -756,20 +759,20 @@ def init (docopt_args):
             if not first_time:
                 if episodes_list:
                     indent = '    '
-                    episode_list = 'Future episodes: ' + ' - '.join (episodes_list)
-                    episodes = textwrap.fill (
-                        U.hi_color (episode_list, foreground=22),
+                    episode_list = 'Future episodes: ' + ' - '.join(episodes_list)
+                    episodes = textwrap.fill(
+                        U.hi_color(episode_list, foreground=22),
                         width=int(series.console_columns),
                         initial_indent=indent,
                         subsequent_indent=indent
-                        )
+                    )
                     show_info[sort_key] = first_row + '\n' + episodes
                 else:
                     show_info[sort_key] = first_row
 
-            if args.ask_inactive:
+            if Args.ask_inactive:
                 if series.status == 'Ended' and first_time:
-                    set_status = ask (
+                    set_status = ask(
                         '%s has ended, and all have been downloaded. Set as inactive? [y/n]: ' %
                         title)
                     if set_status == 'y':
@@ -780,8 +783,8 @@ def init (docopt_args):
         for i in keys:
             print show_info[i]
 
-    if args.calendar:
-        if args.no_color:
+    if Args.calendar:
+        if Args.no_color:
             use_color = False
         else:
             use_color = True
@@ -793,12 +796,12 @@ def init (docopt_args):
         title_color_1 = 18
         title_color_2 = 0
 
-        title_width = 20 # width of show titles column
-        console_columns = int(os.popen ('stty size', 'r').read().split()[1])
-        spacer = ' ' # can be any string, any length
+        title_width = 20  # width of show titles column
+        console_columns = int(os.popen('stty size', 'r').read().split()[1])
+        spacer = ' '  # can be any string, any length
         today = datetime.datetime.today()
 
-        days = args.days
+        days = Args.days
         if days:
             days = days.split(',')
             days = [int(x) for x in days]
@@ -811,8 +814,8 @@ def init (docopt_args):
             calendar_columns = console_columns - (title_width + len(spacer))
 
         # Days_chars can be any string of seven chars. eg: 'mtwtfSS'
-        days_chars = '.....::' # first char is monday
-        monthstart = '|'       # marker used to indicate the begining of month
+        days_chars = '.....::'  # first char is monday
+        monthstart = '|'  # marker used to indicate the begining of month
 
         # build date title row
         months_row = today.strftime('%b') + (' ' * calendar_columns)
@@ -822,16 +825,16 @@ def init (docopt_args):
             cur_date = today + datetime.timedelta(days=days)
 
             if cur_date.month != daybefore.month:
-                days_row = days_row + monthstart
+                days_row += monthstart
                 month = cur_date.strftime('%b')
                 month_len = len(month)
                 months_row = months_row[:days] + month + months_row[(days + month_len):]
             else:
-                days_row = days_row + days_chars[cur_date.weekday()]
+                days_row += days_chars[cur_date.weekday()]
 
             daybefore = cur_date
 
-        months_row = months_row[:calendar_columns] # chop off any extra spaces created by adding the months
+        months_row = months_row[:calendar_columns]  # chop off any extra spaces created by adding the months
         if use_color:
             months_row = U.hi_color(months_row, 225, header_color)
             days_row = U.hi_color(days_row, 225, header_color)
@@ -846,9 +849,9 @@ def init (docopt_args):
         counter = 1
         season_marker = '-'
         all_series = AllSeries(provider)
-        show_name = args.show_name
+        show_name = Args.show_name
         if show_name:
-            all_series.nameFilter(show_name)
+            all_series.name_filter(show_name)
         for series in all_series:
             broadcast_row = ''
             title = series.db_name[:title_width].ljust(title_width)
@@ -856,13 +859,13 @@ def init (docopt_args):
             first_display_date = True
             last_days_away = 0
             last_date = 0
-            for i in series.series:         # season
+            for i in series.series:  # season
                 for j in series.series[i]:  # episode
                     episode_number = series.series[i][j]['episodenumber']
                     b_date = series.series[i][j]['firstaired']
                     if not b_date:
                         continue  # some episode have no broadcast date?
-                    split_date = b_date.split ('-')
+                    split_date = b_date.split('-')
                     broadcast_date = datetime.datetime(
                         int(split_date[0]), int(split_date[1]), int(split_date[2]))
                     if broadcast_date == last_date:
@@ -885,7 +888,8 @@ def init (docopt_args):
                         first_display_date = False
                     else:
                         episode_char_len = len(str(int(episode_number) - 1))
-                        broadcast_row = broadcast_row + (season_marker * (days_away - last_days_away - episode_char_len)) + episode_number
+                        broadcast_row = broadcast_row + (
+                            season_marker * (days_away - last_days_away - episode_char_len)) + episode_number
 
                     last_days_away = days_away
 
@@ -893,7 +897,7 @@ def init (docopt_args):
 
             broadcast_row = broadcast_row[:calendar_columns].ljust(calendar_columns)
 
-            if has_episode or args.show_all:
+            if has_episode or Args.show_all:
                 if use_color and color_row:
                     title = U.hi_color(title, 225, title_color_1)
                     broadcast_row = U.hi_color(broadcast_row, 225, date_color_1)
@@ -908,43 +912,42 @@ def init (docopt_args):
                     color_row = True
                 else:
                     color_row = False
-                    counter = counter + 1
+                    counter += 1
 
-    if args.showmissing:
+    if Args.showmissing:
         fp = FancyPrint()
         for series in AllSeries(provider):
             if series.is_missing():
-                fp.standard_print (series.show_missing())
+                fp.standard_print(series.show_missing())
             else:
-                fp.fancy_print ('Show up to date: %s' % (series.db_name))
+                fp.fancy_print('Show up to date: %s' % series.db_name)
         fp.done()
 
-    if args.download:
+    if Args.download:
         all_series = AllSeries(provider)
-        show_name = args.show_name
+        show_name = Args.show_name
         if show_name:
-            all_series.nameFilter(show_name)
+            all_series.name_filter(show_name)
         for series in all_series:
-            series.download_missing(config.episode_display_count)
+            series.download_missing(Config.episode_display_count)
 
-    if args.addnew:
-        newShow = Series (provider, show_type='new')
-        newShow.add_new (name=args.show_name)
+    if Args.addnew:
+        new_show = Series(provider, show_type='new')
+        new_show.add_new(name=Args.show_name)
 
-    if args.nondbshow:
-        nons = Series (provider, show_type='nondb')
-        nons.non_db (args.search_string, config.episode_display_count)
+    if Args.nondbshow:
+        nons = Series(provider, show_type='nondb')
+        nons.non_db(Args.search_string, Config.episode_display_count)
 
-    if args.editdbinfo:
-        edit_db (args['SHOW_NAME'])
+    if Args.editdbinfo:
+        edit_db(Args['SHOW_NAME'])
 
-    if args.providers:
-        providers = config.providers
+    if Args.providers:
+        providers = Config.providers
         for p in providers:
             print p, '  http://%s' % p.replace('_', '.')
 
 
 if __name__ == '__main__':
-
     docopt_args = docopt(__doc__, version='0.1')
     init(docopt_args)

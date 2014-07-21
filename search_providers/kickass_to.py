@@ -1,11 +1,12 @@
 #!/usr/bin/env python
 
-import feedparser
 import urllib
-import os
 from time import mktime
 from datetime import datetime
 import pprint
+
+import feedparser
+
 from Util import U
 
 
@@ -14,7 +15,8 @@ class Provider (object):
     name = 'Kickass Torrents'
 
 
-    def se_ep (self, season, episode, show_title):
+    @staticmethod
+    def se_ep (season, episode, show_title):
         season_just = str (season).rjust (2, '0')
         episode = str (episode).rjust (2, '0')
         fixed = '"%s S%sE%s" OR "%s %sx%s"' % (
@@ -25,7 +27,7 @@ class Provider (object):
 
     def search(self, search_string, season=False, episode=False):
 
-        if (season and episode):
+        if season and episode:
             search_string = '%s' % (
                 self.se_ep(
                     season, episode, search_string))
@@ -33,7 +35,7 @@ class Provider (object):
         query = search_string
         encoded_search = urllib.quote (query)
         url = 'http://kickass.to/usearch/%s/?rss=1'
-        full_url = url % (encoded_search)
+        full_url = url % encoded_search
 
         parsed = feedparser.parse(full_url)
         header = [
