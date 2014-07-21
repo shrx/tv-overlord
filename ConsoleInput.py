@@ -11,7 +11,7 @@ def ask_user (question):
 	termios.tcsetattr (fd, termios.TCSANOW, newattr)
 
 	oldflags = fcntl.fcntl (fd, fcntl.F_GETFL)
-	fcntl.fcntl (fd, fcntl.F_SETFL, oldflags | os.O_NONBLOCK)
+	fcntl.fcntl (fd, fcntl.F_SETFL, oldflags & ~os.O_NONBLOCK)
 
 	# print '%s ' % (question),
 	print question,
@@ -39,11 +39,5 @@ def ask_user (question):
 
 if __name__ == '__main__':
 	question = 'Input any character:'
-	result = ask (question)
+	result = ask_user (question)
 	print 'The key pressed was:', result
-
-
-
-
-
-
