@@ -268,20 +268,16 @@ class Series:
 
 
     def _ask(self, shows, season, episode, display_count):
-        #from pprint import pprint as pp
-        #pp (shows)
-        #exit()
-
         print
-        class Color:
-            title_bg = 19
-            title_fg = None
-            tb_header_fg = None  # 39
-            tb_header_bg = 17
-            tb_body_fg = 'white'
-            tb_body_bg = None
-            bar = title_bg
-
+        color = {
+            'title_fg': None,
+            'title_bg': 19,
+            'header_fg': None,
+            'header_bg': 17,
+            'body_fg': 'white',
+            'body_bg': None,
+            'bar': 19,
+        }
         if season and episode:
             show_title = '%s %s ' % (self.db_name, self.se_ep(season, episode))
             url = '  %s' % (shows[0][0])
@@ -289,14 +285,19 @@ class Series:
             show_title = self.db_name
             url = ''
 
-        show_title_color = U.hi_color(show_title, foreground=Color.title_fg, background=Color.title_bg)
+        show_title_color = U.hi_color(show_title, foreground=color['title_fg'], background=color['title_bg'])
         show_title_color = U.effects(['boldon'], show_title_color)
-        url = url.ljust(int(self.console_columns) - len(show_title) - 2)
-        url = U.hi_color(url, foreground=27, background=Color.title_bg)
+
+        space_before_title = 2
+        url = url.ljust(int(self.console_columns) - len(show_title) - space_before_title)
+        url = U.hi_color(url, foreground=27, background=color['title_bg'])
+
         full_title = '%s%s' % (show_title_color, url)
 
         tbl = ConsoleTable(shows)
         tbl.set_title(full_title)
+        tbl.set_count(display_count)
+        tbl.set_colors(color)
         show_to_dl = tbl.generate()
 
         return show_to_dl

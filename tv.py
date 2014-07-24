@@ -175,7 +175,6 @@ def init(docopt_args):
         provider = Config.providers[0]
 
     count = int(Args.count)  # convert --count to int
-    count = 'x' * count  # convert count into an iterable string of the length count
     Config.episode_display_count = count
 
     if Args.info:

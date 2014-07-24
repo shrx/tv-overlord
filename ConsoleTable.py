@@ -1,6 +1,5 @@
-import os
+import os, string
 from collections import namedtuple
-
 from ConsoleInput import ask_user
 from Util import U
 
@@ -33,7 +32,6 @@ class ConsoleTable:
 
         console_rows, console_columns = os.popen('stty size', 'r').read().split()
         self.console_columns = int(console_columns)
-        self.return_field = 0
         self.colors = {
             'title_fg': None,
             'title_bg': 19,
@@ -61,11 +59,18 @@ class ConsoleTable:
 
         self.table = table
 
+    def set_count(self, val):
+        #count = '.' * val
+        self.display_count = val
+
     def set_title(self, text):
         self.table.title.text = text
 
     def set_header(self, header_items):
         self.table.header.titles = header_items
+
+    def set_colors(self, colors):
+        self.colors = colors
 
     def generate(self):
         title_bar = U.hi_color(
@@ -119,18 +124,17 @@ class ConsoleTable:
         print header_row
 
         # BODY ROWS -----------------------------------------
-        key = ('1', '2', '3', '4', '5', '6', '7', '8', '9', '0', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h',
-               'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z')
+        key = string.ascii_lowercase  # --> 'abcdefghijklmnopqrstuvwxyz'
 
+        self.table.body = self.table.body[:self.display_count]
         for row, counter in zip(self.table.body, key):
             row_arr = [counter]
             for i, width, align in zip(row, header.widths, header.alignments):
                 if width == 0:
                     width = flex_width
-                row_item = i
+                row_item = i.encode('ascii', 'ignore')
                 row_item = U.snip(row_item, width)
                 row_item = row_item.strip()
-                # row_item = row_item.ljust (width)
 
                 if align == '<':
                     row_item = row_item.ljust(width)
@@ -159,17 +163,22 @@ class ConsoleTable:
             choice_num = [i for i, j in enumerate(key) if j == get][0]
             choice = int(choice_num)
             if choice not in range(len(self.table.body)):
-                U.wr('Number not between 1 and %s, try again' % (len(self.table.body)))
+                self.display_error('Choice not between %s and %s, try again:' % (key[0], key[len(self.table.body) - 1]))
                 self.generate()
                 return
         elif get == '[enter]':  # default choice: #1
             choice = 0
         else:
-            print 'Wrong choice, %s' % get
+            self.display_error('Invalid choice: %s, try again:' % get)
             self.generate()
             return
 
-        return self.table.body[choice][-1:]
+        return self.table.body[choice][-1:][0]
+
+
+    def display_error(self, message):
+        print
+        print U.hi_color('[!]', 16, 178), U.hi_color(message, 178)
 
 
 if __name__ == '__main__':
