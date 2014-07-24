@@ -207,3 +207,18 @@ Options:
   --no-color        Don't use color in output. Useful if output is to be
                     used in email or text file.
 #+END_EXAMPLE
+
+
+* A note on pirating
+
+Downloading shows via the Internet is much easier than watching them
+on cable.  The shows are displayed in XBMC in a list and only the
+shows I want to watch are listed.  This isn't about saving money, but
+convenience.
+
+The problem is that I don't want to be a thief by getting these shows
+for free.  So, to make this work, I pay for the biggest cable package
+I can, but I don't use it.  As far as I'm concerned, this is the same
+as using TiVo and skipping the commercials.
+
+If you want to download shows, you should do this too.
