@@ -209,7 +209,7 @@ Options:
 #+END_EXAMPLE
 
 
-* A note on pirating
+** A note on pirating
 
 Downloading shows via the Internet is much easier than watching them
 on cable.  The shows are displayed in XBMC in a list and only the
