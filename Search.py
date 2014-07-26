@@ -89,7 +89,7 @@ class Search(object):
                     unknown_enviroment = os.environ.get('DESKTOP_SESSION')
                     print 'Unknown enviroment:', unknown_enviroment
             elif platform.system() == 'Darwin':
-                Popen(["open", chosen_show])
+                Popen(["open", "--background", chosen_show])
             else:
                 unknown_system = platform.platform()
                 print 'Unknown system:', unknown_system
