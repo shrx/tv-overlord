@@ -45,7 +45,7 @@ import textwrap
 from dateutil import parser as date_parser
 from docopt import docopt
 
-from AllSeries import AllSeries, dict_factory
+from AllSeries import AllSeries
 
 from ConsoleInput import ask_user as ask
 from Series import Series
