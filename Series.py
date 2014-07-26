@@ -159,13 +159,11 @@ class Series:
 
             if showid == 'skip_rest':
                 return
-
-            if showid == 'mark':
+            elif showid == 'skip':
+                continue
+            elif showid == 'mark':
                 # mark the episode as watched, but don't download it
                 self._update_db(season=episode['season'], episode=episode['episode'])
-                continue
-
-            if not showid:
                 continue
 
             self._download(showid)

@@ -58,9 +58,9 @@ class ConsoleTable:
         table.body = data[1]
 
         self.table = table
+        self.chosen_value = False
 
     def set_count(self, val):
-        #count = '.' * val
         self.display_count = val
 
     def set_title(self, text):
@@ -73,6 +73,7 @@ class ConsoleTable:
         self.colors = colors
 
     def generate(self):
+        #pp(self.table.body)
         title_bar = U.hi_color(
             '|',
             foreground=self.colors['bar'],
@@ -149,31 +150,34 @@ class ConsoleTable:
             print bar.join(row_arr)
 
         # USER INPUT ---------------------------------------
-        choice = ''
+        choice = False
+        while not choice:
+            choice = self.ask(key)
+        return choice
+
+    def ask(self, key):
         get = ask_user('\nNumber, [s]kip, skip [r]est of show, [q]uit or [enter] for #1: ')
+        choice = False
 
         if get == 'q':  # quit
             exit()
         elif get == 's':  # skip
-            return
+            choice = 'skip'
         elif get == 'r':  # skip rest of series
-            skip_rest = True
-            return 'skip_rest'
+            choice = 'skip_rest'
         elif get in key:  # number/letter chosen
-            choice_num = [i for i, j in enumerate(key) if j == get][0]
-            choice = int(choice_num)
-            if choice not in range(len(self.table.body)):
-                self.display_error('Choice not between %s and %s, try again:' % (key[0], key[len(self.table.body) - 1]))
-                self.generate()
-                return
+            choice_num = key.index(get)
+            if choice_num not in range(len(self.table.body)):
+                self.display_error('Choice not between %s and %s, try again:' % (
+                    key[0], key[len(self.table.body) - 1]))
+            else:
+                choice = self.table.body[choice_num][-1:][0]
         elif get == '[enter]':  # default choice: #1
-            choice = 0
-        else:
+            choice = self.table.body[0][-1:][0]
+        elif get not in key:
             self.display_error('Invalid choice: %s, try again:' % get)
-            self.generate()
-            return
 
-        return self.table.body[choice][-1:][0]
+        return choice
 
 
     def display_error(self, message):
@@ -198,20 +202,25 @@ if __name__ == '__main__':
             paragraph.append(word)
         return ' '.join(paragraph)
 
-    data_body = []
-    for i in range(12):
-        data_body.append([get_paragraph(1,30), get_paragraph(1,30), get_paragraph(1,10), get_paragraph(1,10), get_paragraph(1,2)])
-
+    rows = 10
     data = [['This is a title',
-             [get_paragraph(1,2), get_paragraph(1,2), get_paragraph(9,10), get_paragraph(9,10)],
-             [0, 10, 20, 30],
-             ['<', '>', '=', '<']],
-             data_body
-        ]
+             [get_paragraph(1,2), get_paragraph(1,2), get_paragraph(9,10), get_paragraph(9,10), 'RET'],
+             [0, 10, 20, 30, 10],
+             ['<', '>', '=', '<', '<']],
 
-    tbl2 = ConsoleTable(data)
-    tbl2.set_title('New title')
-    print tbl2.generate()
+             [[get_paragraph(1,30),
+               get_paragraph(1,30),
+               get_paragraph(1,10),
+               get_paragraph(1,10),
+               get_paragraph(1,2)] for i in range(rows)]
+           ]
+
+    for i in range(10):
+        tbl2 = ConsoleTable(data)
+        tbl2.set_title('New title')
+        tbl2.set_count(20)
+        out = tbl2.generate()
+        print 'out:', out
 
     data = [['http://thepiratebay.org/search/ Utopia%20S02E03/0/7/0 Utopia%202x03/0/7/0 ',
             ['Name', 'Size', 'Date', 'Seeds'],
