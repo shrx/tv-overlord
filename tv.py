@@ -3,6 +3,7 @@
 r"""Download and manage TV shows
 
 Usage:
+  tv
   tv download    [-n] [-c COUNT] [-l LOCATION] [-p PROVIDER] [SHOW_NAME]
   tv showmissing [-n]
   tv info        [-n] [-a] [-x] [--ask-inactive] [--show-links] [--synopsis] [SHOW_NAME]
@@ -11,6 +12,8 @@ Usage:
   tv nondbshow SEARCH_STRING [-c COUNT] [-l LOCATION] [-p PROVIDER]
   tv editdbinfo SHOW_NAME
   tv providers
+
+  With no arguments, tv runs showmissing
 
   SHOW_NAME is a full or partial name of a tv show.  If SHOW_NAME is
   specified, tv will only act on matches to that name.  For example,
@@ -177,6 +180,19 @@ def init(docopt_args):
     count = int(Args.count)  # convert --count to int
     Config.episode_display_count = count
 
+    # set the default action to showmissing
+    # if no option is set on the command line
+    if (not Args.download and
+        not Args.showmissing and
+        not Args.info and
+        not Args.calendar and
+        not Args.addnew and
+        not Args.nondbshow and
+        not Args.editdbinfo and
+        not Args.providers):
+
+        Args.showmissing = True
+
     if Args.info:
         show_info = {}
         counter = 0
@@ -300,7 +316,7 @@ def init(docopt_args):
         for i in keys:
             print show_info[i]
 
-    if Args.calendar:
+    elif Args.calendar:
         if Args.no_color:
             use_color = False
         else:
@@ -431,7 +447,7 @@ def init(docopt_args):
                     color_row = False
                     counter += 1
 
-    if Args.showmissing:
+    elif Args.showmissing:
         fp = FancyPrint()
         for series in AllSeries(provider):
             if series.is_missing():
@@ -440,7 +456,7 @@ def init(docopt_args):
                 fp.fancy_print('Show up to date: %s' % series.db_name)
         fp.done()
 
-    if Args.download:
+    elif Args.download:
         all_series = AllSeries(provider)
         show_name = Args.show_name
         if show_name:
@@ -448,18 +464,18 @@ def init(docopt_args):
         for series in all_series:
             series.download_missing(Config.episode_display_count)
 
-    if Args.addnew:
+    elif Args.addnew:
         new_show = Series(provider, show_type='new')
         new_show.add_new(name=Args.show_name)
 
-    if Args.nondbshow:
+    elif Args.nondbshow:
         nons = Series(provider, show_type='nondb')
         nons.non_db(Args.search_string, Config.episode_display_count)
 
-    if Args.editdbinfo:
+    elif Args.editdbinfo:
         edit_db(Args['SHOW_NAME'])
 
-    if Args.providers:
+    elif Args.providers:
         providers = Config.providers
         for p in providers:
             print p, '  http://%s' % p.replace('_', '.')
