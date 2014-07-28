@@ -8,6 +8,10 @@ from ConsoleInput import ask_user as ask
 
 
 class Config:
+    def __init__(self):
+        pass
+
+
     thetvdb_apikey = 'DFDB0A667C844513'
     rt_apikey = 'caxewwhecy767pye7zr3dfrb'
     use_cache = True
@@ -17,7 +21,7 @@ class Config:
         os.environ['HOME'],  # '/Users/sm/'
         '.tv-downloader'
     )
-
+    user_db = '%s/%s' % (user_dir, 'shows.sqlite3')
     user_config = '%s/%s' % (user_dir, config_filename)
 
     if not os.path.exists(user_dir):
@@ -40,7 +44,7 @@ class Config:
                     episode NUMERIC,
                     ragetv_series_id TEXT
                 );'''
-            conn = sqlite3.connect('%s/%s' % (user_dir, 'shows.sqlite3'))
+            conn = sqlite3.connect(self.user_db)
             curs = conn.cursor()
             curs.execute(sql)
             conn.commit()
