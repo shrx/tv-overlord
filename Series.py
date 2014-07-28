@@ -45,7 +45,7 @@ class Series:
         return fixed
 
 
-    def __init__(self, provider, dbdata, show_type='current'):
+    def __init__(self, provider, dbdata=False, show_type='current'):
         typelist = ('new', 'nondb', 'current')
         if show_type not in typelist:
             raise Exception('incorrect show type')
