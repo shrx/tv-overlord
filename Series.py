@@ -9,6 +9,8 @@ import Search
 from Util import U
 from tv_config import Config
 from ConsoleTable import ConsoleTable
+from Tracking import Tracking
+
 
 class Series:
     """
@@ -297,6 +299,10 @@ class Series:
         tbl.set_count(display_count)
         tbl.set_colors(color)
         show_to_dl = tbl.generate()
+
+        # save data to Tracking
+        tracking = Tracking()
+        tracking.save(shows, show_to_dl)
 
         return show_to_dl
 
