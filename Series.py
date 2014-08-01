@@ -302,7 +302,7 @@ class Series:
 
         # save data to Tracking
         tracking = Tracking()
-        tracking.save(shows, show_to_dl)
+        tracking.save(self.db_name, season, episode, shows, show_to_dl)
 
         return show_to_dl
 
