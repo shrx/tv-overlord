@@ -9,18 +9,21 @@ shows are available to download.
 
 There are two NZB search providers, nzbclub.com and nzbindex.com.
 Also, there are two bittorent search providers, kickass.to and
-thepiratebay.sx.
+thepiratebay.sx.  Others can be added fairly easily.  See the
+search providers [[https://github.com/smmcg/tv-downloader/blob/master/search_providers/README.org][README.org]], or by making a feature request in issues
+or a pull request.
 
 
 ** Features
 
-+ Keeps track of watched shows
++ Keeps track of downloaded shows
 + Show a list of shows available for download
 + Gives you a list of torrents or nzbs you can choose from
 + You can add new shows from the command line
 + Will display info showing what show will be next and how many days
-  till broadcast
-+ Displays a calendar of upcoming episodes
+  till broadcast.  This list can be filtered and sorted in various ways
++ Displays a calendar of upcoming episodes.  You can also specify a range
+  of days to display, past or future.
 
 
 ** Install
@@ -32,14 +35,15 @@ can take a look at making it work or alternatively send me a pull request.
 
 *** Dependencies
 
-TV Downloader requires four additional python libraries to be installed:
+TV Downloader requires four additional python libraries (not part of
+the standard packages) to be installed:
   1. *tvdb_api* - [[https://github.com/dbr/tvdb_api]] \\
      Python library to access the thetvdb.com api
-  2. *Beautiful Soup* - http://www.crummy.com/software/BeautifulSoup/bs4/doc/ \\
-     Python library used to scrap thepiratebay.org since they don't have an api
-  4. *Requests* - http://docs.python-requests.org/en/latest/  \\
+  2. *Requests* - http://docs.python-requests.org/en/latest/  \\
      Library to download html pages
-  5. *Feedparser* - https://pypi.python.org/pypi/feedparser \\
+  3. *Beautiful Soup* - http://www.crummy.com/software/BeautifulSoup/bs4/doc/ \\
+     Python library used to scrap thepiratebay.org since they don't have an api
+  4. *Feedparser* - https://pypi.python.org/pypi/feedparser \\
      For sites that provide an xml api this library is used to parse them
 
 
@@ -51,8 +55,9 @@ TV Downloader requires four additional python libraries to be installed:
   4. =pip install requests=
   5. Create a dir somewhere and clone this repository: \\
      =git clone https://github.com/smmcg/tv-downloader.git=
-  6. Put tv.py on your $PATH or call it directly
-     (I have it symlinked to =tv= in a bin folder thats on the path)
+  6. Put the dir on your $PATH or symlink tv.py to a dir that is
+     on the path.
+     (I have it symlinked to =tv= in a bin dir thats on the path)
   7. type: =tv.py= \\
      The first time its run, it will ask to create the
      config dir.  Type =Y= to allow it.  The config directory will be
@@ -143,20 +148,16 @@ show as 'inactive' here if you wish.
 ** Screenshots
 
 [[http://i.imgur.com/jMP4T3h.gif]]
-
 This screenshot shows the providers list command and downloading using
 an NZB search provider.
 
 [[http://i.imgur.com/umS1DqH.gif]]
-
 This shows using a bittorrent search provider to download.
 
 [[http://i.imgur.com/sBFl5sg.gif]]
-
 This shows the calendar.
 
 [[http://i.imgur.com/eg0Ui7U.gif]]
-
 This show the info command.
 
 
@@ -174,14 +175,17 @@ to create it for you.
 Download and manage TV shows
 
 Usage:
+  tv
   tv download    [-n] [-c COUNT] [-l LOCATION] [-p PROVIDER] [SHOW_NAME]
   tv showmissing [-n]
   tv info        [-n] [-a] [-x] [--ask-inactive] [--show-links] [--synopsis] [SHOW_NAME]
   tv calendar    [-n] [-a] [-x] [--no-color] [--days DAYS] [SHOW_NAME]
   tv addnew SHOW_NAME
-  tv nondbshow SEARCH_STRING [-l LOCATION] [-p PROVIDER]
-  tv editdbinfo SHOW_NAME [-d DB-FILE]
+  tv nondbshow SEARCH_STRING [-c COUNT] [-l LOCATION] [-p PROVIDER]
+  tv editdbinfo SHOW_NAME
   tv providers
+
+  With no arguments, tv runs showmissing
 
   SHOW_NAME is a full or partial name of a tv show.  If SHOW_NAME is
   specified, tv will only act on matches to that name.  For example,
