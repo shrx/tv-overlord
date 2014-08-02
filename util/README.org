@@ -26,10 +26,14 @@ ymmv.
 - sabnzbd-move-video :: When sabnzb is finished downloading, it calls
      this script which moves the finished files to a network drive.
 
-- tv-completion.bash :: Bash command line completions for TV Downloader. \\
-     The easiest way to use this, is to source this in your .bashrc: \\
-     =source <path to tv-completion dir>/tv-completion.bash= \\
-     eg: \\
+- tv-completion.bash :: Bash command line completions for TV Downloader.
+
+     The easiest way to use this, is to source this in your .bashrc:
+
+     =source <path to tv-completion dir>/tv-completion.bash=
+
+     eg:
+
      =source ~/projects/tv-downloader/src/util/tv-completion.bash=
 
      Or you can install this in you system's bash completion dir,
