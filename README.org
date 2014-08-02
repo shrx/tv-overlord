@@ -7,12 +7,18 @@ bittorent.  It will download nzb files or magnet links.
 TV Downloader keeps track of which shows have been downloaded and what
 shows are available to download.
 
-There are two NZB search providers, nzbclub.com and nzbindex.com.
-Also, there are two bittorent search providers, kickass.to and
-thepiratebay.sx.  Others can be added fairly easily.  See the
+There are two bittorent search providers, kickass.to and
+thepiratebay.sx; and there are two NZB search providers, nzbclub.com
+and nzbindex.com.  Also, Others can be added fairly easily.  See the
 search providers [[https://github.com/smmcg/tv-downloader/blob/master/search_providers/README.org][README.org]], or by making a feature request in issues
 or a pull request.
 
+#+BEGIN_QUOTE
+*Note*: The two nzb search providers don't work, and I'm not sure why, but it
+appears to be a problem on the search engine side.  I no longer use
+nzb's so its not a high priority now but if someone wants me to, I'll
+take a closer look at them.
+#+END_QUOTE
 
 ** Features
 

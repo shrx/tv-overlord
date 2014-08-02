@@ -1,23 +1,35 @@
 
 * Util dir
 
-This contains various programs that are not important, but are helpful
-in using TV Downloader.  The code is of low quality here so ymmv.
+This contains various programs that are not important, but might be
+helpful in using TV Downloader.  The code is of low quality here so
+ymmv.
 
 
 ** files
 
-*deluge_done.bash* - This script is is called when deluge is finished
- downloading the torrent.  It moves the finished torrents to a network
- drive.  It works with the execute plugin.
+- deluge_done.bash :: This script is is called when [[http://deluge-torrent.org/][deluge]] is finished
+     downloading the torrent.  It moves the finished torrents to a
+     network drive.  It works with the execute plugin.
 
-*map_tvdb_to_rage.py* - This script maps the tvdb id's to ragetv's id's.
+- transmission_done.bash :: same as deluge_done.bash but with
+     [[https://www.transmissionbt.com/][transmission]], which, btw, is a supurb bittorent client.
 
-*move-nzbs-to-watched-dir* - When downloading nzb files, I download them
- to a staging folder then use this script to move which ones I want to
- the sabnzbd watched folder.  This really is an unnecessary step.
+- map_tvdb_to_rage.py :: This script maps the tvdb id's to ragetv's
+     id's.
 
-*sabnzbd-move-video* - When sabnzb is finished downloading, it calls
- this script which moves the finished files to a network drive.
+- move-nzbs-to-watched-dir :: When downloading nzb files, I download
+     them to a staging folder then use this script to move which ones
+     I want to the sabnzbd watched folder.  This really is an
+     unnecessary step.
 
-*tv-completion.bash* - Bash command line completions for TV Downloader.
+- sabnzbd-move-video :: When sabnzb is finished downloading, it calls
+     this script which moves the finished files to a network drive.
+
+- tv-completion.bash :: Bash command line completions for TV Downloader. \\
+     The easiest way to use this, is to source this in your .bashrc:
+     =source <path to tv-completion dir>/tv-completion.bash= eg: =source
+     ~/projects/tv-downloader/src/util/tv-completion.bash=
+
+     Or you can install this in you system's bash completion dir,
+     which varies depending on your system
