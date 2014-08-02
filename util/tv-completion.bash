@@ -1,28 +1,54 @@
 #!/usr/bin/env bash
 
-_getnzb()
+_tv()
 {
-	local cur all_options opts
+	local cur prev all_options opts commands
 	COMPREPLY=()
 	cur="${COMP_WORDS[COMP_CWORD]}"
 	prev="${COMP_WORDS[COMP_CWORD-1]}"
-	options='-h --help -d --db-file -l --location -n --no-cache'
-	commands='download info showmissing addnew nondbshow editdbinfo'
+
+    # COMMANDS: ------------------------
 
 	if [ $COMP_CWORD -eq 1 ]; then
-		# select from $all_options for first choice
+	    commands='download showmissing info calendar addnew nondbshow editdbinfo providers'
 		COMPREPLY=( $(compgen -W "${commands}" -- $cur) )
 		return 0
 
+    # OPTIONS: -------------------------
+
+    # download
 	elif [[ "${prev}" == "download" ]]; then
-	elif [[ "${prev}" == "info" ]]; then
+        opts="-n --no-cache -c --count -l --location -p --search-provider"
+		COMPREPLY=( $(compgen -W "${opts}" -- $cur) )
+        return 0
+    # showmissing
 	elif [[ "${prev}" == "showmissing" ]]; then
-	elif [[ "${prev}" == "addnew" ]]; then
+        opts="-n --no-cache"
+		COMPREPLY=( $(compgen -W "${opts}" -- $cur) )
+        return 0
+    # info
+	elif [[ "${prev}" == "info" ]]; then
+        opts="-n --no-cache -a --show-all -x --sort-by-next --ask-inactive --show-links --synopsis"
+		COMPREPLY=( $(compgen -W "${opts}" -- $cur) )
+        return 0
+    # calendar
+	elif [[ "${prev}" == "calendar" ]]; then
+        opts="-n --no-cache -a --show-all -x --sort-by-next --no-color --days"
+		COMPREPLY=( $(compgen -W "${opts}" -- $cur) )
+        return 0
+    # nondbshow
 	elif [[ "${prev}" == "nondbshow" ]]; then
-	elif [[ "${prev}" == "editdbinfo" ]]; then
+        opts="-n --no-cache -c --count -l --location -p --search-provider"
+		COMPREPLY=( $(compgen -W "${opts}" -- $cur) )
+        return 0
 	fi
 }
+complete -F _tv tv
 
-# add this to .bashrc:
-complete -F _getnzb -o filenames getnzb
-
+# the easiest way to use this, is to source this in your .bashrc:
+# source <path to tv-completion dir>/tv-completion.bash
+# eg:
+# source ~/projects/tv-downloader/src/util/tv-completion.bash
+#
+# or you can install this in you system's bash completion dir,
+# which varies depending on your system
