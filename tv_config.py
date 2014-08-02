@@ -44,7 +44,7 @@ class Config:
                     episode NUMERIC,
                     ragetv_series_id TEXT
                 );'''
-            conn = sqlite3.connect(self.user_db)
+            conn = sqlite3.connect(user_db)
             curs = conn.cursor()
             curs.execute(sql)
             conn.commit()
