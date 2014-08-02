@@ -73,7 +73,6 @@ class ConsoleTable:
         self.colors = colors
 
     def generate(self):
-        #pp(self.table.body)
         title_bar = U.hi_color(
             '|',
             foreground=self.colors['bar'],
@@ -125,7 +124,12 @@ class ConsoleTable:
         print header_row
 
         # BODY ROWS -----------------------------------------
-        key = string.ascii_lowercase  # --> 'abcdefghijklmnopqrstuvwxyz'
+
+        # key has the s, r, q, m removed to not interfere with the
+        # ask_user options.  This list can have anything, as long as
+        # they are single characters.
+        key = ('a','b','c','d','e','f','g','h','i','j','k',
+               'l','n','o','p','t','u','v','w','x','y','z')
 
         self.table.body = self.table.body[:self.display_count]
         for row, counter in zip(self.table.body, key):
@@ -156,7 +160,7 @@ class ConsoleTable:
         return choice
 
     def ask(self, key):
-        get = ask_user('\nNumber, [s]kip, skip [r]est of show, [q]uit or [enter] for #1: ')
+        get = ask_user('\nNumber, [s]kip, skip [r]est of show, [q]uit, [m]ark as watched, or [enter] for #1: ')
         choice = False
 
         if get == 'q':  # quit
@@ -165,6 +169,8 @@ class ConsoleTable:
             choice = 'skip'
         elif get == 'r':  # skip rest of series
             choice = 'skip_rest'
+        elif get == 'm':  # mark show as watched, but don't download it
+            choice = 'mark'
         elif get in key:  # number/letter chosen
             choice_num = key.index(get)
             if choice_num not in range(len(self.table.body)):
