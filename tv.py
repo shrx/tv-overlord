@@ -58,6 +58,7 @@ from Util import U
 
 
 def edit_db(search_str):
+    print '>>>>'
     sql = 'SELECT * FROM shows WHERE name=:search'
     conn = sqlite3.connect(Config.db_file)
     conn.row_factory = dict_factory
@@ -473,7 +474,7 @@ def init(docopt_args):
         nons.non_db(Args.search_string, Config.episode_display_count)
 
     elif Args.editdbinfo:
-        edit_db(Args['SHOW_NAME'])
+        edit_db(Args.show_name)
 
     elif Args.providers:
         providers = Config.providers
