@@ -1,6 +1,7 @@
 import sqlite3
 from Series import Series
 from tv_config import Config
+import tv_util
 
 
 class AllSeries:
@@ -57,7 +58,7 @@ class AllSeries:
             sqlfilter,
         )
         conn = sqlite3.connect(Config.db_file)
-        conn.row_factory = self.dict_factory
+        conn.row_factory = tv_util.dict_factory
         curs = conn.cursor()
         ddata = curs.execute(sql)
         data = []
@@ -67,11 +68,3 @@ class AllSeries:
         conn.close()
         return data
 
-    @staticmethod
-    def dict_factory(cursor, row):
-        """Changes the data returned from the db from a
-        tupple to a dictionary"""
-        d = {}
-        for idx, col in enumerate(cursor.description):
-            d[col[0]] = row[idx]
-        return d

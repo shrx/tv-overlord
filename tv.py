@@ -39,7 +39,6 @@ Options:
   --no-color        Don't use color in output. Useful if output is to be
                     used in email or text file.
 """
-
 import datetime
 import os
 import sqlite3
@@ -53,12 +52,11 @@ from AllSeries import AllSeries
 from ConsoleInput import ask_user as ask
 from Series import Series
 from tv_config import Config
-from tv_util import FancyPrint
+from tv_util import FancyPrint, dict_factory
 from Util import U
 
 
 def edit_db(search_str):
-    print '>>>>'
     sql = 'SELECT * FROM shows WHERE name=:search'
     conn = sqlite3.connect(Config.db_file)
     conn.row_factory = dict_factory
@@ -131,7 +129,6 @@ def edit_db(search_str):
 
     conn.commit()
     conn.close()
-
 
 def init(docopt_args):
     class Args:

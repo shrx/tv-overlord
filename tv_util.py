@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-
 import os
 import sys
 import urllib2
@@ -7,6 +6,15 @@ import json
 
 from Util import U
 from tv_config import Config
+
+
+def dict_factory(cursor, row):
+    """Changes the data returned from the db from a
+    tupple to a dictionary"""
+    d = {}
+    for idx, col in enumerate(cursor.description):
+        d[col[0]] = row[idx]
+    return d
 
 
 class FancyPrint:
@@ -101,4 +109,3 @@ class RT:
 if __name__ == '__main__':
 
     pass
-
