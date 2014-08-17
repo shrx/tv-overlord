@@ -113,7 +113,7 @@ class Series:
             series = tv[self.db_name]
         except tvdb_api.tvdb_shownotfound:
             print 'Show not found: %s' % self.db_name
-            return
+            exit()
         except tvdb_api.tvdb_error as e_msg:
             print '\n'
             print 'Error: %s' % self.db_name
