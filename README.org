@@ -41,7 +41,7 @@ can take a look at making it work or alternatively send me a pull request.
 
 *** Dependencies
 
-TV Downloader requires four additional python libraries (not part of
+TV Downloader requires five additional python libraries (not part of
 the standard packages) to be installed:
   1. *tvdb_api* - [[https://github.com/dbr/tvdb_api]] \\
      Python library to access the thetvdb.com api
@@ -51,7 +51,14 @@ the standard packages) to be installed:
      Python library used to scrap thepiratebay.org since they don't have an api
   4. *Feedparser* - https://pypi.python.org/pypi/feedparser \\
      For sites that provide an xml api this library is used to parse them
+  5. *Docopt* - [[http://docopt.org/]] \\
+     The best library for handling command line arguments
 
+Note: install python-dateutil
+Traceback (most recent call last):
+  File "./tv.py", line 48, in <module>
+    from dateutil import parser as date_parser
+ImportError: No module named dateutil
 
 *** Install steps
 
@@ -59,16 +66,17 @@ the standard packages) to be installed:
   2. =pip install beautifulsoup4=
   3. =pip install feedparser=
   4. =pip install requests=
-  5. Create a dir somewhere and clone this repository: \\
+  5. =pip install docopt=
+  6. Create a dir somewhere and clone this repository: \\
      =git clone https://github.com/smmcg/tv-downloader.git=
-  6. Put the dir on your $PATH or symlink tv.py to a dir that is
+  7. Put the dir on your $PATH or symlink tv.py to a dir that is
      on the path.
      (I have it symlinked to =tv= in a bin dir thats on the path)
-  7. type: =tv.py= \\
+  8. type: =tv.py= \\
      The first time its run, it will ask to create the
      config dir.  Type =Y= to allow it.  The config directory will be
      created in your home dir called =.tv-downloader/=
-  8. Type =tv.py addnew "someshow";= to start. \\
+  9. Type =tv.py addnew "someshow";= to start. \\
      For example: =tv.py addnew 'some tv show name';=
 
 

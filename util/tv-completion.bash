@@ -1,5 +1,13 @@
 #!/usr/bin/env bash
 
+# the easiest way to use this, is to source this in your .bashrc:
+# source <path to tv-completion dir>/tv-completion.bash
+# eg:
+# source ~/projects/tv-downloader/src/util/tv-completion.bash
+#
+# or you can install this in you system's bash completion dir,
+# which varies depending on your system
+
 _tv()
 {
 	local cur prev all_options opts commands
@@ -44,11 +52,3 @@ _tv()
 	fi
 }
 complete -F _tv tv
-
-# the easiest way to use this, is to source this in your .bashrc:
-# source <path to tv-completion dir>/tv-completion.bash
-# eg:
-# source ~/projects/tv-downloader/src/util/tv-completion.bash
-#
-# or you can install this in you system's bash completion dir,
-# which varies depending on your system

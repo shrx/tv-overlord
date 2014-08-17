@@ -1,4 +1,9 @@
-#!/usr/bin/python
+"""
+A collection of random utility functions
+
+To see some simple tests, run:
+$ python Util.py
+"""
 
 import random
 import ctypes
@@ -10,7 +15,7 @@ import unicodedata
 
 
 class U:
-    """Utility class containing usefull stuff"""
+    """Utility class containing useful stuff"""
 
     __esc = "[%im"
 
@@ -43,10 +48,8 @@ class U:
 
     __reset = __esc % 0
 
-
     @staticmethod
     def fg_color(color, string):
-
         if color == "black":
             string = U.__blackf + string
         if color == "blue":
@@ -66,18 +69,10 @@ class U:
 
         return string + U.__reset
 
-
     @staticmethod
     def effects(effects, string):
         fmt_str = []
         for effect in effects:
-            # if effect == 'boldon':
-            # fmt_str += U.__boldon
-            # if effect == 'ulon':
-            # fmt_str += U.__ulon
-            # if effect == 'yellowf':
-            # fmt_str += U.__yellowf
-
             if effect == 'blackf':
                 fmt_str.append(U.__blackf)
             if effect == 'bluef':
@@ -129,7 +124,6 @@ class U:
 
         return ''.join(fmt_str) + string + U.__reset
 
-
     @staticmethod
     def hi_color(string, foreground=None, background=None):
         # accept a range from 16 to 231
@@ -145,98 +139,12 @@ class U:
             background_pat = '[48;5;%sm' % background
         reset = '[0m'
 
-        # print foreground_pat, type(foreground_pat)
-        # print type(background_pat)
-        # print '---', string, '---'
-        # print (type (reset))
-
         ret_str = foreground_pat + background_pat + string + reset
         return ret_str
 
-
     @staticmethod
-    def wr(*msg):
-
-        print U.pretty_format(*msg)
-
-
-    @staticmethod
-    def is_windows_console():
-
-        # Try and determine console type
-        try:
-            h = ctypes.windll.kernel32.GetStdHandle(-12)
-            csbi = ctypes.create_string_buffer(22)
-            res = ctypes.windll.kernel32.GetConsoleScreenBufferInfo(h, csbi)
-
-            if res:
-                is_console = True
-                # import struct
-                # (bufx, bufy, curx, cury, wattr,
-                # left, top, right, bottom, maxx, maxy) = struct.unpack("hhhhHhhhhhh", csbi.raw)
-                # sizex = right - left + 1
-                # sizey = bottom - top + 1
-            else:
-                is_console = False
-                # sizex, sizey = 80, 25 # can't determine actual size - return default values
-        except:
-            is_console = False
-
-        return is_console
-
-
-    @staticmethod
-    def pretty_format(*msg):
-
-        if U.is_windows_console():
-            sep = ' | '
-            dict_sep = ':'
-        else:
-            sep = U.__redf + '|' + U.__reset
-            dict_sep = U.__redf + ':' + U.__reset
-
-        ret_list = []
-        for val in msg:
-            if type(val) in (str, unicode):
-                ret_list.append(val.encode("utf-8"))
-
-            elif type(val) == int:
-                ret_list.append(str(val))
-
-            elif type(val) in (tuple, list):
-                for val2 in val:
-                    ret_list.append(U.pretty_format(val2))
-
-            elif type(val) == dict:
-                for val2 in val:
-                    ret_list.append(
-                        U.pretty_format(
-                            val2 + dict_sep + str(val[val2])))
-
-            else:
-                ret_list.append(val)
-                # print U.error (type (val))
-
-        return sep.join(ret_list)
-
-
-    @staticmethod
-    def error(msg="No error message"):
-        if U.is_windows_console():
-            print "UTIL ERROR:", msg
-        else:
-            print U.__redb + "UTIL ERROR:" + U.__reset, msg
-        exit()
-
-
-    @staticmethod
-    def stop(msg="[Program halted]"):
-        if U.is_windows_console():
-            print msg
-        else:
-            print U.__greenb + msg + U.__reset
-        exit()
-
+    def is_odd(val):
+        return val % 2 and True or False
 
     @staticmethod
     def snip(text, length):
@@ -252,27 +160,9 @@ class U:
         short_mid = length / 2
         start = text[0: short_mid]
         end = text[short_mid + end_half - short_mid * 2: len(text)]
-
-        if U.is_windows_console():
-            color_sep = sep
-        else:
-            color_sep = U.__greenf + U.__boldon + sep + U.__reset
+        color_sep = U.__greenf + U.__boldon + sep + U.__reset
 
         return start + color_sep + end
-
-
-    @staticmethod
-    def is_odd(val):
-        return val % 2 and True or False
-
-
-    @staticmethod
-    def randomize_sequence(l):
-        length = len(l)
-        for i in range(length):
-            j = random.randrange(i, length)
-            l[i], l[j] = l[j], l[i]
-
 
     @staticmethod
     def pretty_filesize(file_bytes):
@@ -294,126 +184,16 @@ class U:
         return size
 
 
-class SpinCursor(threading.Thread):
-    """
-    A console spin cursor class
-    http://aspn.activestate.com/ASPN/Cookbook/Python/Recipe/534142
-
-    Use the SpinCursor class to indicate that your program is busy
-    doing something. The cursor can be customized to set its min spin
-    count, max spin count and number of spins per second.
-
-    Example Usage...
-
-    # This will spin 5 times even if the data arrives early...
-    spin = SpinCursor (minspin=5, msg="Waiting for data...")
-    spin.start()
-
-    if data_arrived():
-    spin.join()
-
-    # This will spin only during the waiting time...
-    spin = SpinCursor (msg="Waiting for data...")
-    spin.start()
-
-    if data_arrived():
-    spin.stop()
-
-    # This will spin really fast...!
-    spin = SpinCursor (msg="I am really busy...", speed=50)
-    spin.start()
-
-    """
-
-
-    def __init__(self, msg='', maxspin=0, minspin=10, speed=5):
-
-        # Count of a spin
-        self.count = 0
-        self.out = sys.stdout
-        self.flag = False
-        self.max = maxspin
-        self.min = minspin
-        # Any message to print first ?
-        self.msg = msg
-        # Complete printed string
-        self.string = ''
-        # Speed is given as number of spins a second
-        # Use it to calculate spin wait time
-        self.waittime = 1.0 / float(speed * 4)
-        if os.name == 'posix':
-            self.spinchars = (unicodedata.lookup('FIGURE DASH'), u'\\ ', u'| ', u'/ ')
-            self.spinchars = (u'-', u'\\ ', u'| ', u'/ ')
-        else:
-            # The unicode dash character does not show
-            # up properly in Windows console.
-            self.spinchars = (u'-', u'\\ ', u'| ', u'/ ')
-
-        threading.Thread.__init__(self, None, None, "Spin Thread")
-
-
-    def spin(self):
-
-        """ Perform a single spin """
-
-        for x in self.spinchars:
-            self.string = self.msg + " " + x + "\r"
-            self.out.write(self.string.encode('utf-8'))
-            self.out.flush()
-            time.sleep(self.waittime)
-
-
-    def run(self):
-
-        while (not self.flag) and ((self.count < self.min) or (self.count < self.max)):
-            self.spin()
-            self.count += 1
-
-        # Clean up display...
-        self.out.write(" " * (len(self.string) + 1))
-
-
-    def stop(self):
-
-        self.flag = True
-
-
 if __name__ == '__main__':
 
     line = "-" * 50
 
-    print "\nTesting U.is_windows_console\n", line
-
-    print "Is windows console?", U.is_windows_console()
-
-    print "\nTesting U.wr\n", line
-
-    U.wr("single string")
-    U.wr("two strings", "another")
-    U.wr("a bunch", "a", "b", "c", "d", "e")
-    U.wr("numbers:", 100, 200, 300)
-    U.wr(("tuple", "tuple 2"))
-    U.wr(["list", "list 2"])
-    U.wr({"key 1": "key 1 value", "key 2": "key 2 value"})
-    U.wr("A complex one", ("Nested", ("one", 2, 3)), [1, 2, {"dict1": "dict1_val", "dict2": "dict2_val"}, 3])
-
     print "\nTesting U.snip -- U.snip (<text>, <length>)\n", line
 
     seq = "abcdefghijklmnopqrstuvwxyz"
-    length = 13
-    for i in range(30):
-        U.wr(U.snip(seq[0:i], length).ljust(length), "<")
-
-        for i in range(20, 30):
-            print U.snip(seq, i)
-
-    print "\nTesting U.randomize_sequence -- U.randomize_sequence (<seq>)\n", line
-
-    seq = range(10)
-    print seq, '\n'
-    for x in range(5):
-        U.randomize_sequence(seq)
-        print seq
+    for j in (13, 14):
+        for i in range(10, 20):
+            print "%s<" % (U.snip(seq[0:i], j).ljust(j))
 
     print '\nTesting U.hi_color() -- U.hi_color (<text>, <foreground>, <background>)\n', line
 
@@ -441,29 +221,18 @@ if __name__ == '__main__':
                'italicon', 'ulon']
 
     for eff in effects:
-        print U.effects([eff], eff)
+        print U.effects([eff], eff),
+    print
+    print
 
-    print ''
     print 'Combining effects:'
     for e in range(10):
-        U.randomize_sequence(effects)
-        print U.effects([effects[0], effects[1], effects[2]],
-                        '%s %s %s' % (effects[0], effects[1], effects[2]))
+        item1 = random.choice(effects)
+        item2 = random.choice(effects)
+        item3 = random.choice(effects)
+        print U.effects([item1, item2, item3],
+                        '%s %s %s' % (item1, item2, item3))
 
     print ''
     print U.effects(['boldon', 'ulon', 'greenf'],
                     'This text should have bold, underline, and green text')
-
-
-
-
-
-
-
-    # # print '\nTest SpinCursor\n', line
-    ##
-    ## # spin = SpinCursor (msg="Spinning...", minspin=5, speed=5)
-    ## # spin.start()
-    ##
-    ## spin = SpinCursor (msg="Spinning another time", minspin=10, speed=2)
-    ## spin.start()

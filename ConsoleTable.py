@@ -1,3 +1,8 @@
+
+"""
+Build a table to display data in a terminal.
+"""
+
 import os, string
 from collections import namedtuple
 from ConsoleInput import ask_user
@@ -8,26 +13,26 @@ class ConsoleTable:
     def __init__(self, data):
         """Build a table to display data in the terminal
 
-        :param data: An array of arrays.
+        @param data: An array of arrays.
+        data must be in this format::
 
-        data must be in this format:
-        [
-          # TABLE DESCRIPTION
           [
-            'Title string',                        # title string
-            ['title', 'title', 'title', 'title'],  # titles of columns
-            [10, 5, 0, 20],                        # widths of columns, 0 is flex
-            ['<', '>', '=', '>']                   # alignments
-          ],
+            # TABLE DESCRIPTION LIST:
+            [
+              'Title string',                        # title string
+              ['title', 'title', 'title', 'title'],  # titles of columns
+              [10, 5, 0, 20],                        # widths of columns, 0 is flex
+              ['<', '>', '=', '>']                   # alignments
+            ],
 
-          # TABLE DATA.  Last one is what gets returned
-          # after the user selects a row.
-          [
-            ['first', 'second', 'third', 'forth', 'key field'],
-            ['first', 'second', 'third', 'forth', 'key field'],
-            ['first', 'second', 'third', 'forth', 'key field']
+            # TABLE DATA LIST.  Last one is what gets returned
+            # after the user selects a row.
+            [
+              ['first', 'second', 'third', 'forth', 'key field'],
+              ['first', 'second', 'third', 'forth', 'key field'],
+              ['first', 'second', 'third', 'forth', 'key field']
+            ]
           ]
-        ]
         """
 
         console_rows, console_columns = os.popen('stty size', 'r').read().split()
