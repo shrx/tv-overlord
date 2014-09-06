@@ -66,9 +66,18 @@ class Tracking(object):
         return rowsdata
 
 if __name__ == '__main__':
+    import dateutil.parser
+
     t = Tracking()
     rows = t.display()
     print 'length:', len(rows)
     for i in rows:
-        dt = datetime.datetime
-        print i[0], '-', i[1], 'S%sE%s' % (i[2].rjust(2, '0'), i[3].rjust(2, '0'))
+        date = i[0]          # date
+        d = dateutil.parser.parse(date)
+        d = d.strftime("%Y-%m-%d")
+        print d, '-',
+        print i[1],          # show name
+        if i[2] and i[3]:    # season and episode
+            print 'S%sE%s' % (i[2].rjust(2, '0'), i[3].rjust(2, '0'))
+        else:
+            print '(non db show)'
