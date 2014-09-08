@@ -191,6 +191,7 @@ class Series:
         if len(missing) == 0:
             return False
         ret = '%s' % (U.effects(['boldon', 'greenf'], self.db_name))
+        ret += '  %s, %s' % (self.airs_dayofweek, self.airs_time)
         ret += '\n'
         indent = '    '
         missing_list = []
@@ -216,7 +217,7 @@ class Series:
         print '%sFirst aired: %s' % (indent, self.firstaired)
         print '%sStatus: %s' % (indent, self.status)
         print
-
+        print self.airs_time, self.airs_dayofweek
         correct = ask('Is this the correct show? [y/n]')
 
         if correct == 'y':
@@ -255,12 +256,17 @@ class Series:
                 split_date = b_date.split('-')
                 broadcast_date = datetime.date(
                     int(split_date[0]), int(split_date[1]), int(split_date[2]))
-                if broadcast_date >= today:  # unaired future date
+                #if broadcast_date >= today:  # unaired future date
+                    #break
+                if broadcast_date > today:  # unaired future date
                     break
 
                 last_season = self.series[i][j]['seasonnumber']
                 last_episode = self.series[i][j]['episodenumber']
                 last_broadcast = self.se_ep(last_season, last_episode)
+                if last_season == '0' or last_episode == '0':
+                    break  # don't display the S00E01 or S05E00 type episodes
+
                 if last_watched < last_broadcast:
                     missing.append({'season': last_season, 'episode': last_episode})
 

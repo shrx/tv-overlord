@@ -42,6 +42,8 @@ class Config:
                     name TEXT,
                     season NUMERIC,
                     episode NUMERIC,
+                    airs_time TEXT,
+                    airs_dayofweek TEXT,
                     ragetv_series_id TEXT
                 );'''
             conn = sqlite3.connect(user_db)
