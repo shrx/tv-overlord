@@ -203,7 +203,7 @@ def init(docopt_args):
         # show we may as well show everything
         if show_name:
             Args.show_all = True
-            Args.synopsys = True
+            Args.synopsis = True
             Args.show_links = True
             all_shows.name_filter(show_name)
 
