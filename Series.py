@@ -191,7 +191,7 @@ class Series:
         if len(missing) == 0:
             return False
         ret = '%s' % (U.effects(['boldon', 'greenf'], self.db_name))
-        ret += '  %s, %s' % (self.airs_dayofweek, self.airs_time)
+        ret += ' - %s, %s' % (self.airs_dayofweek, self.airs_time)
         ret += '\n'
         indent = '    '
         missing_list = []
@@ -248,6 +248,18 @@ class Series:
         if not hasattr(self, 'series'):
             return
 
+        # Check the db_next_episode date and see if
+        # we should check if a show is ready
+        #   IF: a date is in the db and that date is less that today,
+        # THEN: 'return' since its not time yet to check for new episodes
+        if hasattr(self, 'db_next_episode'):
+            next_date = self.db_next_episode.split('-')
+            next_date = datetime.date(
+                int(next_date[0]), int(next_date[1]), int(next_date[2])
+            )
+            if today < next_date:
+                return missing
+
         for i in self.series:  # for each season
             for j in self.series[i]:  # for each episode
                 b_date = self.series[i][j]['firstaired']
@@ -259,18 +271,40 @@ class Series:
                 #if broadcast_date >= today:  # unaired future date
                     #break
                 if broadcast_date > today:  # unaired future date
+                    # since this date is the next future date, put
+                    # this in the db so we can check for the next
+                    # episode at that future date
+                    self.set_next_episode(broadcast_date)
                     break
 
                 last_season = self.series[i][j]['seasonnumber']
                 last_episode = self.series[i][j]['episodenumber']
                 last_broadcast = self.se_ep(last_season, last_episode)
                 if last_season == '0' or last_episode == '0':
-                    break  # don't display the S00E01 or S05E00 type episodes
+                    break  # don't display the S00E01 or S05E00 type special episodes
 
                 if last_watched < last_broadcast:
                     missing.append({'season': last_season, 'episode': last_episode})
 
         return missing
+
+
+    def set_next_episode(self, next_date):
+        #print '>>>', self.series['seriesname'], self.id, next_date, '<<<'
+        #exit()
+
+        #sql = 'UPDATE shows SET next_episode=:next_date WHERE thetvdb_series_id=:tvdb_id'
+        sql = 'UPDATE shows SET next_episode=:next_date WHERE name=:show_name'
+        conn = sqlite3.connect (Config.db_file)
+        curs = conn.cursor()
+        #values = {'next_date': next_date.isoformat(), 'tvdb_id':self.id}
+        values = {'next_date': next_date.isoformat(), 'show_name':self.db_name}
+        # print values
+        # return
+        #print '----', values
+        curs.execute (sql, values)
+        conn.commit()
+        conn.close()
 
 
     def _ask(self, shows, season, episode, display_count):
@@ -308,7 +342,8 @@ class Series:
 
         # save data to Tracking
         tracking = Tracking()
-        tracking.save(self.db_name, season, episode, shows, show_to_dl)
+        if show_to_dl not in ['skip', 'skip_rest', 'mark']:
+            tracking.save(self.db_name, season, episode, shows, show_to_dl)
 
         return show_to_dl
 
