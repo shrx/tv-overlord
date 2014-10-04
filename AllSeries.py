@@ -75,4 +75,3 @@ class AllSeries:
         conn.commit()
         conn.close()
         return data
-

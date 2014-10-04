@@ -42,6 +42,7 @@ class Config:
                     name TEXT,
                     season NUMERIC,
                     episode NUMERIC,
+                    next_episode TEXT,
                     airs_time TEXT,
                     airs_dayofweek TEXT,
                     ragetv_series_id TEXT

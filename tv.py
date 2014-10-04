@@ -380,6 +380,8 @@ def init(docopt_args):
         counter = 1
         season_marker = '-'
         all_series = AllSeries(provider)
+        if Args.sort_by_next:
+            all_series.sort_by_date()
         show_name = Args.show_name
         if show_name:
             all_series.name_filter(show_name)
@@ -417,6 +419,8 @@ def init(docopt_args):
                             before_first = ' ' * days_away
                         broadcast_row = before_first + episode_number
                         first_display_date = False
+                        # set the next episode date in the db while we're here:
+                        series.set_next_episode(broadcast_date.date())
                     else:
                         episode_char_len = len(str(int(episode_number) - 1))
                         broadcast_row = broadcast_row + (
