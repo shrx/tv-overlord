@@ -41,7 +41,7 @@ class AllSeries:
         self.sqlfilter = show_name
 
     def sort_by_date(self):
-        self.sort_field = 'next_episode'
+        self.sort_field = 'next_episode, name'
 
     def _query_db(self, sqlfilter=''):
         if sqlfilter:
