@@ -13,11 +13,15 @@ class AllSeries:
     nameFilter(name)
       A string that used in the sql query to
       select LIKE matches on the show "name" field
+    sort_by_date()
+      Sort the results by date instead of the
+      default 'name'
     """
 
     def __init__(self, provider):
         self.provider = provider
         self.sqlfilter = ''
+        self.sort_field = "replace (name, 'The ', '')"
 
     def __iter__(self):
         self.dbdata = self._query_db(self.sqlfilter)
@@ -35,6 +39,9 @@ class AllSeries:
     def name_filter(self, name):
         show_name = 'name LIKE "%%%s%%"' % name
         self.sqlfilter = show_name
+
+    def sort_by_date(self):
+        self.sort_field = 'next_episode, name'
 
     def _query_db(self, sqlfilter=''):
         if sqlfilter:
@@ -54,8 +61,9 @@ class AllSeries:
                 status='active'
                 %s
             ORDER BY
-                replace (name, 'The ', '');""" % (
+                %s;""" % (
             sqlfilter,
+            self.sort_field
         )
         conn = sqlite3.connect(Config.db_file)
         conn.row_factory = tv_util.dict_factory
