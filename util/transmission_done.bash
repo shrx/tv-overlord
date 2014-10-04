@@ -1,6 +1,10 @@
 #!/usr/bin/env bash
 
-log=~/shows/transmission-dl.log
+debug=false
+if [[ $1 == 'debug' ]]; then
+    debug=true
+fi
+logf=~/shows/transmission-dl.log
 torrentid=$TR_TORRENT_ID
 torrentname=$TR_TORRENT_NAME
 torrentpath=$TR_TORRENT_DIR
@@ -32,29 +36,58 @@ function msg
         terminal-notifier -title 'Video Mover' -message "$1";
 	fi
 }
+function log
+{
+    if [[ $debug = true ]]; then
+        echo $*
+    else
+        echo $* >> $logf
+    fi
+}
 
-echo ' ' >> $log
-echo $(date) '==============' >> $log
+log ' '
+log $(date) '=============='
 
-echo "torrentid:   $torrentid" >> $log
-echo "torrentname: $torrentname" >> $log
-echo "torrentpath: $torrentpath" >> $log
-
+log "torrentid:	  $torrentid"
+log "torrentname: $torrentname"
+log "torrentpath: $torrentpath"
+log "Debugging command:"
+# add a test command to try and debug any
+# weird names that don't get parsed correctly:
+log "\
+export TR_TORRENT_ID='$torrentid'; \
+export TR_TORRENT_NAME='$torrentname'; \
+export TR_TORRENT_DIR='$torrentpath'; \
+./transmission_done.bash debug"
 
 dest=$(echo $torrentname |
-    # 1x11.* or S11E11.*
-    sed 's/[. ]\([[:digit:]]x[[:digit:]]\{2\}\|S[[:digit:]]\{2\}E[[:digit:]]\{2\}\).*//'|
-    sed 's/[. ]/_/g')
+# 1. first remove any extraneous strings that don't fit the pattern
+#    from the torrent name before parsing.  There could end up being
+#    several more here.
+
+    sed 's/\[ www\.torrenting\.com \] - //' |
+
+# 2. Now parse torrent name to get the name of the show.
+
+    # search for this pattern: 1x11.* or S11E11.*
+    # remove from episode and season to the end of string
+    sed 's/[. ]*\([[:digit:]]x[[:digit:]]\{2\}\|S[[:digit:]]\{2\}E[[:digit:]]\{2\}\).*//' |
+    # remove any spaces at start or end of string
+    sed 's/^[[:space:]]\|[[:space:]]$//g' |
+    # convert dots or spaces to underscores
+    sed 's/[. _]\+/_/g')
 
 full_dest=$shows_dir$dest
 
-echo "Destination dir: $full_dest" >> $log
+log "Destination dir: $full_dest"
+
+if [[ $debug == true ]]; then exit; fi
 
 if [ ! -d "$full_dest" ]; then
     if mkdir "$full_dest"; then
-        echo "Creating dir: $dest" >> $log
+        log "Creating dir: $dest"
     else
-        echo "dir NOT created" >> $log
+        log "dir NOT created"
     fi
 fi
 
@@ -63,6 +96,6 @@ if [ -d "$full_dest" ]; then
         msg "Show copied: $torrentname\nTo: $full_dest"
     else
         msg "ERROR copying $torrentname\nTo: $full_dest"
-        echo "ERROR copying $torrentname To: $full_dest" >> $log
+        log "ERROR copying $torrentname To: $full_dest"
     fi
 fi
