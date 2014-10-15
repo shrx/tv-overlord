@@ -268,9 +268,7 @@ class Series:
                 split_date = b_date.split('-')
                 broadcast_date = datetime.date(
                     int(split_date[0]), int(split_date[1]), int(split_date[2]))
-                #if broadcast_date >= today:  # unaired future date
-                    #break
-                if broadcast_date > today:  # unaired future date
+                if broadcast_date >= today:  # unaired future date
                     # since this date is the next future date, put
                     # this in the db so we can check for the next
                     # episode at that future date

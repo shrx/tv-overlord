@@ -70,7 +70,7 @@ if __name__ == '__main__':
 
     t = Tracking()
     rows = t.display()
-    print 'length:', len(rows)
+    print '%s downloaded' % len(rows)
     for i in rows:
         date = i[0]          # date
         d = dateutil.parser.parse(date)
