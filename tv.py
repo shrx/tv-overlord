@@ -4,8 +4,8 @@ r"""Download and manage TV shows
 
 Usage:
   tv
-  tv download    [-n] [-c COUNT] [-l LOCATION] [-p PROVIDER] [SHOW_NAME]
-  tv showmissing [-n]
+  tv download    [-n] [-t] [-c COUNT] [-l LOCATION] [-p PROVIDER] [SHOW_NAME]
+  tv showmissing [-n] [-t]
   tv info        [-n] [-a] [-x] [--ask-inactive] [--show-links] [--synopsis] [SHOW_NAME]
   tv calendar    [-n] [-a] [-x] [--no-color] [--days DAYS] [SHOW_NAME]
   tv addnew SHOW_NAME
@@ -32,6 +32,7 @@ Options:
                     in the config file.
   -a, --show-all    Show all shows including the ones marked inactive
   -x, --sort-by-next  Sort by release date instead of the default alphabetical
+  -t, --today       Show or download today's episodes
   --ask-inactive    Ask to make inactive shows that are cancelled
   --show-links      Show links to IMDB.com and TheTVDb.com for each show
   -s --synopsis     Display the show synopsis
@@ -163,6 +164,7 @@ def init(docopt_args):
         synopsis        = docopt_args['--synopsis']
         days            = docopt_args['--days']
         no_color        = docopt_args['--no-color']
+        today           = docopt_args['--today']
 
 
     if Args.location:
@@ -452,7 +454,7 @@ def init(docopt_args):
     elif Args.showmissing:
         fp = FancyPrint()
         for series in AllSeries(provider):
-            if series.is_missing():
+            if series.is_missing(Args.today):
                 fp.standard_print(series.show_missing())
             else:
                 fp.fancy_print('Show up to date: %s' % series.db_name)
@@ -464,7 +466,7 @@ def init(docopt_args):
         if show_name:
             all_series.name_filter(show_name)
         for series in all_series:
-            series.download_missing(Config.episode_display_count)
+            series.download_missing(Config.episode_display_count, Args.today)
 
     elif Args.addnew:
         new_show = Series(provider, show_type='new')

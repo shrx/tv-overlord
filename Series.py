@@ -126,8 +126,8 @@ class Series:
         self.series = series
 
 
-    def download_missing(self, episode_display_count):
-        missing = self._get_missing()
+    def download_missing(self, episode_display_count, download_today=False):
+        missing = self._get_missing(download_today)
         if self.db_search_engine_name:
             search_title = self.db_search_engine_name
         else:
@@ -172,8 +172,8 @@ class Series:
             self._update_db(season=episode['season'], episode=episode['episode'])
 
 
-    def is_missing(self):
-        missing = self._get_missing()
+    def is_missing(self, download_today=False):
+        missing = self._get_missing(download_today)
         self.missing = missing
 
         ret = True
@@ -236,7 +236,7 @@ class Series:
         self._download(show_data)
 
 
-    def _get_missing(self):
+    def _get_missing(self, download_today=False):
         """Returns a list of missing episodes"""
         missing = []
         today = datetime.date.today()
@@ -257,7 +257,7 @@ class Series:
             next_date = datetime.date(
                 int(next_date[0]), int(next_date[1]), int(next_date[2])
             )
-            if today < next_date:
+            if today <= next_date:
                 return missing
 
         for i in self.series:  # for each season
@@ -268,12 +268,20 @@ class Series:
                 split_date = b_date.split('-')
                 broadcast_date = datetime.date(
                     int(split_date[0]), int(split_date[1]), int(split_date[2]))
-                if broadcast_date >= today:  # unaired future date
-                    # since this date is the next future date, put
-                    # this in the db so we can check for the next
-                    # episode at that future date
-                    self.set_next_episode(broadcast_date)
-                    break
+
+                if download_today == False:
+                    # download yesterday's and older shows
+                    if broadcast_date >= today:  # unaired future date
+                        # since this date is the next future date, put
+                        # this in the db so we can check for the next
+                        # episode at that future date
+                        self.set_next_episode(broadcast_date)
+                        break
+                else:
+                    # download today's and older shows
+                    if broadcast_date > today:  # unaired future date
+                        self.set_next_episode(broadcast_date)
+                        break
 
                 last_season = self.series[i][j]['seasonnumber']
                 last_episode = self.series[i][j]['episodenumber']
