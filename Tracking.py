@@ -67,17 +67,36 @@ class Tracking(object):
 
 if __name__ == '__main__':
     import dateutil.parser
+    import json
+    from pprint import pprint as pp
+
+    all_show_data = []
 
     t = Tracking()
     rows = t.display()
     print '%s downloaded' % len(rows)
     for i in rows:
-        date = i[0]          # date
+        show_data = {}
+        date = i[0]                               # date
         d = dateutil.parser.parse(date)
         d = d.strftime("%Y-%m-%d")
-        print d, '-',
-        print i[1],          # show name
-        if i[2] and i[3]:    # season and episode
-            print 'S%sE%s' % (i[2].rjust(2, '0'), i[3].rjust(2, '0'))
+        show_data['date'] = d
+        show_data['show_name'] = i[1]             # show name
+        if i[2] and i[3]:                         # season and episode
+            show_data['episode_number'] = 'S%sE%s' % (i[2].rjust(2, '0'), i[3].rjust(2, '0'))
         else:
-            print '(non db show)'
+            show_data['episode_number'] = '(non db show)'
+
+        data = json.loads(i[4])
+        torrent_count = 0
+        for torrent in data[1]:
+            torrent_count += int(torrent[3])
+        show_data['torrent_count'] = torrent_count
+        all_show_data.append(show_data)
+
+    sorted_data = sorted(all_show_data, key=lambda k: k['torrent_count'])
+    for i in sorted_data:
+        print i['show_name'].ljust(20),
+        print i['episode_number'],
+        print i['date'],
+        print '-', i['torrent_count']

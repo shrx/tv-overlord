@@ -28,12 +28,12 @@ function msg
 		elif [ -e icon2 ]; then
 			icon=$icon2
 		fi
-		# notify-send --hint=int:transient:1 --icon=$icon 'Video Mover' "$1"
-		notify-send --icon=$icon 'Video Mover' "$1"
+		# notify-send --hint=int:transient:1 --icon=$icon 'Video Mover' "$2"
+		notify-send --icon=$icon 'Video Mover' "$2"
 	elif kdialog --help &> /dev/null; then
-		kdialog --title 'Video Mover' --passivepopup "$1" 10;
+		kdialog --title 'Video Mover' --passivepopup "$2" 10;
     elif type terminal-notifier; then
-        terminal-notifier -title 'Video Mover' -message "$1";
+        terminal-notifier -title "$1" -message "$2";
 	fi
 }
 function log
@@ -93,9 +93,11 @@ fi
 
 if [ -d "$full_dest" ]; then
     if cp -r "$torrentpath/$torrentname" "$full_dest"; then
-        msg "Show copied: $torrentname\nTo: $full_dest"
+        msg "$dest" "Show: $torrentname
+To: $full_dest"
     else
-        msg "ERROR copying $torrentname\nTo: $full_dest"
+        msg "$dest" "ERROR copying $torrentname
+To: $full_dest"
         log "ERROR copying $torrentname To: $full_dest"
     fi
 fi
