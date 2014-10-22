@@ -1,11 +1,9 @@
-import sqlite3
 import json
 import datetime
-from tv_config import Config
+from DB import SqlLiteDB
 
 
-class Tracking(object):
-
+class Tracking(SqlLiteDB):
     def __init__(self):
         config = Config()
 
@@ -48,22 +46,6 @@ class Tracking(object):
         rows = self.run_sql(sql)
         return rows
 
-    def run_sql(self, sql, values=False):
-        conn = sqlite3.connect(Config.user_db)
-        curs = conn.cursor()
-        if values:
-            results = curs.execute(sql, values)
-        else:
-            results = curs.execute(sql)
-        rowsdata = []
-
-        if results:
-            for i in results:
-                rowsdata.append(i)
-
-        conn.commit()
-        conn.close()
-        return rowsdata
 
 if __name__ == '__main__':
     import dateutil.parser
