@@ -5,7 +5,6 @@ from DB import SqlLiteDB
 
 class Tracking(SqlLiteDB):
     def __init__(self):
-        config = Config()
 
         sql = '''
             CREATE TABLE IF NOT EXISTS tracking (
@@ -19,6 +18,7 @@ class Tracking(SqlLiteDB):
         self.run_sql(sql)
 
     def save(self, show_title, season, episode, data, chosen):
+        data, chosen = self._remove_urls(data, chosen)
         data = json.dumps(data)
         now = datetime.datetime.today()
         date = now.isoformat()
@@ -38,6 +38,20 @@ class Tracking(SqlLiteDB):
         }
 
         self.run_sql(sql, values)
+
+    def _remove_urls(self, data, chosen):
+        '''Remove the magnet url's from the data since they have no use
+        for data analysis and they take up to much room in the db
+        '''
+        from pprint import pprint as pp
+
+        for i in range(len(data[1])):
+            url = data[1][i][4]
+            if url == chosen:
+                chosen = i
+            data[1][i][4] = i
+
+        return data, chosen
 
     def display(self):
         sql = '''
