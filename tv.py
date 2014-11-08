@@ -166,7 +166,6 @@ def init(docopt_args):
         no_color        = docopt_args['--no-color']
         today           = docopt_args['--today']
 
-
     if Args.location:
         Config.staging = Args['--location']
     if Args.no_cache:
@@ -487,4 +486,8 @@ def init(docopt_args):
 
 if __name__ == '__main__':
     docopt_args = docopt(__doc__, version='0.1')
-    init(docopt_args)
+
+    try:
+        init(docopt_args)
+    except KeyboardInterrupt:
+        print '\b\b<Quitting TV>'
