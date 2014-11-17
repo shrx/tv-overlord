@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 import sys
-from subprocess import Popen
+import subprocess
 import os
 import platform
 
@@ -84,16 +84,16 @@ class Search(object):
                 # with magnet links.
                 desktop = os.environ.get('DESKTOP_SESSION')
                 if desktop == "gnome":
-                    Popen(["gvfs-open", chosen_show])
+                    subprocess.Popen(["gvfs-open", chosen_show])
                 elif desktop == 'kde':
-                    Popen(["kioclient", chosen_show])
+                    subprocess.Popen(["kioclient", chosen_show])
                 elif desktop == 'ubuntu':
-                    Popen(['xdg-open', chosen_show])
+                    subprocess.Popen(['xdg-open', chosen_show])
                 else:
                     unknown_enviroment = os.environ.get('DESKTOP_SESSION')
                     print 'Unknown enviroment:', unknown_enviroment
             elif platform.system() == 'Darwin':
-                Popen(["open", "--background", chosen_show])
+                subprocess.Popen(["open", "--background", chosen_show])
             else:
                 unknown_system = platform.platform()
                 print 'Unknown system:', unknown_system
