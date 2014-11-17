@@ -43,8 +43,6 @@ class Tracking(SqlLiteDB):
         '''Remove the magnet url's from the data since they have no use
         for data analysis and they take up to much room in the db
         '''
-        from pprint import pprint as pp
-
         for i in range(len(data[1])):
             url = data[1][i][4]
             if url == chosen:
@@ -57,7 +55,7 @@ class Tracking(SqlLiteDB):
         sql = '''
             SELECT * FROM tracking;
         '''
-        rows = self.run_sql(sql)
+        rows = self.run_sql(sql, named_fields=True)
         return rows
 
 
