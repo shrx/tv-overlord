@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 import sys
-from subprocess import Popen
+import subprocess
 import os
 import platform
 
@@ -83,17 +83,19 @@ class Search(object):
                 # gvfs-open will open whatever application is associated
                 # with magnet links.
                 desktop = os.environ.get('DESKTOP_SESSION')
-                if desktop == "gnome":
-                    Popen(["gvfs-open", chosen_show])
-                elif desktop == 'kde':
-                    Popen(["kioclient", chosen_show])
-                elif desktop == 'ubuntu':
-                    Popen(['xdg-open', chosen_show])
-                else:
-                    unknown_enviroment = os.environ.get('DESKTOP_SESSION')
+                desktop_tools = {"gnome": "gvfs-open",
+                                 "kde": "kioclient",
+                                 "ubuntu": "xdg-open"}
+                try:
+                    out = subprocess.check_output([desktop_tools[desktop], chosen_show], stderr=sp.PIPE)
+                except KeyError:
                     print 'Unknown enviroment:', unknown_enviroment
+                    exit()
+                except OSError:
+                    print 'You do not seem to have a bittorent client installed'
+                    exit()
             elif platform.system() == 'Darwin':
-                Popen(["open", "--background", chosen_show])
+                subprocess.Popen(["open", "--background", chosen_show])
             else:
                 unknown_system = platform.platform()
                 print 'Unknown system:', unknown_system
