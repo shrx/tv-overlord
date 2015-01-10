@@ -44,7 +44,11 @@ class Provider (object):
             search_string = urllib.quote(search)
             url = '%s/search/%s/0/7/0' % (self.provider_url, search_string)
             urls += '%s/0/7/0 ' % search_string
-            r = requests.get(url)
+            try:
+                r = requests.get(url)
+            except requests.exceptions.ConnectionError:
+                print '\nThe PirateBay is unavailable'
+                exit()
             html = r.content
             soup = BeautifulSoup(html)
 
