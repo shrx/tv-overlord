@@ -8,12 +8,13 @@ class Tracking(SqlLiteDB):
 
         sql = '''
             CREATE TABLE IF NOT EXISTS tracking (
-                date TEXT,
+                download_date TEXT,
                 show_title TEXT,
                 season TEXT,
                 episode TEXT,
-                data TEXT,
-                chosen TEXT
+                download_data TEXT,
+                chosen TEXT,
+                torrent_hash TEXT
             );'''
         self.run_sql(sql)
 
@@ -24,7 +25,7 @@ class Tracking(SqlLiteDB):
         date = now.isoformat()
         sql = '''
             INSERT INTO tracking(
-                date, show_title, season, episode, data, chosen)
+                download_date, show_title, season, episode, download_data, chosen)
             VALUES(
                 :date, :show_title, :season, :episode, :data, :chosen);'''
 
