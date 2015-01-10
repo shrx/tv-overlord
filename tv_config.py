@@ -46,7 +46,17 @@ class Config:
                     airs_time TEXT,
                     airs_dayofweek TEXT,
                     ragetv_series_id TEXT
-                );'''
+                );
+                CREATE TABLE tracking (
+                    download_date TEXT,
+                    show_title TEXT,
+                    season TEXT,
+                    episode TEXT,
+                    download_data TEXT,
+                    chosen TEXT,
+                    torrent_hash TEXT
+                );
+                '''
             conn = sqlite3.connect(user_db)
             curs = conn.cursor()
             curs.execute(sql)
@@ -60,6 +70,14 @@ class Config:
     cfg = ConfigParser.ConfigParser(allow_no_value=True)
     cfg.read(user_config)
 
+    # optional fields
+    try:
+        # [App Settings]
+        ip = cfg.get('App Settings', 'ip')
+    except ConfigParser.NoOptionError as err_msg:
+        ip = False
+
+    # required fields
     providers = []
     try:
         # [File Locations]

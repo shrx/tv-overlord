@@ -55,6 +55,7 @@ from Series import Series
 from tv_config import Config
 from tv_util import FancyPrint, dict_factory
 from Util import U
+from location import Location
 
 
 def edit_db(search_str):
@@ -462,6 +463,11 @@ def init(docopt_args):
     elif Args.download:
         all_series = AllSeries(provider)
         show_name = Args.show_name
+        if Config.ip:
+            L = Location()
+            if L.ips_match(Config.ip):
+                print '%s not connected to VPN' % (U.effects(['redb', 'boldon'], ' Warning: '))
+                exit()
         if show_name:
             all_series.name_filter(show_name)
         for series in all_series:
