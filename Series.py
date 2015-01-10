@@ -113,13 +113,18 @@ class Series:
             series = tv[self.db_name]
         except tvdb_api.tvdb_shownotfound:
             print 'Show not found: %s' % self.db_name
-            exit()
+            #exit()
+            return
         except tvdb_api.tvdb_error as e_msg:
             print '\n'
             print 'Error: %s' % self.db_name
             print '-----------------------------'
             print e_msg
             return
+        except UnboundLocalError as e:
+            print '+++++++++++++++++++++++++'
+            print e
+            print '+++++++++++++++++++++++++'
 
         for i in series.data:
             setattr(self, i, series.data[i])
