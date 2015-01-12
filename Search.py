@@ -37,6 +37,7 @@ class Search(object):
 
         [
           [
+            ['Title string', 'search url'],
             [head1, head2, head3, id],
             [head1-width, head2-width, head3-width],
             [head1-alignment, head2-alignment, head3-alignment]

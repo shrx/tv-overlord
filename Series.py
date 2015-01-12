@@ -331,10 +331,10 @@ class Series:
         }
         if season and episode:
             show_title = '%s %s ' % (self.db_name, self.se_ep(season, episode))
-            url = '  %s' % (shows[0][0])
+            url = '  %s' % (shows[0][0][1])
         else:
-            show_title = self.db_name
-            url = ''
+            show_title = '%s  ' % shows[0][0][0]
+            url = shows[0][0][1]
 
         show_title_color = U.hi_color(show_title, foreground=color['title_fg'], background=color['title_bg'])
         show_title_color = U.effects(['boldon'], show_title_color)

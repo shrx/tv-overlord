@@ -19,7 +19,7 @@ class ConsoleTable:
           [
             # TABLE DESCRIPTION LIST:
             [
-              'Title string',                        # title string
+              ['Title string', 'search url'],        # title string
               ['title', 'title', 'title', 'title'],  # titles of columns
               [10, 5, 0, 20],                        # widths of columns, 0 is flex
               ['<', '>', '=', '>']                   # alignments
