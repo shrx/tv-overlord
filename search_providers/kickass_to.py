@@ -19,8 +19,10 @@ class Provider (object):
     def se_ep (season, episode, show_title):
         season_just = str (season).rjust (2, '0')
         episode = str (episode).rjust (2, '0')
-        fixed = '"%s S%sE%s" OR "%s %sx%s"' % (
-            show_title, season_just, episode, show_title, season, episode)
+        #fixed = '"%s S%sE%s" OR "%s %sx%s"' % (
+            #show_title, season_just, episode, show_title, season, episode)
+        fixed = '%s S%sE%s' % (
+            show_title, season_just, episode)
 
         return fixed
 
