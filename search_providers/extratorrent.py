@@ -56,13 +56,16 @@ class Provider(object):
             magnet_url = 'magnet:?xt=urn:btih:{}&tr=udp%3A%2F%2Ftracker.openbittorrent.com&tr=udp%3A%2F%2Ftracker.publicbt.com'
             magnet_hash = show['info_hash']
             magnet = magnet_url.format(magnet_hash)
+            seeds = show['seeders']
+            if seeds == '---':
+                seeds = '0'
 
             show_data.append([
-                title,                  # title
-                size,                   # show size
-                date,                   # date
-                show['seeders'],        # seeds
-                magnet                  # id (download magnet url)
+                title,
+                size,
+                date,
+                seeds,
+                magnet
             ])
 
         show_data.sort(key=lambda x: int(x[3]), reverse=True) # sort by seeds
