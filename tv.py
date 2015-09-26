@@ -4,7 +4,7 @@ r"""Download and manage TV shows
 
 Usage:
   tv
-  tv download    [-n] [-t] [-c COUNT] [-l LOCATION] [-p PROVIDER] [SHOW_NAME]
+  tv download    [-n] [-t] [-i] [-c COUNT] [-l LOCATION] [-p PROVIDER] [SHOW_NAME]
   tv showmissing [-n] [-t]
   tv info        [-n] [-a] [-x] [--ask-inactive] [--show-links] [--synopsis] [SHOW_NAME]
   tv calendar    [-n] [-a] [-x] [--no-color] [--days DAYS] [SHOW_NAME]
@@ -30,6 +30,8 @@ Options:
   -p SEARCH_PROVIDER, --search-provider SEARCH_PROVIDER
                     Specify a different search engine instead of the one
                     in the config file.
+  -i, --ignore-warning
+                    Ignore 'Not connected to vpn' warning
   -a, --show-all    Show all shows including the ones marked inactive
   -x, --sort-by-next  Sort by release date instead of the default alphabetical
   -t, --today       Show or download today's episodes
@@ -166,6 +168,7 @@ def init(docopt_args):
         days            = docopt_args['--days']
         no_color        = docopt_args['--no-color']
         today           = docopt_args['--today']
+        ignore          = docopt_args['--ignore-warning']
 
     if Args.location:
         Config.staging = Args['--location']
@@ -463,7 +466,7 @@ def init(docopt_args):
     elif Args.download:
         all_series = AllSeries(provider)
         show_name = Args.show_name
-        if Config.ip:
+        if Config.ip and not Args.ignore:
             L = Location()
             if L.ips_match(Config.ip):
                 print '%s not connected to VPN' % (U.effects(['redb', 'boldon'], ' Warning: '))

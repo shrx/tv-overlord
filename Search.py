@@ -87,8 +87,11 @@ class Search(object):
                 desktop_tools = {"gnome": "gvfs-open",
                                  "kde": "kioclient",
                                  "ubuntu": "xdg-open"}
+                app = desktop_tools[desktop]
                 try:
-                    out = subprocess.check_output([desktop_tools[desktop], chosen_show], stderr=sp.PIPE)
+                    #out = subprocess.check_output([desktop_tools[desktop], chosen_show], stderr=subprocess.PIPE)
+                    subprocess.Popen([app, chosen_show])
+
                 except KeyError:
                     print 'Unknown enviroment:', unknown_enviroment
                     exit()
