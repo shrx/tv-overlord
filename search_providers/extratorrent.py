@@ -33,7 +33,8 @@ class Provider(object):
 
         query = search_string
         encoded_search = urllib.quote(query)
-        url = 'https://extratorrent.unblocked.la/rss.xml?type=search&search=%s'
+        # cid=0 everything, cid=8 tv shows:
+        url = 'https://extratorrent.unblocked.la/rss.xml?type=search&cid=0&search=%s'
         full_url = url % encoded_search
 
         parsed = feedparser.parse(full_url)
