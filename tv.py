@@ -176,7 +176,16 @@ def init(docopt_args):
         Config.use_cache = False
 
     if Args.search_provider:
-        provider = Args.search_provider
+        provider = False
+        user_provider = Args.search_provider
+        for p in Config.providers:
+            if user_provider in p:
+                provider = p
+                break
+        if not provider:
+            print 'Unknown provider: {}'.format(user_provider)
+            print 'Choices are: {}'.format(', '.join(Config.providers))
+            exit()
     else:
         provider = Config.providers[0]
 
