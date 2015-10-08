@@ -184,7 +184,7 @@ def init(docopt_args):
                 break
         if not provider:
             print 'Unknown provider: {}'.format(user_provider)
-            print 'Choises are: {}'.format(', '.join(Config.providers))
+            print 'Choices are: {}'.format(', '.join(Config.providers))
             exit()
     else:
         provider = Config.providers[0]
