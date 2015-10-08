@@ -138,6 +138,14 @@ class ConsoleTable:
 
         self.table.body = self.table.body[:self.display_count]
         for row, counter in zip(self.table.body, key):
+            # look through all the cells to see if any have 720 or 1080 in the
+            # string and mark this row as high def if so.
+            is_hidef = False
+            for cell in row:
+                if '720' in cell or '1080' in cell:
+                    is_hidef = True
+                    break
+
             row_arr = [counter]
             for i, width, align in zip(row, header.widths, header.alignments):
                 if width == 0:
@@ -154,6 +162,10 @@ class ConsoleTable:
                     row_item = row_item.center(width)
                 else:
                     row_item = row_item.ljust(width)
+
+                # if hi dev, set the foreground to green
+                if is_hidef:
+                    row_item = U.hi_color(row_item, foreground=76)
 
                 row_arr.append(row_item)
             print bar.join(row_arr)
