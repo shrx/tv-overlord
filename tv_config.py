@@ -70,14 +70,23 @@ class Config:
     cfg = ConfigParser.ConfigParser(allow_no_value=True)
     cfg.read(user_config)
 
-    # optional fields
+    # OPTIONAL FIELDS
     try:
         # [App Settings]
         ip = cfg.get('App Settings', 'ip')
+        torrent_done = cfg.get('App Settings', 'torrent done')
+        clean_torrents = cfg.get('App Settings', 'clean torrents')
+
+        # [File Locations]
+        tv_dir = os.path.expanduser(cfg.get('File Locations', 'tv dir'))
+
     except ConfigParser.NoOptionError as err_msg:
         ip = False
+        torrent_done = False
+        clean_torrents = False
+        tv_dir = False
 
-    # required fields
+    # REQUIRED FIELDS
     providers = []
     try:
         # [File Locations]
