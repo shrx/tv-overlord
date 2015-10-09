@@ -8,8 +8,11 @@ logf=~/shows/transmission-dl.log
 torrentid=$TR_TORRENT_ID
 torrentname=$TR_TORRENT_NAME
 torrentpath=$TR_TORRENT_DIR
-# shows_dir='~/net1/dl/TV Shows/'
-shows_dir='/Volumes/Volume_1/dl/TV Shows/'
+if [ "$OSTYPE" == 'linux-gnu' ]; then
+    shows_dir='/home/sm/net1/dl/TV Shows/'
+elif [ "$OSTYPE" == 'darwin' ]; then
+    shows_dir='/Volumes/Volume_1/dl/TV Shows/'
+fi
 
 #  TR_APP_VERSION
 #  TR_TIME_LOCALTIME

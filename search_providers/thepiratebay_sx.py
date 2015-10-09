@@ -41,6 +41,7 @@ class Provider (object):
 
         urls = '%s/search/ ' % self.provider_url
         for search in searches:
+            pretty_name = search_string
             search_string = urllib.quote(search)
             url = '%s/search/%s/0/7/0' % (self.provider_url, search_string)
             urls += '%s/0/7/0 ' % search_string
@@ -85,8 +86,9 @@ class Provider (object):
 
                 show_data.append([name, size, date, seeds, magnet])
 
+        print urls
         header = [
-            urls,
+            [pretty_name, urls],
             ['Name', 'Size', 'Date', 'Seeds'],
             [0, 11, 12, 6],
             ['<', '>', '<', '>']]

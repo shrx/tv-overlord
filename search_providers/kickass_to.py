@@ -19,8 +19,8 @@ class Provider (object):
     def se_ep (season, episode, show_title):
         season_just = str (season).rjust (2, '0')
         episode = str (episode).rjust (2, '0')
-        fixed = '"%s S%sE%s" OR "%s %sx%s"' % (
-            show_title, season_just, episode, show_title, season, episode)
+        fixed = '"%s" S%sE%s OR %sx%s' % (
+            show_title, season_just, episode, season, episode)
 
         return fixed
 
@@ -34,12 +34,12 @@ class Provider (object):
 
         query = search_string
         encoded_search = urllib.quote (query)
-        url = 'http://kickass.to/usearch/%s/?rss=1'
+        url = 'http://kickass.to/usearch/%s/?rss=1&field=seeders&sorder=desc'
         full_url = url % encoded_search
 
         parsed = feedparser.parse(full_url)
         header = [
-            full_url,
+            [search_string, full_url],
             ['Name', 'Size', 'Date', 'Seeds'],
             [0, 10, 12, 6],
             ['<', '>', '<', '>']]
@@ -63,7 +63,7 @@ class Provider (object):
                 show['torrent_magneturi'] # id (download magnet url)
             ])
 
-        show_data.sort(key=lambda x: int(x[3]), reverse=True) # sort by seeds
+        #show_data.sort(key=lambda x: int(x[3]), reverse=True) # sort by seeds
         return [header] + [show_data]
 
     def download (self, chosen_show, destination, final_name):

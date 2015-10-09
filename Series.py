@@ -113,13 +113,18 @@ class Series:
             series = tv[self.db_name]
         except tvdb_api.tvdb_shownotfound:
             print 'Show not found: %s' % self.db_name
-            exit()
+            #exit()
+            return
         except tvdb_api.tvdb_error as e_msg:
             print '\n'
             print 'Error: %s' % self.db_name
             print '-----------------------------'
             print e_msg
             return
+        except UnboundLocalError as e:
+            print '+++++++++++++++++++++++++'
+            print e
+            print '+++++++++++++++++++++++++'
 
         for i in series.data:
             setattr(self, i, series.data[i])
@@ -326,10 +331,10 @@ class Series:
         }
         if season and episode:
             show_title = '%s %s ' % (self.db_name, self.se_ep(season, episode))
-            url = '  %s' % (shows[0][0])
+            url = '  %s' % (shows[0][0][1])
         else:
-            show_title = self.db_name
-            url = ''
+            show_title = '%s  ' % shows[0][0][0]
+            url = shows[0][0][1]
 
         show_title_color = U.hi_color(show_title, foreground=color['title_fg'], background=color['title_bg'])
         show_title_color = U.effects(['boldon'], show_title_color)
