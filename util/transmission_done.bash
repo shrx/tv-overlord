@@ -68,13 +68,13 @@ dest=$(echo $torrentname |
 #    from the torrent name before parsing.  There could end up being
 #    several more here.
 
-    sed 's/\[ www\.torrenting\.com \] - //' |
+    sed 's/\[ www\.torrenting\.com \] - //I' |
 
 # 2. Now parse torrent name to get the name of the show.
 
     # search for this pattern: 1x11.* or S11E11.*
     # remove from episode and season to the end of string
-    sed 's/[. ]*\([[:digit:]]x[[:digit:]]\{2\}\|S[[:digit:]]\{2\}E[[:digit:]]\{2\}\).*//' |
+    sed 's/[. ]*\([[:digit:]]x[[:digit:]]\{2\}\|S[[:digit:]]\{2\}E[[:digit:]]\{2\}\).*//I' |
     # remove any spaces at start or end of string
     sed 's/^[[:space:]]\|[[:space:]]$//g' |
     # convert dots or spaces to underscores
