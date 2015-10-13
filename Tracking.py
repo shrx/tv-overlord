@@ -1,10 +1,10 @@
 import json
 import datetime
 import urlparse
-from DB import SqlLiteDB
+from DB import DB
 
 
-class Tracking(SqlLiteDB):
+class Tracking(DB):
     def __init__(self):
 
         sql = '''
@@ -21,15 +21,22 @@ class Tracking(SqlLiteDB):
 
     def save(self, show_title, season, episode, data, chosen_url):
         magnet_hash = self._extract_hash(chosen_url)
-        data, chosen = self._remove_urls(data, chosen_url)
+        # Cleaned_data contains the data array without the magnet urls.
+        # To use that, change cleaned_data to data
+        cleaned_data, chosen = self._remove_urls(data, chosen_url)
         data = json.dumps(data)
         now = datetime.datetime.today()
         date = now.isoformat()
+        # oneoff is a show that was downloaded via 'nondbshow'
+        oneoff = 0
+        if not season or episode:
+            oneoff = 1
+
         sql = '''
             INSERT INTO tracking(
-                download_date, show_title, season, episode, download_data, chosen, chosen_hash)
+                download_date, show_title, season, episode, download_data, chosen, chosen_hash, one_off)
             VALUES(
-                :date, :show_title, :season, :episode, :data, :chosen, :hash);'''
+                :date, :show_title, :season, :episode, :data, :chosen, :hash, :one_off);'''
 
         values = {
             'date': date,
@@ -39,6 +46,7 @@ class Tracking(SqlLiteDB):
             'data': data,
             'chosen': chosen,
             'hash': magnet_hash,
+            'one_off': oneoff,
         }
 
         self.run_sql(sql, values)

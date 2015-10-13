@@ -61,6 +61,7 @@ log "\
 export TR_TORRENT_ID='$torrentid'; \
 export TR_TORRENT_NAME='$torrentname'; \
 export TR_TORRENT_DIR='$torrentpath'; \
+export TR_TORRENT_HASH='$TR_TORRENT_HASH'; \
 ./transmission_done.bash debug"
 
 dest=$(echo $torrentname |

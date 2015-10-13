@@ -2,12 +2,13 @@
 
 r'''
 Usage:
-  transmission_done.py
+  transmission_done.py [--debug]
 
 This script passes the enviroment variables from transmission to
 the torrent manager.
 
 Options:
+  -d --debug    Output debut info
   -h --help     Show this help
   -v --version  Show the version number
 '''
@@ -27,7 +28,7 @@ from torrent_manager import TorrentManager
 #  TR_TORRENT_ID
 #x TR_TORRENT_NAME
 
-def main():
+def main(args):
     try:
         torrent_dir = os.environ['TR_TORRENT_DIR']
         torrent_hash = os.environ['TR_TORRENT_HASH']
@@ -36,10 +37,15 @@ def main():
         print 'Enviroment variables not set'
         exit()
 
-    TorrentManager(torrent_hash, torrent_dir, torrent_name)
+    if args['--debug']:
+        print 'torrent_hash:', torrent_hash
+        print 'torrent_dir:', torrent_dir
+        print 'torrent_name:', torrent_name
+
+    TorrentManager(torrent_hash, torrent_dir, torrent_name, debug=args['--debug'])
 
 
 if __name__ == '__main__':
     args = docopt(__doc__, version='0.1')
-    main()
+    main(args)
 
