@@ -328,6 +328,7 @@ class Series:
             'body_fg': 'white',
             'body_bg': None,
             'bar': 19,
+            'hi_def': 70,
         }
         if season and episode:
             show_title = '%s %s ' % (self.db_name, self.se_ep(season, episode))

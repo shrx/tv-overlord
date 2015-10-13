@@ -47,6 +47,7 @@ import os
 import sqlite3
 import textwrap
 
+from pprint import pprint as pp
 from dateutil import parser as date_parser
 from docopt import docopt
 
@@ -504,7 +505,6 @@ def init(docopt_args):
 
 if __name__ == '__main__':
     docopt_args = docopt(__doc__, version='0.1')
-
     try:
         init(docopt_args)
     except KeyboardInterrupt:
