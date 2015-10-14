@@ -15,7 +15,35 @@ import shutil
 
 
 class TorrentManager(DB):
+    """Manage media files after they have been downloaded
 
+    A torrent client calls it's resprective manager; transmission_done.py
+    or deluge_done.py; when the torrent has finished downloading, then
+    that manager calls this class.
+
+    This probably should just be functions instead of a class since its
+    really just a singleton.
+
+    Usage:
+        TorrentManger(torrent_hash, path, filename, debug=False)
+
+    Args:
+        torrent_hash: The torrent hash, retrieved from the magnet url
+        path:         The source folder where the downloaded torrent is
+        filename:     The name of the torrent, can be a file or dir
+        debug:        If console output is wanted
+
+    Two settings in config.ini control behaviour
+    torrent done: copy|move
+    clean torrents: yes|no
+
+    If 'torrent done' is not defined, then nothing happens. Else the
+    content is copied or moved.
+
+    if 'clean torrents' is 'yes', then only the media file is
+    transfered.  If it's 'no', then whatever was downloaded is
+    transfered to the destination.
+    """
     def __init__(self, torrent_hash, path, filename, debug=False):
         torrent_origin = Config.torrents_dir
         # set up logging
