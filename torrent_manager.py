@@ -33,11 +33,11 @@ class TorrentManager(DB):
         filename:     The name of the torrent, can be a file or dir
         debug:        If console output is wanted
 
-    Two settings in config.ini control behaviour
+    Two settings in config.ini control behaviour:
     torrent done: copy|move
     clean torrents: yes|no
 
-    If 'torrent done' is not defined, then nothing happens. Else the
+    If 'torrent done' is not defined, then nothing happens, else the
     content is copied or moved.
 
     if 'clean torrents' is 'yes', then only the media file is
@@ -64,8 +64,12 @@ class TorrentManager(DB):
         logging.info('path: %s', path)
         logging.info('filename: %s', filename)
 
+        debug_command = '''export TR_TORRENT_NAME='%s'; export TR_TORRENT_DIR='%s'; export TR_TORRENT_HASH='%s'; python ~/projects/media-downloader/src/transmission_done.py'''
+        logging.info(debug_command, filename, path, torrent_hash)
+
         if self.is_oneoff(torrent_hash):
-            logging.info('Download is a one off. Doing nothing.')
+            logging.info('Download is a one off, doing nothing.')
+            self.set_torrent_complete(torrent_hash)
             return
 
         filename = os.path.join(Config.torrents_dir, filename)
@@ -79,12 +83,13 @@ class TorrentManager(DB):
                 os.mkdir(destination_dir)
                 logging.info('creating dir: %s' % destination_dir)
 
-            logging.info('copying %s to %s' % (source, destination_dir))
-            self.copy(source, destination_dir)
+            destination_file = os.path.join(destination_dir, pretty_filename)
+
+            logging.info('copying %s to %s' % (source, destination_file))
+            self.copy(source, destination_file)
             Tell('%s done' % pretty_filename)
 
-        debug_command = '''export TR_TORRENT_NAME='%s'; export TR_TORRENT_DIR='%s'; export TR_TORRENT_HASH='%s'; python ~/projects/media-downloader/src/transmission_done.py'''
-        logging.info(debug_command, filename, path, torrent_hash)
+        self.set_torrent_complete(torrent_hash)
 
     def copy(self, source, destination):
         """Copy files or dirs using the platform's copy tool"""
@@ -110,8 +115,10 @@ class TorrentManager(DB):
         """
         show_name, season, episode = self.get_show_info(torrent_hash)
 
+        seperator = ' '
         # new file name
-        file_show_name = show_name.replace(' ', '.')
+        file_show_name = show_name.replace(' ', seperator)
+
         seep = ''
         if season and episode:
             season = season.rjust(2, '0')
@@ -120,11 +127,25 @@ class TorrentManager(DB):
         else:
             seep = datetime.date.today().isoformat()
 
+        basename = os.path.basename(filename)
+        res = None
+        res_options = ['720p', '1080p']
+        for i in res_options:
+            if i in basename:
+                res = i
+
         file_type = ''
         if os.path.isfile(filename):
             file_type = os.path.splitext(filename)[1]
 
-        pretty_filename = '{}.{}{}'.format(file_show_name, seep, file_type)
+        newname = seperator.join([file_show_name, seep, res])
+        # remove any extraneous space or duplicate seperator charaters
+        newname = newname.strip(' ' + seperator)
+        newname = newname.replace(seperator + seperator, '')
+
+        pretty_filename = newname + file_type
+
+        #pretty_filename = '{}.{}{}{}'.format(file_show_name, seep, res, file_type)
 
         # new dir name
         pretty_dirname = show_name #.replace(' ', '_')

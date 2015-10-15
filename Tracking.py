@@ -29,7 +29,7 @@ class Tracking(DB):
         date = now.isoformat()
         # oneoff is a show that was downloaded via 'nondbshow'
         oneoff = 0
-        if not season or episode:
+        if not season or not episode:
             oneoff = 1
 
         sql = '''

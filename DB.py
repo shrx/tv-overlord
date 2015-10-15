@@ -37,7 +37,7 @@ class DB(object):
     def get_show_info(self, hash):
         sql = '''SELECT show_title, season, episode
                  FROM tracking
-                 WHERE chosen_hash = :hash'''
+                 WHERE lower(chosen_hash) = lower(:hash)'''
         values = {'hash': hash}
 
         data = self.run_sql(sql, values, named_fields=True)[0]
@@ -45,9 +45,15 @@ class DB(object):
 
     def is_oneoff(self, hash):
         sql = '''SELECT one_off FROM tracking
-                 WHERE chosen_hash = :hash'''
+                 WHERE lower(chosen_hash) = lower(:hash)'''
         values = {'hash': hash}
 
         data = self.run_sql(sql, values, named_fields=True)[0]
         return data['one_off']
+
+    def set_torrent_complete(self, hash):
+        sql = '''UPDATE tracking SET complete = 1
+                 WHERE lower(chosen_hash) = lower(:hash)'''
+        values = {'hash': hash}
+        data = self.run_sql(sql, values)
 
