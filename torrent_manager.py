@@ -128,7 +128,7 @@ class TorrentManager(DB):
             seep = datetime.date.today().isoformat()
 
         basename = os.path.basename(filename)
-        res = None
+        res = ''
         res_options = ['720p', '1080p']
         for i in res_options:
             if i in basename:
