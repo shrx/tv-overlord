@@ -51,14 +51,13 @@ from pprint import pprint as pp
 from dateutil import parser as date_parser
 from docopt import docopt
 
-from AllSeries import AllSeries
-
-from ConsoleInput import ask_user as ask
-from Series import Series
-from tv_config import Config
-from tv_util import FancyPrint, dict_factory
-from Util import U
-from location import Location
+from tv.allseries import AllSeries
+from tv.consoleinput import ask_user as ask
+from tv.series import Series
+from tv.tvconfig import Config
+from tv.tvutil import FancyPrint, dict_factory
+from tv.util import U
+from tv.location import Location
 
 
 def edit_db(search_str):

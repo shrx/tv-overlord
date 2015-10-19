@@ -1,4 +1,4 @@
-from tv_config import Config
+from tv.tvconfig import Config
 from pprint import pprint as pp
 import sqlite3
 

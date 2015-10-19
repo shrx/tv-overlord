@@ -5,9 +5,9 @@ Build a table to display data in a terminal.
 
 import os, string
 from collections import namedtuple
-from ConsoleInput import ask_user
-from pprint import pprint as pp
-from Util import U
+
+from tv.consoleinput import ask_user
+from tv.util import U
 
 
 class ConsoleTable:
@@ -46,7 +46,6 @@ class ConsoleTable:
             'body_fg': 'white',
             'body_bg': None,
             'bar': 19,
-            'hi_def': 70,
         }
         self.display_count = 5
 
@@ -167,7 +166,7 @@ class ConsoleTable:
 
                 # if hi dev, set the foreground to green
                 if is_hidef:
-                    row_item = U.hi_color(row_item, foreground=self.colors['hi_def'])
+                    row_item = U.hi_color(row_item, foreground=76)
 
                 row_arr.append(row_item)
             print bar.join(row_arr)

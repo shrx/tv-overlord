@@ -4,12 +4,13 @@ import sqlite3
 import sys
 import textwrap
 import tvdb_api
-from ConsoleInput import ask_user as ask, ask_user
-import Search
-from Util import U
-from tv_config import Config
-from ConsoleTable import ConsoleTable
-from Tracking import Tracking
+
+from tv.consoleinput import ask_user as ask
+from tv.search import Search, SearchError
+from tv.util import U
+from tv.tvconfig import Config
+from tv.consoletable import ConsoleTable
+from tv.tracking import Tracking
 
 
 class Series:
@@ -56,10 +57,10 @@ class Series:
         if show_type == 'current':
             self._set_db_data(dbdata)
             self._get_thetvdb_series_data()
-            self.search_provider = Search.Search(provider)
+            self.search_provider = Search(provider)
 
         if show_type == 'nondb':
-            self.search_provider = Search.Search(provider)
+            self.search_provider = Search(provider)
 
         self.console_rows, self.console_columns = os.popen('stty size', 'r').read().split()
 
@@ -235,7 +236,7 @@ class Series:
             show_data = self._ask(self.search_provider.search(search_str), None, None, display_count)
             if not show_data:
                 return
-        except Search.SearchError:
+        except SearchError:
             print 'No matches'
             return
         self._download(show_data)

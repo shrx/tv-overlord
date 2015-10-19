@@ -5,7 +5,7 @@ import shutil
 import sqlite3
 
 from pprint import pprint as pp
-from ConsoleInput import ask_user as ask
+from tv.consoleinput import ask_user as ask
 
 
 class Config:

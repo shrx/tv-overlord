@@ -6,7 +6,8 @@ import re
 from bs4 import BeautifulSoup
 import requests
 
-from tv_config import Config
+from tv.util import U
+from tv.tvconfig import Config
 
 
 class Provider (object):

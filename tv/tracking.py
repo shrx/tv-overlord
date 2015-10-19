@@ -1,7 +1,8 @@
 import json
 import datetime
 import urlparse
-from DB import DB
+
+from tv.db import DB
 
 
 class Tracking(DB):
