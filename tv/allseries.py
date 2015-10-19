@@ -1,7 +1,8 @@
 import sqlite3
-from Series import Series
-from tv_config import Config
-import tv_util
+
+from tv.series import Series
+from tv.tvconfig import Config
+from tv.tvutil import FancyPrint, dict_factory
 
 
 class AllSeries:
@@ -66,7 +67,8 @@ class AllSeries:
             self.sort_field
         )
         conn = sqlite3.connect(Config.db_file)
-        conn.row_factory = tv_util.dict_factory
+        #conn.row_factory = tv_util.dict_factory
+        conn.row_factory = dict_factory
         curs = conn.cursor()
         ddata = curs.execute(sql)
         data = []

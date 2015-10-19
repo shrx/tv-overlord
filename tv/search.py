@@ -5,7 +5,7 @@ import subprocess
 import os
 import platform
 
-from Util import U
+from tv.util import U
 
 
 class SearchError(Exception):
@@ -20,7 +20,7 @@ class SearchError(Exception):
 class Search(object):
     def __init__(self, provider):
 
-        mod_name = 'search_providers.' + provider
+        mod_name = 'tv.search_providers.' + provider
         mod = __import__(mod_name, fromlist=["Provider"])
         engine = getattr(mod, 'Provider')
         self.engine = engine()

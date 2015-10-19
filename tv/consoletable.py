@@ -5,8 +5,9 @@ Build a table to display data in a terminal.
 
 import os, string
 from collections import namedtuple
-from ConsoleInput import ask_user
-from Util import U
+
+from tv.consoleinput import ask_user
+from tv.util import U
 
 
 class ConsoleTable:
