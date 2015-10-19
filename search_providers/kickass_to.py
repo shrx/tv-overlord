@@ -11,7 +11,9 @@ from Util import U
 
 
 class Provider (object):
-    provider_url = 'http://kickass.to'
+    #provider_url = 'http://kickass.to'
+    #provider_url = 'http://thekat.tv'
+    provider_url = 'http://kat.cr'
     name = 'Kickass Torrents'
 
 
@@ -34,7 +36,7 @@ class Provider (object):
 
         query = search_string
         encoded_search = urllib.quote (query)
-        url = 'http://kickass.to/usearch/%s/?rss=1&field=seeders&sorder=desc'
+        url = '{}/usearch/%s/?rss=1&field=seeders&sorder=desc'.format(self.provider_url)
         full_url = url % encoded_search
 
         parsed = feedparser.parse(full_url)

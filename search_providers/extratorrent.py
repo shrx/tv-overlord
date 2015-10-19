@@ -11,7 +11,8 @@ from Util import U
 
 class Provider(object):
 
-    provider_url = 'https://extratorrent.unblocked.la'
+    #provider_url = 'https://extratorrent.unblocked.la'
+    provider_url = 'http://extratorrent.cc'
     name = 'ExtraTorrent'
 
     @staticmethod
@@ -34,10 +35,11 @@ class Provider(object):
         query = search_string
         encoded_search = urllib.quote(query)
         # cid=0 everything, cid=8 tv shows:
-        url = 'https://extratorrent.unblocked.la/rss.xml?type=search&cid=0&search=%s'
+        url = '{}/rss.xml?type=search&cid=0&search=%s'.format(self.provider_url)
         full_url = url % encoded_search
 
         parsed = feedparser.parse(full_url)
+
         header = [
             [search_string, full_url],
             ['Name', 'Size', 'Date', 'Seeds'],
