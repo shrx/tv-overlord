@@ -64,6 +64,8 @@ class TorrentManager(DB):
         logging.info('path: %s', path)
         logging.info('filename: %s', filename)
 
+        self.save_info(torrent_hash, filename)
+
         debug_command = '''export TR_TORRENT_NAME='%s'; export TR_TORRENT_DIR='%s'; export TR_TORRENT_HASH='%s'; python ~/projects/media-downloader/src/transmission_done.py'''
         logging.info(debug_command, filename, path, torrent_hash)
 

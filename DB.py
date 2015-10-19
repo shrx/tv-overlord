@@ -51,6 +51,12 @@ class DB(object):
         data = self.run_sql(sql, values, named_fields=True)[0]
         return data['one_off']
 
+    def save_info(self, hash, filename):
+        sql = '''UPDATE tracking SET filename = :filename
+                 WHERE lower(chosen_hash) = lower(:hash)'''
+        values = {'hash': hash, 'filename': filename}
+        self.run_sql(sql, values)
+
     def set_torrent_complete(self, hash):
         sql = '''UPDATE tracking SET complete = 1
                  WHERE lower(chosen_hash) = lower(:hash)'''
