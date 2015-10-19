@@ -1,4 +1,5 @@
 from tv_config import Config
+from pprint import pprint as pp
 import sqlite3
 
 
@@ -10,7 +11,7 @@ def dict_factory(cursor, row):
         d[col[0]] = row[idx]
     return d
 
-class SqlLiteDB(object):
+class DB(object):
     def named_sql(self, sql, values=False):
         pass
 
@@ -32,3 +33,33 @@ class SqlLiteDB(object):
         conn.commit()
         conn.close()
         return rowsdata
+
+    def get_show_info(self, hash):
+        sql = '''SELECT show_title, season, episode
+                 FROM tracking
+                 WHERE lower(chosen_hash) = lower(:hash)'''
+        values = {'hash': hash}
+
+        data = self.run_sql(sql, values, named_fields=True)[0]
+        return data['show_title'], data['season'], data['episode']
+
+    def is_oneoff(self, hash):
+        sql = '''SELECT one_off FROM tracking
+                 WHERE lower(chosen_hash) = lower(:hash)'''
+        values = {'hash': hash}
+
+        data = self.run_sql(sql, values, named_fields=True)[0]
+        return data['one_off']
+
+    def save_info(self, hash, filename):
+        sql = '''UPDATE tracking SET filename = :filename
+                 WHERE lower(chosen_hash) = lower(:hash)'''
+        values = {'hash': hash, 'filename': filename}
+        self.run_sql(sql, values)
+
+    def set_torrent_complete(self, hash):
+        sql = '''UPDATE tracking SET complete = 1
+                 WHERE lower(chosen_hash) = lower(:hash)'''
+        values = {'hash': hash}
+        data = self.run_sql(sql, values)
+

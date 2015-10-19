@@ -4,6 +4,7 @@ import ConfigParser
 import shutil
 import sqlite3
 
+from pprint import pprint as pp
 from ConsoleInput import ask_user as ask
 
 
@@ -54,7 +55,7 @@ class Config:
                     episode TEXT,
                     download_data TEXT,
                     chosen TEXT,
-                    torrent_hash TEXT
+                    chosen_hash TEXT
                 );
                 '''
             conn = sqlite3.connect(user_db)
@@ -67,17 +68,22 @@ class Config:
         else:
             exit()
 
+    defaults = {'ip':False, 'clean torrents':False, 'tv dir':False,
+                'torrents dir':False, 'torrent done':False}
     cfg = ConfigParser.ConfigParser(allow_no_value=True)
     cfg.read(user_config)
 
-    # optional fields
-    try:
-        # [App Settings]
-        ip = cfg.get('App Settings', 'ip')
-    except ConfigParser.NoOptionError as err_msg:
-        ip = False
+    # OPTIONAL FIELDS
+    # [App Settings]
+    ip = cfg.get('App Settings', 'ip')
+    torrent_done = cfg.get('App Settings', 'torrent done')
+    clean_torrents = cfg.get('App Settings', 'clean torrents')
 
-    # required fields
+    # [File Locations]
+    tv_dir = os.path.expanduser(cfg.get('File Locations', 'tv dir'))
+    torrents_dir = os.path.expanduser(cfg.get('File Locations', 'torrents dir'))
+
+    # REQUIRED FIELDS
     providers = []
     try:
         # [File Locations]

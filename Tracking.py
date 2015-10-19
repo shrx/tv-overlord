@@ -1,9 +1,10 @@
 import json
 import datetime
-from DB import SqlLiteDB
+import urlparse
+from DB import DB
 
 
-class Tracking(SqlLiteDB):
+class Tracking(DB):
     def __init__(self):
 
         sql = '''
@@ -14,20 +15,28 @@ class Tracking(SqlLiteDB):
                 episode TEXT,
                 download_data TEXT,
                 chosen TEXT,
-                torrent_hash TEXT
+                chosen_hash TEXT
             );'''
         self.run_sql(sql)
 
-    def save(self, show_title, season, episode, data, chosen):
-        data, chosen = self._remove_urls(data, chosen)
+    def save(self, show_title, season, episode, data, chosen_url):
+        magnet_hash = self._extract_hash(chosen_url)
+        # Cleaned_data contains the data array without the magnet urls.
+        # To use that, change cleaned_data to data
+        cleaned_data, chosen = self._remove_urls(data, chosen_url)
         data = json.dumps(data)
         now = datetime.datetime.today()
         date = now.isoformat()
+        # oneoff is a show that was downloaded via 'nondbshow'
+        oneoff = 0
+        if not season or not episode:
+            oneoff = 1
+
         sql = '''
             INSERT INTO tracking(
-                download_date, show_title, season, episode, download_data, chosen)
+                download_date, show_title, season, episode, download_data, chosen, chosen_hash, one_off)
             VALUES(
-                :date, :show_title, :season, :episode, :data, :chosen);'''
+                :date, :show_title, :season, :episode, :data, :chosen, :hash, :one_off);'''
 
         values = {
             'date': date,
@@ -36,6 +45,8 @@ class Tracking(SqlLiteDB):
             'episode': episode,
             'data': data,
             'chosen': chosen,
+            'hash': magnet_hash,
+            'one_off': oneoff,
         }
 
         self.run_sql(sql, values)
@@ -51,6 +62,25 @@ class Tracking(SqlLiteDB):
             data[1][i][4] = i
 
         return data, chosen
+
+    def _extract_hash(self, url):
+        if not url.startswith('magnet:'):
+            print 'Warning: url is not a magnet'
+            print url
+            return ''
+        parsed_url = urlparse.urlparse(url)
+        #print 'a', parsed_url
+        magnet_hash = urlparse.parse_qs(parsed_url.query)['xt']
+        #print 'b', magnet_hash
+        if len(magnet_hash) > 1:
+            print 'multple hashes:'
+            print magnet_hash
+
+        magnet_hash = magnet_hash[0].split(':')[-1]
+        #print 'c', magnet_hash
+        #exit()
+
+        return magnet_hash
 
     def display(self):
         sql = '''
