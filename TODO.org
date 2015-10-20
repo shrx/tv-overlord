@@ -1,0 +1,72 @@
+
+#+TITLE: Todo for tv project
+
+* Big Things [1/4]
+ - [X] Change helper scripts to one python class.
+ - [ ] Speed up showmissing.
+ - [ ] Rebuild config system, use SetBack.
+ - [ ] Sync with remote server.
+
+
+* Todo
+
+** For 1.0 release  [1/6]
+ 1. [ ] debug all commands and options.
+ 2. [X] test nzb's
+ 3. [ ] when adding new show, check if already added
+ 4. [ ] confirm working on linux
+ 5. [ ] add a 'Future Plans' section to README.org
+ 6. [ ] test config.ini for missing fields, or wrong values, etc.
+
+** Code cleanups  [3/3]
+ 1. [X] convert all filenames to lowercase
+ 2. [X] remove unused code from Util.py
+ 3. [X] remove unused code from tv_util.py
+
+** Bugs
+ - Halt if 'unknown enviroment: none'
+   1. Option to deposit torrent links in a dir
+   2. Give options to specify torrent application
+   3. App requires a desktop enviroment
+ - Format paragraph in addnew
+ - +Dateutil parser error, always need to install?+
+ - +Halt after 'show not found' in addnew+
+ - Unicode errors.  All strings from servers should
+   pass through a single encode function
+   + Make sure all strings from api are encoded ascii
+
+** Misc
+ - Add new search providers.  List at http://torrentfreak.com/top-10-popular-torrent-sites-2014-140104/
+   - http://torrentz.eu/ (meta search site)
+   - http://isohunt.to/
+   - http://extratorrent.cc/
+ - Change date format to show age instead.
+   Instead of: =Apr 13, 2014=, Change to: =6 Months=
+ - Rewrite torrent helper scripts to python and use the db to rename
+   shows instead of parsing the name.
+ - Add a method to higlight a torrent name if its been downloaded before
+ - Where requests is used, implement all of request's exceptions.  See here:
+   http://docs.python-requests.org/en/latest/user/quickstart/#errors-and-exceptions
+
+** Torrent helper rewrite
+ - use watch folder
+
+*** Future releases
+ 1. Fast showmissing
+ 2. Make so can be package with cx_freeze
+    [[http://cx-freeze.sourceforge.net/]]
+ 3. document all modules, classes and attributes
+ 4. make sure each class can be imported into ipython
+    and used there
+ 5. create a config class that unifies user, app, and in
+    program settings
+ 6. move all hardcoded vars (eg. indent) into config object
+ 7. internationalize strings
+ 8. unify torrent helper scripts
+
+*** Documentaion
+ - more details about search_provider format
+
+*** Possible structure changes
+http://www.jeffknupp.com/blog/2013/08/16/open-sourcing-a-python-project-the-right-way/
+
