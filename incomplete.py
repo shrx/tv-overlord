@@ -1,16 +1,8 @@
 
-import os
-import re
-import sqlite3
-import time
-import datetime
-import sys
 from pprint import pprint as pp
-import logging
-from tv_config import Config
-from DB import DB
-from notify import Tell
-import shutil
+
+from tv.tvconfig import Config
+from tv.db import DB
 
 
 def main():

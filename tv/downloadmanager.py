@@ -8,13 +8,13 @@ import subprocess
 import sys
 from pprint import pprint as pp
 import logging
-from tv_config import Config
-from DB import DB
-from notify import Tell
-import shutil
+
+from tv.tvconfig import Config
+from tv.db import DB
+from tv.notify import Tell
 
 
-class TorrentManager(DB):
+class DownloadManager(DB):
     """Manage media files after they have been downloaded
 
     A torrent client calls it's resprective manager; transmission_done.py
@@ -47,7 +47,7 @@ class TorrentManager(DB):
     def __init__(self, torrent_hash, path, filename, debug=False):
         torrent_origin = Config.torrents_dir
         # set up logging
-        log_file = '{}torrent_manager.log'.format(torrent_origin)
+        log_file = '{}tv_download_manager.log'.format(torrent_origin)
         logging.basicConfig(format='%(asctime)s: %(levelname)s: %(message)s',
                             datefmt='%Y-%m-%d %H:%M:%S',
                             filename=log_file,

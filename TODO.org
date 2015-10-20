@@ -10,18 +10,24 @@
 
 * Todo
 
-** For 1.0 release  [1/6]
+** For 1.0 release  [2/8]
  1. [ ] debug all commands and options.
- 2. [X] test nzb's
- 3. [ ] when adding new show, check if already added
- 4. [ ] confirm working on linux
- 5. [ ] add a 'Future Plans' section to README.org
- 6. [ ] test config.ini for missing fields, or wrong values, etc.
+ 2. [ ] bullet proof install
+ 3. [X] test nzb's
+ 4. [ ] when adding new show, check if already added
+ 5. [X] confirm working on linux
+ 6. [ ] add a 'Future Plans' section to README.org
+ 7. [ ] test config.ini for missing fields, or wrong values, etc.
+ 8. [ ] make work on a server enviroment
+    1. [ ] test with commandline torrent clients
 
-** Code cleanups  [3/3]
+** Code cleanups  [3/6]
  1. [X] convert all filenames to lowercase
  2. [X] remove unused code from Util.py
  3. [X] remove unused code from tv_util.py
+ 4. [ ] have only one dict_factory
+ 5. [ ] combine util.py and tvutil.py
+ 6. [ ] move all database routines to db.py
 
 ** Bugs
  - Halt if 'unknown enviroment: none'
@@ -42,16 +48,11 @@
    - http://extratorrent.cc/
  - Change date format to show age instead.
    Instead of: =Apr 13, 2014=, Change to: =6 Months=
- - Rewrite torrent helper scripts to python and use the db to rename
-   shows instead of parsing the name.
  - Add a method to higlight a torrent name if its been downloaded before
  - Where requests is used, implement all of request's exceptions.  See here:
    http://docs.python-requests.org/en/latest/user/quickstart/#errors-and-exceptions
 
-** Torrent helper rewrite
- - use watch folder
-
-*** Future releases
+** Future releases
  1. Fast showmissing
  2. Make so can be package with cx_freeze
     [[http://cx-freeze.sourceforge.net/]]
@@ -64,9 +65,9 @@
  7. internationalize strings
  8. unify torrent helper scripts
 
-*** Documentaion
+** Documentaion
  - more details about search_provider format
 
-*** Possible structure changes
+** Possible structure changes
 http://www.jeffknupp.com/blog/2013/08/16/open-sourcing-a-python-project-the-right-way/
 

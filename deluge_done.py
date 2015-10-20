@@ -19,7 +19,7 @@ Options:
 from docopt import docopt
 import os
 from pprint import pprint as pp
-from torrent_manager import TorrentManager
+from tv.downloadmanager import DownloadManager
 
 
 def main(args):
@@ -32,7 +32,7 @@ def main(args):
         print 'torrent_dir:', torrent_dir
         print 'torrent_name:', torrent_name
 
-    TorrentManager(torrent_hash, torrent_dir, torrent_name, debug=args['--debug'])
+    DownloadManager(torrent_hash, torrent_dir, torrent_name, debug=args['--debug'])
 
 
 if __name__ == '__main__':
