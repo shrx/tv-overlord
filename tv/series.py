@@ -4,6 +4,7 @@ import sqlite3
 import sys
 import textwrap
 import tvdb_api
+from pprint import pprint as pp
 
 from tv.consoleinput import ask_user as ask
 from tv.search import Search, SearchError
@@ -11,6 +12,7 @@ from tv.util import U
 from tv.tvconfig import Config
 from tv.consoletable import ConsoleTable
 from tv.tracking import Tracking
+from tv.db import DB
 
 
 class Series:
@@ -64,6 +66,7 @@ class Series:
 
         self.console_rows, self.console_columns = os.popen('stty size', 'r').read().split()
 
+        self.db = DB()
 
     def _set_db_data(self, dbdata):
         """Add the data from the local db"""
@@ -112,8 +115,10 @@ class Series:
         tv = tvdb_api.Tvdb(apikey=Config.thetvdb_apikey, cache=Config.use_cache)
         try:
             series = tv[self.db_name]
+            self.show_exists = True
         except tvdb_api.tvdb_shownotfound:
             print 'Show not found: %s' % self.db_name
+            self.show_exists = False
             #exit()
             return
         except tvdb_api.tvdb_error as e_msg:
@@ -214,6 +219,9 @@ class Series:
         self._get_thetvdb_series_data()
         indent = '  '
 
+        if not self.show_exists:
+            exit()
+
         print
         print self.seriesname
         print '-' * len(self.seriesname)
@@ -222,8 +230,8 @@ class Series:
         print
         print '%sFirst aired: %s' % (indent, self.firstaired)
         print '%sStatus: %s' % (indent, self.status)
+        #print '%sAirs: %s, %s' % (indent, self.airs_time, self.airs_dayofweek)
         print
-        print self.airs_time, self.airs_dayofweek
         correct = ask('Is this the correct show? [y/n]')
 
         if correct == 'y':
@@ -396,15 +404,22 @@ class Series:
 
 
     def _add_new_db(self, season=0, episode=0):
-        sql = '''insert into shows (
-            network_status, status, thetvdb_series_id, name, season, episode)
-            values (:network_status, :status, :thetvdb_id, :name, :season, :episode)'''
-        values = {'network_status': self.status,
-                  'status': 'active',
-                  'thetvdb_id': self.id,
-                  'name': self.seriesname,
-                  'season': season,
-                  'episode': episode}
+        if self.db.show_exists(self.id):
+            sql = '''UPDATE shows SET status="active"
+                     WHERE thetvdb_series_id=:thetvdb_id;'''
+            values = {'thetvdb_id': self.id}
+            print
+            print '%s is already in the db. Its status is now set to "active"' % self.seriesname
+        else:
+            sql = '''insert into shows (
+                network_status, status, thetvdb_series_id, name, season, episode)
+                values (:network_status, :status, :thetvdb_id, :name, :season, :episode)'''
+            values = {'network_status': self.status,
+                      'status': 'active',
+                      'thetvdb_id': self.id,
+                      'name': self.seriesname,
+                      'season': season,
+                      'episode': episode}
         conn = sqlite3.connect(Config.db_file)
         curs = conn.cursor()
         curs.execute(sql, values)

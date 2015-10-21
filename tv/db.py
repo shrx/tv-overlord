@@ -63,3 +63,13 @@ class DB(object):
         values = {'hash': hash}
         data = self.run_sql(sql, values)
 
+    def show_exists(self, id):
+        sql = '''SELECT thetvdb_series_id, status FROM shows
+                 WHERE thetvdb_series_id=:thetvdb_id'''
+        values = {'thetvdb_id': id}
+        data = self.run_sql(sql, values)
+
+        if data:
+            return True
+        else:
+            return False
