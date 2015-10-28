@@ -4,6 +4,7 @@ import urllib
 import os
 from time import mktime
 from datetime import datetime
+from pprint import pprint as pp
 
 import feedparser
 
@@ -221,7 +222,8 @@ class Provider(object):
             ])
 
         header = [
-            '%s  (%s)' % (search_string, self.provider_url),
+            #'%s  (%s)' % (search_string, self.provider_url),
+            [search_string, full_url],
             ['Name', 'Date', 'Size'],
             [0, 12, 10],
             ['<', '<', '>']
@@ -234,7 +236,7 @@ class Provider(object):
         if not os.path.isdir(destination):
             raise ProviderError('%s is not a dir' % dest)
 
-        href = chosen_show['nzbid']
+        href = chosen_show
         filename = href.split('/')[-1]
         if final_name:
             # final_name should be a name that SABNzbd can parse

@@ -1,6 +1,7 @@
 import json
 import datetime
 import urlparse
+from pprint import pprint as pp
 
 from tv.db import DB
 
@@ -44,7 +45,7 @@ class Tracking(DB):
             'show_title' : show_title,
             'season': season,
             'episode': episode,
-            'data': data,
+            'data': '',
             'chosen': chosen,
             'hash': magnet_hash,
             'one_off': oneoff,
@@ -56,6 +57,8 @@ class Tracking(DB):
         '''Remove the magnet url's from the data since they have no use
         for data analysis and they take up to much room in the db
         '''
+        return data, chosen
+
         for i in range(len(data[1])):
             url = data[1][i][4]
             if url == chosen:
@@ -66,20 +69,14 @@ class Tracking(DB):
 
     def _extract_hash(self, url):
         if not url.startswith('magnet:'):
-            print 'Warning: url is not a magnet'
-            print url
             return ''
         parsed_url = urlparse.urlparse(url)
-        #print 'a', parsed_url
         magnet_hash = urlparse.parse_qs(parsed_url.query)['xt']
-        #print 'b', magnet_hash
         if len(magnet_hash) > 1:
             print 'multple hashes:'
             print magnet_hash
 
         magnet_hash = magnet_hash[0].split(':')[-1]
-        #print 'c', magnet_hash
-        #exit()
 
         return magnet_hash
 

@@ -64,7 +64,7 @@ class Provider(object):
                     season, episode, search_string))
 
         # print search_string
-        url = 'http://www.nzbclub.com/nzbfeed.aspx?'
+        url = 'http://www.nzbclub.com/nzbrss.aspx?'
         query = {
             'q': search_string
             , 'ig': 2  # hide adult: 1=yes, 2=no
@@ -79,7 +79,7 @@ class Provider(object):
         parsed = feedparser.parse(full_url)
 
         header = [
-            '%s  (%s)' % (search_string, self.provider_url),
+            [search_string, full_url],
             ['Name', 'Date', 'Size'],
             [0, 12, 10],
             ['<', '<', '>']
