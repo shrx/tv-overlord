@@ -79,17 +79,13 @@ class Search(object):
         if chosen_show.startswith("magnet:"):
 
             if platform.system() == 'Linux':
-                # gvfs-... are the Gnome tools for interacting with
-                # the file system.  Use KIO for kde.
-                # gvfs-open will open whatever application is associated
-                # with magnet links.
-                desktop = os.environ.get('DESKTOP_SESSION')
-                desktop_tools = {"gnome": "gvfs-open",
-                                 "kde": "kioclient",
-                                 "ubuntu": "xdg-open"}
-                app = desktop_tools[desktop]
+                isX = True if os.environ.get('DISPLAY') else False
+                if isX:
+                    app = 'xdg-open'
+                else:
+                    print('Non X usage is not supported')
+
                 try:
-                    #out = subprocess.check_output([desktop_tools[desktop], chosen_show], stderr=subprocess.PIPE)
                     subprocess.Popen([app, chosen_show])
 
                 except KeyError:

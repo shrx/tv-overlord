@@ -13,7 +13,8 @@ from tv.util import U
 class Provider(object):
 
     #provider_url = 'https://extratorrent.unblocked.la'
-    provider_url = 'http://extratorrent.cc'
+    #provider_url = 'http://extratorrent.cc'
+    provider_url = 'http://195.144.21.16/'
     name = 'ExtraTorrent'
 
     @staticmethod

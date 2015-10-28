@@ -30,7 +30,7 @@ class Config:
         if ask('Create config directory and files? [y/n]') == 'y':
             # create dir and config.ini
             os.mkdir(user_dir)
-            app_home = os.path.dirname(os.path.realpath(__file__))
+            app_home = os.path.join(os.path.dirname(os.path.realpath(__file__)), '..')
             app_config = '%s/%s' % (app_home, config_filename)
             shutil.copy(app_config, user_dir)
             # make db
@@ -55,7 +55,10 @@ class Config:
                     episode TEXT,
                     download_data TEXT,
                     chosen TEXT,
-                    chosen_hash TEXT
+                    chosen_hash TEXT,
+                    one_off INTERGER,
+                    complete INTERGER,
+                    filename TEXT
                 );
                 '''
             conn = sqlite3.connect(user_db)
