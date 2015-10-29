@@ -139,13 +139,11 @@ class ConsoleTable:
 
         self.table.body = self.table.body[:self.display_count]
         for row, counter in zip(self.table.body, key):
-            # look through all the cells to see if any have 720 or 1080 in the
+            # look through the title cell to see if any have 720 or 1080 in the
             # string and mark this row as high def if so.
             is_hidef = False
-            for cell in row:
-                if '720' in cell or '1080' in cell:
-                    is_hidef = True
-                    break
+            if '720p' in row[0] or '1080p' in row[0]:
+                is_hidef = True
 
             row_arr = [counter]
             for i, width, align in zip(row, header.widths, header.alignments):
