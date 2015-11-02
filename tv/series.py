@@ -341,7 +341,7 @@ class Series:
         }
         if season and episode:
             show_title = '%s %s ' % (self.db_name, self.se_ep(season, episode))
-            url = '  %s' % (shows[0][0][1])
+            url = ' %s' % (shows[0][0][1])
         else:
             show_title = '%s  ' % shows[0][0][0]
             url = shows[0][0][1]

@@ -5,6 +5,7 @@ Build a table to display data in a terminal.
 
 import os, string
 from collections import namedtuple
+from pprint import pprint as pp
 
 from tv.consoleinput import ask_user
 from tv.util import U
@@ -35,7 +36,6 @@ class ConsoleTable:
             ]
           ]
         """
-
         console_rows, console_columns = os.popen('stty size', 'r').read().split()
         self.console_columns = int(console_columns)
         self.colors = {
@@ -48,6 +48,7 @@ class ConsoleTable:
             'bar': 19,
         }
         self.display_count = 5
+        self.is_postdownload = False
 
         # Unpack the data param into more a usable format using namedtuples
         table = namedtuple('TableData', ['title', 'header', 'body'])
@@ -90,8 +91,9 @@ class ConsoleTable:
         )
 
         # TITLE --------------------------------------------
+        titletext = ('  ' + self.table.title.text).ljust(self.console_columns)
         title = U.effects(['boldon'], U.hi_color(
-            ('  ' + self.table.title.text).ljust(self.console_columns),
+            titletext,
             foreground=self.colors['title_fg'],
             background=self.colors['title_bg'],
         ))
@@ -172,11 +174,14 @@ class ConsoleTable:
         # USER INPUT ---------------------------------------
         choice = False
         while not choice:
-            choice = self.ask(key)
+            if self.is_postdownload:
+                choice = self.ask_postdownload(key)
+            else:
+                choice = self.ask(key)
         return choice
 
     def ask(self, key):
-        get = ask_user('\nNumber, [s]kip, skip [r]est of show, [q]uit, [m]ark as watched, or [enter] for #1: ')
+        get = ask_user('\nLetter, [s]kip, skip [r]est of show, [q]uit, [m]ark as watched, or [enter] for #1: ')
         choice = False
 
         if get == 'q':  # quit
@@ -196,6 +201,25 @@ class ConsoleTable:
                 choice = self.table.body[choice_num][-1:][0]
         elif get == '[enter]':  # default choice: #1
             choice = self.table.body[0][-1:][0]
+        elif get not in key:
+            self.display_error('Invalid choice: %s, try again:' % get)
+
+        return choice
+
+
+    def ask_postdownload(self, key):
+        get = ask_user('\nLetter or [q]uit: ')
+        choice = False
+
+        if get == 'q':
+            exit()
+        elif get in key:  # number/letter chosen
+            choice_num = key.index(get)
+            if choice_num not in range(len(self.table.body)):
+                self.display_error('Choice not between %s and %s, try again:' % (
+                    key[0], key[len(self.table.body) - 1]))
+            else:
+                choice = self.table.body[choice_num][-1:][0]
         elif get not in key:
             self.display_error('Invalid choice: %s, try again:' % get)
 
