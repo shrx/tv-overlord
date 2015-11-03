@@ -149,6 +149,7 @@ class ConsoleTable:
 
             row_arr = [counter]
             for i, width, align in zip(row, header.widths, header.alignments):
+                i = str(i)
                 if width == 0:
                     width = flex_width
                 row_item = i.encode('ascii', 'ignore')

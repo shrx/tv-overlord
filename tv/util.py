@@ -45,6 +45,8 @@ class U:
     __uloff = __esc % 24
     __invon = __esc % 7
     __invoff = __esc % 27
+    __strikeon = __esc % 9
+    __strikeoff = __esc % 29
 
     __reset = __esc % 0
 
@@ -121,6 +123,10 @@ class U:
                 fmt_str.append(U.__invon)
             if effect == 'invoff':
                 fmt_str.append(U.__invoff)
+            if effect == 'strikeon':
+                fmt_str.append(U.__strikeon)
+            if effect == 'strikeoff':
+                fmt_str.append(U.__strikeoff)
 
         return ''.join(fmt_str) + string + U.__reset
 
@@ -218,7 +224,7 @@ if __name__ == '__main__':
     effects = ['blackf', 'bluef', 'cyanf', 'greenf', 'purplef', 'redf',
                'whitef', 'yellowf', 'blackb', 'blueb', 'cyanb', 'greenb',
                'purpleb', 'redb', 'whiteb', 'yellowb', 'boldon',
-               'italicon', 'ulon']
+               'italicon', 'ulon', 'strikeon']
 
     for eff in effects:
         print U.effects([eff], eff),

@@ -64,6 +64,7 @@ class DownloadManager(DB):
         logging.info('path: %s', path)
         logging.info('filename: %s', filename)
 
+        filename = os.path.join(Config.torrents_dir, filename)
         self.save_info(torrent_hash, filename)
 
         debug_command = '''export TR_TORRENT_NAME='%s'; export TR_TORRENT_DIR='%s'; export TR_TORRENT_HASH='%s'; python ~/projects/media-downloader/src/transmission_done.py'''
@@ -74,7 +75,6 @@ class DownloadManager(DB):
             self.set_torrent_complete(torrent_hash)
             return
 
-        filename = os.path.join(Config.torrents_dir, filename)
         if Config.torrent_done in ('copy', 'move'):
             if Config.clean_torrents:
                 source = self.get_show_file(filename)

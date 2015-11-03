@@ -12,7 +12,8 @@ Options:
 
 import os
 import re
-import time
+import datetime
+from dateutil import parser
 from docopt import docopt
 from pprint import pprint as pp
 
@@ -21,6 +22,9 @@ from tv.db import DB
 from tv.consoletable import ConsoleTable
 from tv.consoleinput import ask_user
 from tv.downloadmanager import DownloadManager
+#from tv.tvutil import FancyPrint
+from tv.util import U
+
 
 def episode(name, season, episode):
     seep = ''
@@ -29,6 +33,27 @@ def episode(name, season, episode):
     full = name + seep
     return full
 
+def exists(filename):
+    ok = 76
+    missing = 160
+    print filename
+    if filename is None:
+        return ''
+    elif os.path.exists(filename):
+        #filename = U.hi_color(filename, foreground=ok)
+        filename = filename
+    else:
+        #filename = U.hi_color(filename, foreground=missing)
+        #filename = U.effects(['strikeon'], filename)
+        filename = U.effects(['blackf', 'strikeon'], filename)
+    return filename
+
+def format_date(date):
+    parsed = parser.parse(date)
+    #print new
+    new = parsed.strftime('%a %b/%d')
+    #print date
+    return new
 
 def main(args):
     days = args['DAYS']
@@ -46,13 +71,17 @@ def main(args):
             [16, 25, 0],
             ['<', '<', '<']
         ],
-        [[i[0], episode(i[1], i[4], i[5]), i[2], i[3]] for i in sqldata]
+        [[format_date(i[0]),
+          episode(i[1], i[4], i[5]),
+          exists(i[2]),
+          i[3]] for i in sqldata]
     ]
     #pp([[i[4], i[5]] for i in sqldata])
+    #pp (data)
     if action == 'download':
         title = 'Re-download selected show'
     else:
-        title = 'Move selected file to: {}'.format(Config.tv_dir)
+        title = 'Copy selected file to: {}'.format(Config.tv_dir)
 
     tbl = ConsoleTable(data)
     tbl.set_title(title)
