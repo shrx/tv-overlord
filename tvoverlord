@@ -12,6 +12,7 @@ Usage:
   tv nondbshow SEARCH_STRING [-c COUNT] [-l LOCATION] [-p PROVIDER]
   tv editdbinfo SHOW_NAME
   tv providers
+  tv history (list|copy|download) [CRITERIA]
 
   With no arguments, tv runs showmissing
 
@@ -58,6 +59,7 @@ from tv.tvconfig import Config
 from tv.tvutil import FancyPrint, dict_factory
 from tv.util import U
 from tv.location import Location
+from tv.history import History
 
 
 def edit_db(search_str):
@@ -135,6 +137,8 @@ def edit_db(search_str):
     conn.close()
 
 def init(docopt_args):
+    #print docopt_args
+    #exit()
     class Args:
         """Mapping from docopt args to object
 
@@ -152,9 +156,14 @@ def init(docopt_args):
         nondbshow       = docopt_args['nondbshow']
         editdbinfo      = docopt_args['editdbinfo']
         providers       = docopt_args['providers']
+        history         = docopt_args['history']
         # arguments
         search_string   = docopt_args['SEARCH_STRING']
         show_name       = docopt_args['SHOW_NAME']
+        criteria        = docopt_args['CRITERIA']
+        show            = docopt_args['list']
+        copy            = docopt_args['copy']
+        download        = docopt_args['download']
         # options
         count           = docopt_args['--count']
         location        = docopt_args['--location']
@@ -201,7 +210,8 @@ def init(docopt_args):
         not Args.addnew and
         not Args.nondbshow and
         not Args.editdbinfo and
-        not Args.providers):
+        not Args.providers and
+        not Args.history):
 
         Args.showmissing = True
 
@@ -500,6 +510,30 @@ def init(docopt_args):
         providers = Config.providers
         for p in providers:
             print p, '  http://%s' % p.replace('_', '.')
+
+    elif Args.history:
+        criteria = ''
+        # try to parse criteria as an int, then as a date.  If neither don't
+        # work, pass it on as a string which should be a show title
+        try:
+            criteria = int(Args.criteria)
+        except:
+            try:
+                criteria = date_parser.parse(Args.criteria)
+            except:
+                #print 'CRITERIA is not a number or a date'
+                #exit()
+                criteria = Args.criteria
+
+
+        history = History(criteria)
+        if Args.show:
+            history.show()
+        elif Args.copy:
+            history.copy()
+        elif Args.download:
+            history.download()
+
 
 
 if __name__ == '__main__':
