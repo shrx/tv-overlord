@@ -18,7 +18,7 @@ _tv()
     # COMMANDS: ------------------------
 
 	if [ $COMP_CWORD -eq 1 ]; then
-	    commands='download showmissing info calendar addnew nondbshow editdbinfo providers'
+	    commands='download showmissing info calendar addnew nondbshow editdbinfo providers history'
 		COMPREPLY=( $(compgen -W "${commands}" -- $cur) )
 		return 0
 
@@ -26,27 +26,35 @@ _tv()
 
     # download
 	elif [[ "${prev}" == "download" ]]; then
-        opts="-n --no-cache -c --count -l --location -p --search-provider"
+        opts="--no-cache --today --ignore-warning --count --location --search-provider"
 		COMPREPLY=( $(compgen -W "${opts}" -- $cur) )
         return 0
     # showmissing
 	elif [[ "${prev}" == "showmissing" ]]; then
-        opts="-n --no-cache"
+        opts="--no-cache --today"
 		COMPREPLY=( $(compgen -W "${opts}" -- $cur) )
         return 0
     # info
 	elif [[ "${prev}" == "info" ]]; then
-        opts="-n --no-cache -a --show-all -x --sort-by-next --ask-inactive --show-links --synopsis"
+        opts="--no-cache --show-all --sort-by-next --ask-inactive --show-links --synopsis"
 		COMPREPLY=( $(compgen -W "${opts}" -- $cur) )
         return 0
     # calendar
 	elif [[ "${prev}" == "calendar" ]]; then
-        opts="-n --no-cache -a --show-all -x --sort-by-next --no-color --days"
+        opts="--no-cache --show-all --sort-by-next --no-color --days"
 		COMPREPLY=( $(compgen -W "${opts}" -- $cur) )
         return 0
+    # addnew
     # nondbshow
 	elif [[ "${prev}" == "nondbshow" ]]; then
-        opts="-n --no-cache -c --count -l --location -p --search-provider"
+        opts="--count --location --search-provider"
+		COMPREPLY=( $(compgen -W "${opts}" -- $cur) )
+        return 0
+    # editdbinfo
+    # providers
+    # history
+	elif [[ "${prev}" == "history" ]]; then
+        opts="list copy redownload"
 		COMPREPLY=( $(compgen -W "${opts}" -- $cur) )
         return 0
 	fi

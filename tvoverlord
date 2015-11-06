@@ -12,7 +12,7 @@ Usage:
   tv nondbshow SEARCH_STRING [-c COUNT] [-l LOCATION] [-p PROVIDER]
   tv editdbinfo SHOW_NAME
   tv providers
-  tv history (list|copy|download) [CRITERIA]
+  tv history (list|copy|redownload) [CRITERIA]
 
   With no arguments, tv runs showmissing
 
@@ -163,7 +163,7 @@ def init(docopt_args):
         criteria        = docopt_args['CRITERIA']
         show            = docopt_args['list']
         copy            = docopt_args['copy']
-        download        = docopt_args['download']
+        redownload      = docopt_args['redownload']
         # options
         count           = docopt_args['--count']
         location        = docopt_args['--location']
@@ -525,15 +525,13 @@ def init(docopt_args):
                 #exit()
                 criteria = Args.criteria
 
-
         history = History(criteria)
         if Args.show:
             history.show()
         elif Args.copy:
             history.copy()
-        elif Args.download:
+        elif Args.redownload:
             history.download()
-
 
 
 if __name__ == '__main__':
