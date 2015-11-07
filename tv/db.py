@@ -88,10 +88,8 @@ class DB(object):
                    chosen_hash, season, episode, chosen FROM tracking
                  WHERE date(download_date) = :date'''
         date_str = date.strftime('%Y-%m-%d')
-        #print '>', date_str
         values = {'date': date_str}
         data = self.run_sql(sql, values)
-        #pp(data)
         return data
 
     def get_downloaded_title(self, title):
@@ -100,7 +98,6 @@ class DB(object):
                  WHERE show_title like :title'''
         values = {'title': "%{}%".format(title)}
         data = self.run_sql(sql, values)
-        pp(data)
         return data
 
     def get_missing(self):

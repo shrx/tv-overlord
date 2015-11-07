@@ -54,19 +54,12 @@ class History:
         return new
 
     def show(self):
-        '''date name
-        magnet downloaded
-        files downloaded
-        copied
-
-        '''
-
         for row in self.sqldata:
             date = self.format_date(row[0])
             name = U.snip(self.episode(row[1], row[4], row[5]), 25)
             name = name.ljust(25)
             filename = self.exists(row[2])
-            print '%s %s %s' % (date, name, filename)
+            print '%s  %s  %s' % (date, name, filename)
 
     def copy(self):
         title = 'Copy files to %s' % Config.tv_dir
