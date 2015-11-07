@@ -58,9 +58,9 @@ class Provider(object):
             # the ExtraTorrent rss feed doesn't supply the magnet link, or any
             # usable links (They must be downloaded from the site).  But the
             # feed has the URN hash, so we can build a magnet link from that.
-            magnet_url = 'magnet:?xt=urn:btih:{}&tr=udp%3A%2F%2Ftracker.openbittorrent.com&tr=udp%3A%2F%2Ftracker.publicbt.com'
+            magnet_url = 'magnet:?xt=urn:btih:{}&dn={}'
             magnet_hash = show['info_hash']
-            magnet = magnet_url.format(magnet_hash)
+            magnet = magnet_url.format(magnet_hash, urllib.quote(title))
             seeds = show['seeders']
             if seeds == '---':
                 seeds = '0'
