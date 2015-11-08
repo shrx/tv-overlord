@@ -1,24 +1,17 @@
 
-* TV Downloader
+* TV Overlord
 
 A command line tool to download and manage TV shows from newsgroups or
 bittorent.  It will download nzb files or magnet links.
 
-TV Downloader keeps track of which shows have been downloaded and what
+TV Overlord keeps track of which shows have been downloaded and what
 shows are available to download.
 
-There are two bittorent search providers, kickass.to and
-thepiratebay.sx; and there are two NZB search providers, nzbclub.com
-and nzbindex.com.  Also, Others can be added fairly easily.  See the
+There are serveral bittorent search providers and two NZB search
+providers and new ones can be added fairly easily.  See the
 search providers [[https://github.com/smmcg/tv-downloader/blob/master/search_providers/README.org][README.org]], or by making a feature request in issues
 or a pull request.
 
-#+BEGIN_QUOTE
-*Note*: The two nzb search providers don't work, and I'm not sure why, but it
-appears to be a problem on the search engine side.  I no longer use
-nzb's so its not a high priority now but if someone wants me to, I'll
-take a closer look at them.
-#+END_QUOTE
 
 ** Features
 
@@ -41,7 +34,7 @@ can take a look at making it work or alternatively send me a pull request.
 
 *** Dependencies
 
-TV Downloader requires some additional python libraries (not part of
+TV Overlord requires some additional python libraries (not part of
 the standard packages) to be installed:
   1. *tvdb_api* - [[https://github.com/dbr/tvdb_api]] \\
      Python library to access the thetvdb.com api
@@ -75,82 +68,97 @@ the standard packages) to be installed:
 
 ** How to use
 
-=tv.py addnew "show name";=
+**** Add new
+
+: tvoverlord addnew SHOWNAME
 
 tv will search thetvdb.com for a match to your show name.  If the show
 it asks you is not the right one, it helps to add the year to the
-name: =tv.py addnew 'show name year';=.
+name: =tvoverlord addnew 'show name year';=.
 
+**** Show missing
 
-=tv.py showmissing;=
+: tvoverlord showmissing [--no-cache] [--today]
 
-This will list any shows that are ready to download.
+This will list any shows that are available to download.
 
+**** Download
 
-=tv.py download;= \\
-=tv.py download -c COUNT -l LOCATION -p PROVIDER [SHOW NAME]=
+: tvoverlord download [--no-cache] [--today] [--ignore-warning] [--count NUM]
+:                     [--location FILEPATH] [--provider NAME] [SHOWNAME]
 
 For each show thats ready to download, it will ask you which one you
 want to download.
 
- * =-c COUNT=  sets the number of results to display, the default is 5.
- * =-l LOCATION=  sets the dir to download the nzb files to if you are using
+ + =--count=  sets the number of results to display, the default is 5.
+ + =--location=  sets the dir to download the nzb files to if you are using
    an nzb search engine.  This can be set in the ini file
- * =-p PROVIDER=  will set the provider to use.  Look in the ini file to see
+ + =--provider=  will set the provider to use.  Look in the ini file to see
    how that can be specified there.
 
 And finally, you can specify a single show to only download that show
 instead of downloading all.
 
+**** Calendar
 
-=tv.py calendar;=
-
-=tv.py calendar --days DAYS;= \\
-=tv.py calendar --days DAYS,AFTER;=
+: tvoverlord calendar [--no-cache] [--today] [--sort-by-next]
+:                     [--no-color] [--days DAYS[,AFTER]] [SHOWNAME]
 
 Display a calendar of all the current shows in your database.  It
 defaults to the width of the console.
 
- * =--days DAYS= will narrow the calendar to DAYS days.  For example,
+ + =--days DAYS= will narrow the calendar to DAYS days.  For example,
    =--days 10= will show the next 10 days only.
- * =--days DAYS,AFTER= will display from DAYS to AFTER days.  For
+ + =--days DAYS,AFTER= will display from DAYS to AFTER days.  For
    example, =--days 10,5= will display from the 10th day to the 15th day.
 
+**** History
 
-=tv.py info;= \\
-=tv.py info -a -x --show-links --synopsis --ask-inactive [SHOW NAME];=
+: tvoverlord history (list|copy|redownload) [CRITERIA]
+
+The history command lets you view the status of previously downloaded
+episodes and recopy or redownload the episode.  CRITERIA can be a
+number, date or partial title of a show.
+
+**** Info
+
+: tvoverlord info [--no-cache] [--today] [--sort-by-next] [--show-links]
+:                 [--synopsis] [--ask-inactive] [SHOW NAME]
 
 This will show you what shows are next, and how many days till they
 are broadcast.  Called without arguments, it lists all show except
 shows marked inactive, in alphabetical order.  A single show can be
 specified also.
 
- * =-a= will show all shows including inactive shows
- * =-x= this will sort the shows by order of which episodes are next
- * =--show-links= will display links to imdb.com and thetvdb.com for
+ + =-a= will show all shows including inactive shows
+ + =-x= this will sort the shows by order of which episodes are next
+ + =--show-links= will display links to imdb.com and thetvdb.com for
    each show
- * =--ask-inactive=  When a show has been completely downloaded, and it
+ + =--ask-inactive=  When a show has been completely downloaded, and it
    has been cancelled or ended, it will ask you if you want to mark it
    inactive.
 
+**** Search and download non tracked
 
-=tv.py nondbshow "some search name";=
+: tvoverlord nondbshow [--count NUM] [--location FILEPATH]
+:                      [--provider NAME] SEARCHTERM
 
 This will show you matches to your search.  Anything downloaded this
 way will not be recorded in your database.
 
+**** Providers
 
-=tv.py providers;=
+: tvoverlord providers
 
 This will list search providers available to the program.  The default
 one is the provider at the top of the list in config.ini.
 
+**** Edit db info
 
-=tv.py editdbinfo "exact show name";=
+: tvoverlord editdbinfo SHOWNAME
 
 Edit the data in the database for show name.  You can manually set a
 show as 'inactive' here if you wish.
-
 
 ** Screenshots
 
@@ -171,26 +179,28 @@ This show the info command.
 ** Configure
 
 TV Downloader stores the config file sqlite database in
-~/.tv_downloader.  If that dir doesn't exist, the program will offer
+=~/.tv_downloader=.  If that dir doesn't exist, the program will offer
 to create it for you.
 
 
 ** Command line
 
-=$ tv.py --help=
+=$ tvoverlord --help=
 #+BEGIN_EXAMPLE
+$ tvoverlord -h
 Download and manage TV shows
 
 Usage:
   tv
-  tv download    [-n] [-c COUNT] [-l LOCATION] [-p PROVIDER] [SHOW_NAME]
-  tv showmissing [-n]
+  tv download    [-n] [-t] [-i] [-c COUNT] [-l LOCATION] [-p PROVIDER] [SHOW_NAME]
+  tv showmissing [-n] [-t]
   tv info        [-n] [-a] [-x] [--ask-inactive] [--show-links] [--synopsis] [SHOW_NAME]
   tv calendar    [-n] [-a] [-x] [--no-color] [--days DAYS] [SHOW_NAME]
   tv addnew SHOW_NAME
   tv nondbshow SEARCH_STRING [-c COUNT] [-l LOCATION] [-p PROVIDER]
   tv editdbinfo SHOW_NAME
   tv providers
+  tv history (list|copy|redownload) [CRITERIA]
 
   With no arguments, tv runs showmissing
 
@@ -209,8 +219,11 @@ Options:
   -p SEARCH_PROVIDER, --search-provider SEARCH_PROVIDER
                     Specify a different search engine instead of the one
                     in the config file.
+  -i, --ignore-warning
+                    Ignore 'Not connected to vpn' warning
   -a, --show-all    Show all shows including the ones marked inactive
   -x, --sort-by-next  Sort by release date instead of the default alphabetical
+  -t, --today       Show or download today's episodes
   --ask-inactive    Ask to make inactive shows that are cancelled
   --show-links      Show links to IMDB.com and TheTVDb.com for each show
   -s --synopsis     Display the show synopsis
@@ -233,3 +246,4 @@ I can, but I don't use it.  As far as I'm concerned, this is the same
 as using TiVo and skipping the commercials.
 
 If you want to download shows, you should do this too.
+
