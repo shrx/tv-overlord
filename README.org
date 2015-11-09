@@ -1,8 +1,9 @@
 
-* TV Overlord
+[[http://i.imgur.com/S9hlqg0.png]]
 
-A command line tool to download and manage TV shows from newsgroups or
-bittorent.  It will download nzb files or magnet links.
+TV Overlord is a command line tool to download and manage TV shows
+from newsgroups or bittorent.  It will download nzb files or magnet
+links.
 
 TV Overlord keeps track of which shows have been downloaded and what
 shows are available to download.
@@ -22,7 +23,7 @@ for each tv show.
 
 There are serveral bittorent search providers and two NZB search
 providers and new ones can be added fairly easily.  See the
-search providers [[https://github.com/smmcg/tv-downloader/blob/master/search_providers/README.org][README.org]], or by making a feature request in issues
+search providers [[https://github.com/8cylinder/tv-overlord/tree/master/tv/search_providers][README.org]], or by making a feature request in issues
 or a pull request.
 
 
@@ -197,23 +198,57 @@ show as 'inactive' here if you wish.
 
 ** Configure
 
-TV Downloader stores the config file sqlite database in
-=~/.tv_downloader=.  If that dir doesn't exist, the program will offer
-to create it for you.
+TV Overlord looks for the database and =config.ini= in the
+=~/.tv_overlord/= directory.  If that directory doesn't exist, the app
+will create it.
+
+*** Configuration file sections
+
+=[App Settings]=
+ + =ip: xxx.xxx.xxx.xxx= \\
+   If used, TV Overlord will issue a warning if not connected to a
+   vpn.  This should be you ip address when *not* connected to a vpn, so
+   if your current ip matches this one, the program stops.  It uses
+   http://api.ipify.org to get the current ip address.
+
+ + =clean torrents: (yes|no)=\\
+   If yes, the video file is extracted from the downloaded dir and
+   renamed. For example:
+   =Z.Nation.2x09.INTERNAL.720p.HDTV.x264-KILLERS[ettv].mkv= will be
+   renamed to "=Z Nation S02E09 720p.mkv=" and then copied to the "=tv
+   dir=" (description below).  If that directory doesn't have a dir
+   called "Z Nation", it's created.
+
+   If no, then whatever was downloaded gets copied to the "tv dir" and
+   put into the "Z Nation" directory
+
+=[Search Providers]=
+ + This is a list of search providers that come with the application.
+   The first one is the default.  The search engine used can be
+   overridden on the command line with =--provider=PROVIDERNAME=
+
+=[File Locations]=
+ + =db file: FILEPATH= \\
+   The location of the database.
+ + =tv dir: FILEPATH= \\
+   If specified, this is where the post download script will put the
+   episodes.
+ + =staging: FILEPATH= \\
+   If using NZB searches, this is where the NZB files will be put.
 
 ** Screenshots
 
-[[http://i.imgur.com/jMP4T3h.gif]]
+[[http://i.imgur.com/jMP4T3h.gif]] \\
 This screenshot shows the providers list command and downloading using
 an NZB search provider.
 
-[[http://i.imgur.com/umS1DqH.gif]]
+[[http://i.imgur.com/umS1DqH.gif]] \\
 This shows using a bittorrent search provider to download.
 
-[[http://i.imgur.com/sBFl5sg.gif]]
+[[http://i.imgur.com/sBFl5sg.gif]] \\
 This shows the calendar.
 
-[[http://i.imgur.com/eg0Ui7U.gif]]
+[[http://i.imgur.com/eg0Ui7U.gif]] \\
 This show the info command.
 
 

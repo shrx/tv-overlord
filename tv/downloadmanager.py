@@ -45,9 +45,8 @@ class DownloadManager(DB):
     transfered to the destination.
     """
     def __init__(self, torrent_hash, path, filename, debug=False):
-        torrent_origin = Config.torrents_dir
         # set up logging
-        log_file = '{}tv_download_manager.log'.format(torrent_origin)
+        log_file = '{}tv_download_manager.log'.format(path)
         logging.basicConfig(format='%(asctime)s: %(levelname)s: %(message)s',
                             datefmt='%Y-%m-%d %H:%M:%S',
                             filename=log_file,
@@ -64,7 +63,7 @@ class DownloadManager(DB):
         logging.info('path: %s', path)
         logging.info('filename: %s', filename)
 
-        filename = os.path.join(Config.torrents_dir, filename)
+        filename = os.path.join(path, filename)
         self.save_info(torrent_hash, filename)
 
         debug_command = '''export TR_TORRENT_NAME='%s'; export TR_TORRENT_DIR='%s'; export TR_TORRENT_HASH='%s'; python ~/projects/media-downloader/src/transmission_done.py'''
@@ -72,14 +71,14 @@ class DownloadManager(DB):
 
         if self.is_oneoff(torrent_hash):
             logging.info('Download is a one off, doing nothing.')
-            self.set_torrent_complete(torrent_hash)
-            return
-
-        if Config.torrent_done in ('copy', 'move'):
+        else:
             if Config.clean_torrents:
                 source = self.get_show_file(filename)
 
             pretty_filename, destination_dir = self.pretty_names(source, torrent_hash)
+            if not os.path.exists(Config.tv_dir):
+                logging.error('{} does not exist'.format(Config.tv_dir))
+                exit()
             destination_dir = os.path.join(Config.tv_dir, destination_dir)
             if not os.path.exists(destination_dir):
                 os.mkdir(destination_dir)
