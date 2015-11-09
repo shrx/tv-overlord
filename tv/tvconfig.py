@@ -79,12 +79,12 @@ class Config:
     # OPTIONAL FIELDS
     # [App Settings]
     ip = cfg.get('App Settings', 'ip')
-    torrent_done = cfg.get('App Settings', 'torrent done')
+    #torrent_done = cfg.get('App Settings', 'torrent done')
     clean_torrents = cfg.get('App Settings', 'clean torrents')
 
     # [File Locations]
     tv_dir = os.path.expanduser(cfg.get('File Locations', 'tv dir'))
-    torrents_dir = os.path.expanduser(cfg.get('File Locations', 'torrents dir'))
+    #torrents_dir = os.path.expanduser(cfg.get('File Locations', 'torrents dir'))
 
     # REQUIRED FIELDS
     providers = []
