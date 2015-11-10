@@ -6,20 +6,24 @@
  - [ ] Speed up showmissing.
  - [ ] Rebuild config system, use SetBack.
  - [ ] Sync with remote server.
+ - [ ] make work on a server enviroment
+   1. [ ] make work with transmission deamon
+   2. [ ] test with commandline torrent clients
+   3. [ ] maybe use http://torcache.net/ for clients that don't
+          support magnet links
 
 
 * Todo
 
-** For 1.0 release  [2/8]
+** For 1.0 release  [3/8]
  1. [ ] debug all commands and options.
  2. [ ] bullet proof install
  3. [X] test nzb's
- 4. [ ] when adding new show, check if already added
+ 4. [X] when adding new show, check if already added
  5. [X] confirm working on linux
  6. [ ] add a 'Future Plans' section to README.org
  7. [ ] test config.ini for missing fields, or wrong values, etc.
- 8. [ ] make work on a server enviroment
-    1. [ ] test with commandline torrent clients
+ 8. [ ] don't save the download list array in tracking
 
 ** Code cleanups  [3/6]
  1. [X] convert all filenames to lowercase
@@ -42,13 +46,6 @@
    + Make sure all strings from api are encoded ascii
 
 ** Misc
- - Add new search providers.  List at http://torrentfreak.com/top-10-popular-torrent-sites-2014-140104/
-   - http://torrentz.eu/ (meta search site)
-   - http://isohunt.to/
-   - http://extratorrent.cc/
- - Change date format to show age instead.
-   Instead of: =Apr 13, 2014=, Change to: =6 Months=
- - Add a method to higlight a torrent name if its been downloaded before
  - Where requests is used, implement all of request's exceptions.  See here:
    http://docs.python-requests.org/en/latest/user/quickstart/#errors-and-exceptions
 
@@ -69,5 +66,17 @@
  - more details about search_provider format
 
 ** Possible structure changes
-http://www.jeffknupp.com/blog/2013/08/16/open-sourcing-a-python-project-the-right-way/
+  http://www.jeffknupp.com/blog/2013/08/16/open-sourcing-a-python-project-the-right-way/
+
+
+
+#+BEGIN_SRC text
+
+        \ /
+       <(. )>  [TV Overlord]
+         ^
+        /^\
+       //^\\
+
+#+END_SRC
 
