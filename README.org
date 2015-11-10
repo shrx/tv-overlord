@@ -69,15 +69,15 @@ the standard packages) to be installed:
   1. =pip install tvdb_api beautifulsoup4 feedparser requests docopt python-dateutil=
   2. Create a dir somewhere and clone this repository: \\
      =git clone https://github.com/smmcg/tv-downloader.git=
-  3. Put the dir on your $PATH or symlink tv.py to a dir that is
+  3. Put the dir on your $PATH or symlink tvoverlord to a dir that is
      on the path.
      (I have it symlinked to =tv= in a bin dir thats on the path)
-  4. type: =tv.py= \\
+  4. type: =tvoverlord= \\
      The first time its run, it will ask to create the
      config dir.  Type =Y= to allow it.  The config directory will be
      created in your home dir called =.tv-downloader/=
-  5. Type =tv.py addnew "someshow";= to start. \\
-     For example: =tv.py addnew 'some tv show name';=
+  5. Type =tvoverlord addnew "someshow";= to start. \\
+     For example: =tvoverlord addnew 'some tv show name';=
 
 
 ** How to use
