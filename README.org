@@ -66,7 +66,7 @@ the standard packages) to be installed:
 
 *** Install steps
 
-  1. =pip install tvdb_api beautifulsoup4 feedparser requests docopt python-dateutil=
+  1. =sudo pip install tvdb_api beautifulsoup4 feedparser requests docopt python-dateutil=
   2. Create a dir somewhere and clone this repository: \\
      =git clone https://github.com/smmcg/tv-downloader.git=
   3. Put the dir on your $PATH or symlink tvoverlord to a dir that is
