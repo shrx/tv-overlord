@@ -156,7 +156,7 @@ class ConsoleTable:
                 i = str(i)
                 if width == 0:
                     width = flex_width
-                row_item = i.encode('ascii', 'ignore')
+                row_item = i
                 row_item = U.snip(row_item, width)
                 row_item = row_item.strip()
 

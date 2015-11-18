@@ -234,7 +234,8 @@ class Provider(object):
 
     def download(self, chosen_show, destination, final_name):
         if not os.path.isdir(destination):
-            raise ProviderError('%s is not a dir' % dest)
+            print('\n%s does not exist' % destination)
+            exit()
 
         href = chosen_show
         filename = href.split('/')[-1]

@@ -166,7 +166,7 @@ class U:
         else:
             end_half = 1
 
-        short_mid = length / 2
+        short_mid = int(length / 2)
         start = text[0: short_mid]
         end = text[short_mid + end_half - short_mid * 2: len(text)]
         #color_sep = U.__greenf + U.__boldon + sep + U.__reset

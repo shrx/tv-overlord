@@ -270,7 +270,7 @@ def init(docopt_args):
 
             synopsis = ''
             if Args.synopsis and series.overview:
-                paragraph = series.overview.encode('ascii', 'ignore')
+                paragraph = series.overview
                 indent = '    '
                 fill_width = 80
                 if int(series.console_columns) < fill_width:
