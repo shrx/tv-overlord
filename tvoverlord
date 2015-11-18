@@ -3,16 +3,16 @@
 r"""Download and manage TV shows
 
 Usage:
-  tv
-  tv download    [-n] [-t] [-i] [-c COUNT] [-l LOCATION] [-p PROVIDER] [SHOW_NAME]
-  tv showmissing [-n] [-t]
-  tv info        [-n] [-a] [-x] [--ask-inactive] [--show-links] [--synopsis] [SHOW_NAME]
-  tv calendar    [-n] [-a] [-x] [--no-color] [--days DAYS] [SHOW_NAME]
-  tv addnew SHOW_NAME
-  tv nondbshow SEARCH_STRING [-c COUNT] [-l LOCATION] [-p PROVIDER]
-  tv editdbinfo SHOW_NAME
-  tv providers
-  tv history (list|copy|redownload) [CRITERIA]
+  tvoverlord
+  tvoverlord download    [-n] [-t] [-i] [-c COUNT] [-l LOCATION] [-p PROVIDER] [SHOW_NAME]
+  tvoverlord showmissing [-n] [-t]
+  tvoverlord info        [-n] [-a] [-x] [--ask-inactive] [--show-links] [--synopsis] [SHOW_NAME]
+  tvoverlord calendar    [-n] [-a] [-x] [--no-color] [--days DAYS] [SHOW_NAME]
+  tvoverlord addnew SHOW_NAME
+  tvoverlord nondbshow SEARCH_STRING [-c COUNT] [-l LOCATION] [-p PROVIDER]
+  tvoverlord editdbinfo SHOW_NAME
+  tvoverlord providers
+  tvoverlord history (list [-w FIELDS]|copy|redownload) [CRITERIA]
 
   With no arguments, tv runs showmissing
 
@@ -42,6 +42,14 @@ Options:
   --days DAYS       The number of days to show in the calendar
   --no-color        Don't use color in output. Useful if output is to be
                     used in email or text file.
+  -w, FIELDS --what-to-show FIELDS
+                    An optional list of information to show seperated by commas.
+                    It can be any of these: date, title, season, episode, magnet,
+                    oneoff, complete, filename
+                    eg. --what-to-show 'title,filename,magnet'
+
+TVOverlord source code is available at https://github.com/8cylinder/tv-overlord
+Any feature requests, or bug reports should go there.
 """
 import datetime
 import os
@@ -178,6 +186,7 @@ def init(docopt_args):
         no_color        = docopt_args['--no-color']
         today           = docopt_args['--today']
         ignore          = docopt_args['--ignore-warning']
+        what            = docopt_args['--what-to-show']
 
     if Args.location:
         Config.staging = Args['--location']
@@ -525,9 +534,11 @@ def init(docopt_args):
                 #exit()
                 criteria = Args.criteria
 
+        #print '...', Args.criteria, criteria
+
         history = History(criteria)
         if Args.show:
-            history.show()
+            history.show(Args.what)
         elif Args.copy:
             history.copy()
         elif Args.redownload:
@@ -536,6 +547,8 @@ def init(docopt_args):
 
 if __name__ == '__main__':
     docopt_args = docopt(__doc__, version='0.1')
+    #print docopt_args
+    #exit()
     try:
         init(docopt_args)
     except KeyboardInterrupt:

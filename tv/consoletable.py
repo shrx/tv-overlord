@@ -135,9 +135,13 @@ class ConsoleTable:
 
         # key has the s, r, q, m removed to not interfere with the
         # ask_user options.  This list can have anything, as long as
-        # they are single characters.
-        key = ('a','b','c','d','e','f','g','h','i','j','k',
-               'l','n','o','p','t','u','v','w','x','y','z')
+        # they are single characters.  This is aprox 90 characters.
+        key = ('a','b','c','d','e','f','g','h','i','j','k','l','n','o','p',
+               't','u','v','w','x','y','z','A','B','C','D','E','F','G','H',
+               'I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W',
+               'X','Y','Z','0','1','2','3','4','5','6','7','8','9','!','"',
+               '#','$','%','&',"'",'(',')','*','+',',','-','.','/',':',';',
+               '<','=','>','?','@','[','\\',']','^','_','`','{','|','}','~')
 
         self.table.body = self.table.body[:self.display_count]
         for row, counter in zip(self.table.body, key):
@@ -165,7 +169,7 @@ class ConsoleTable:
                 else:
                     row_item = row_item.ljust(width)
 
-                # if hi dev, set the foreground to green
+                # if hi def, set the foreground to green
                 if is_hidef:
                     row_item = U.hi_color(row_item, foreground=76)
 

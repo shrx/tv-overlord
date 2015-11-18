@@ -76,7 +76,7 @@ class DB(object):
 
     def get_downloaded_days(self, days=0):
         sql = '''SELECT download_date, show_title, filename,
-                   chosen_hash, season, episode, chosen FROM tracking
+                   chosen_hash, season, episode, chosen, one_off, complete FROM tracking
                  WHERE julianday(date(download_date))
                        > (julianday(date('now'))-:days)'''
         values = {'days': days}
@@ -85,7 +85,7 @@ class DB(object):
 
     def get_downloaded_date(self, date):
         sql = '''SELECT download_date, show_title, filename,
-                   chosen_hash, season, episode, chosen FROM tracking
+                   chosen_hash, season, episode, chosen, one_off, complete FROM tracking
                  WHERE date(download_date) = :date'''
         date_str = date.strftime('%Y-%m-%d')
         values = {'date': date_str}
@@ -94,7 +94,7 @@ class DB(object):
 
     def get_downloaded_title(self, title):
         sql = '''SELECT download_date, show_title, filename,
-                   chosen_hash, season, episode, chosen FROM tracking
+                   chosen_hash, season, episode, chosen, one_off, complete FROM tracking
                  WHERE show_title like :title'''
         values = {'title': "%{}%".format(title)}
         data = self.run_sql(sql, values)
@@ -102,7 +102,7 @@ class DB(object):
 
     def get_missing(self):
         sql = '''SELECT download_date, show_title, filename,
-                   chosen_hash, season, episode, chosen FROM tracking
+                   chosen_hash, season, episode, chosen, one_off, complete FROM tracking
                  WHERE complete IS NULL'''
         data = self.run_sql(sql)
         return data

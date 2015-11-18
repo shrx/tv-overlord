@@ -53,13 +53,36 @@ class History:
         new = parsed.strftime('%a %b/%d')
         return new
 
-    def show(self):
+    def show(self, what):
+        # date, title, season, episode, magnet, oneoff, complete, filename
+        if what:
+            what = what.replace(' ', '').split(',')
+            line = ''
+            for i in what:
+                line = line + '{%s}\t' % i
+        else:
+            line = '{date}\t{title}\t{complete}\t{filename}'
+
         for row in self.sqldata:
             date = self.format_date(row[0])
-            name = U.snip(self.episode(row[1], row[4], row[5]), 25)
-            name = name.ljust(25)
+            title = row[1]
             filename = self.exists(row[2])
-            print '%s  %s  %s' % (date, name, filename)
+            season = row[4]
+            episode = row[5]
+            magnet = row[6]
+            oneoff = 'one off' if row[7] else 'tracked'
+            complete = 'complete' if row[8] else 'incomplete'
+
+            fields = {'date': date,
+                      'title': title,
+                      'filename': filename,
+                      'season': season,
+                      'episode': episode,
+                      'magnet': magnet,
+                      'oneoff': oneoff,
+                      'complete': complete}
+
+            print line.format(**fields)
 
     def copy(self):
         title = 'Copy files to %s' % Config.tv_dir
