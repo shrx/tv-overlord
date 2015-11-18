@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-import urllib
+import urllib.request, urllib.parse, urllib.error
 import os
 from time import mktime
 from datetime import datetime
@@ -75,7 +75,7 @@ class Provider(object):
             , 'sp': 1  # don't show passworded files
             , 'nfo': 0  # has to have nfo  1=yes, 0=no
         }
-        full_url = url + urllib.urlencode(query)
+        full_url = url + urllib.parse.urlencode(query)
         parsed = feedparser.parse(full_url)
 
         header = [
@@ -123,7 +123,7 @@ class Provider(object):
             # Could be a movie or one off download.
             fullname = destination + '/' + filename
 
-        urllib.urlretrieve(href, fullname)
+        urllib.request.urlretrieve(href, fullname)
 
         return filename
 

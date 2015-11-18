@@ -30,7 +30,7 @@ class AllSeries:
         self.i = 0
         return self
 
-    def next(self):
+    def __next__(self):
         if self.i == len(self.dbdata):
             raise StopIteration
         series = Series(self.provider, dbdata=self.dbdata[self.i])

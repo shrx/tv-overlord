@@ -117,20 +117,20 @@ class Series:
             series = tv[self.db_name]
             self.show_exists = True
         except tvdb_api.tvdb_shownotfound:
-            print 'Show not found: %s' % self.db_name
+            print('Show not found: %s' % self.db_name)
             self.show_exists = False
             #exit()
             return
         except tvdb_api.tvdb_error as e_msg:
-            print '\n'
-            print 'Error: %s' % self.db_name
-            print '-----------------------------'
-            print e_msg
+            print('\n')
+            print('Error: %s' % self.db_name)
+            print('-----------------------------')
+            print(e_msg)
             return
         except UnboundLocalError as e:
-            print '+++++++++++++++++++++++++'
-            print e
-            print '+++++++++++++++++++++++++'
+            print('+++++++++++++++++++++++++')
+            print(e)
+            print('+++++++++++++++++++++++++')
 
         for i in series.data:
             setattr(self, i, series.data[i])
@@ -167,8 +167,8 @@ class Series:
                     episode=episode['episode']
                 )
             else:
-                print '"%s" is listed in TheTVDB, but not found at the search engine' % (
-                    search_title)
+                print('"%s" is listed in TheTVDB, but not found at the search engine' % (
+                    search_title))
 
             if showid == 'skip_rest':
                 return
@@ -222,16 +222,16 @@ class Series:
         if not self.show_exists:
             exit()
 
-        print
-        print self.seriesname
-        print '-' * len(self.seriesname)
-        print textwrap.fill(self.overview, width=int(self.console_columns),
-                            initial_indent=indent, subsequent_indent=indent)
-        print
-        print '%sFirst aired: %s' % (indent, self.firstaired)
-        print '%sStatus: %s' % (indent, self.status)
+        print()
+        print(self.seriesname)
+        print('-' * len(self.seriesname))
+        print(textwrap.fill(self.overview, width=int(self.console_columns),
+                            initial_indent=indent, subsequent_indent=indent))
+        print()
+        print('%sFirst aired: %s' % (indent, self.firstaired))
+        print('%sStatus: %s' % (indent, self.status))
         #print '%sAirs: %s, %s' % (indent, self.airs_time, self.airs_dayofweek)
-        print
+        print()
         correct = ask('Is this the correct show? [y/n]')
 
         if correct == 'y':
@@ -245,7 +245,7 @@ class Series:
             if not show_data:
                 return
         except SearchError:
-            print 'No matches'
+            print('No matches')
             return
         self._download(show_data)
 
@@ -328,7 +328,7 @@ class Series:
 
 
     def _ask(self, shows, season, episode, display_count):
-        print
+        print()
         color = {
             'title_fg': None,
             'title_bg': 19,
@@ -378,7 +378,7 @@ class Series:
 
         backspace = '\b' * len(msg)
         done = U.hi_color(filename.ljust(len(msg)), foreground=34)
-        print '%s%s' % (backspace, done)
+        print('%s%s' % (backspace, done))
 
 
     def set_inactive(self):
@@ -408,8 +408,8 @@ class Series:
             sql = '''UPDATE shows SET status="active"
                      WHERE thetvdb_series_id=:thetvdb_id;'''
             values = {'thetvdb_id': self.id}
-            print
-            print '%s is already in the db. Its status is now set to "active"' % self.seriesname
+            print()
+            print('%s is already in the db. Its status is now set to "active"' % self.seriesname)
         else:
             sql = '''insert into shows (
                 network_status, status, thetvdb_series_id, name, season, episode)

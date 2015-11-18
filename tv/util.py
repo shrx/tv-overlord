@@ -156,7 +156,7 @@ class U:
     def snip(text, length):
         #sep = '+'
         #sep = '0xE2 0x80 0xA6'
-        sep = u"\u2026"
+        sep = "\u2026"
 
         if len(text) <= length:
             return text
@@ -198,14 +198,14 @@ if __name__ == '__main__':
 
     line = "-" * 50
 
-    print "\nTesting U.snip -- U.snip (<text>, <length>)\n", line
+    print("\nTesting U.snip -- U.snip (<text>, <length>)\n", line)
 
     seq = "abcdefghijklmnopqrstuvwxyz"
     for j in (13, 14):
         for i in range(10, 20):
-            print "%s<" % (U.snip(seq[0:i], j).ljust(j))
+            print("%s<" % (U.snip(seq[0:i], j).ljust(j)))
 
-    print '\nTesting U.hi_color() -- U.hi_color (<text>, <foreground>, <background>)\n', line
+    print('\nTesting U.hi_color() -- U.hi_color (<text>, <foreground>, <background>)\n', line)
 
     k = int(15)
     for i in range(17, 52):
@@ -220,10 +220,10 @@ if __name__ == '__main__':
                 pad = ' '
 
             label = ' ' + str(k) + pad
-            print U.hi_color(label, foreground=16, background=k),
-        print ''
+            print(U.hi_color(label, foreground=16, background=k), end=' ')
+        print('')
 
-    print '\nTest effects -- U.effects (<[effect list]>, <text>)\n', line
+    print('\nTest effects -- U.effects (<[effect list]>, <text>)\n', line)
 
     effects = ['blackf', 'bluef', 'cyanf', 'greenf', 'purplef', 'redf',
                'whitef', 'yellowf', 'blackb', 'blueb', 'cyanb', 'greenb',
@@ -231,18 +231,18 @@ if __name__ == '__main__':
                'italicon', 'ulon', 'strikeon']
 
     for eff in effects:
-        print U.effects([eff], eff),
-    print
-    print
+        print(U.effects([eff], eff), end=' ')
+    print()
+    print()
 
-    print 'Combining effects:'
+    print('Combining effects:')
     for e in range(10):
         item1 = random.choice(effects)
         item2 = random.choice(effects)
         item3 = random.choice(effects)
-        print U.effects([item1, item2, item3],
-                        '%s %s %s' % (item1, item2, item3))
+        print(U.effects([item1, item2, item3],
+                        '%s %s %s' % (item1, item2, item3)))
 
-    print ''
-    print U.effects(['boldon', 'ulon', 'greenf'],
-                    'This text should have bold, underline, and green text')
+    print('')
+    print(U.effects(['boldon', 'ulon', 'greenf'],
+                    'This text should have bold, underline, and green text'))

@@ -9,7 +9,7 @@ class Location:
         try:
             r = requests.get(url)
         except requests.exceptions.ConnectionError:
-            print '\nIP identification services are unavailable - http://api.ipify.org'
+            print('\nIP identification services are unavailable - http://api.ipify.org')
             exit()
 
         self.ip = r.content

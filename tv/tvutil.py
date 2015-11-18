@@ -25,7 +25,7 @@ class FancyPrint:
             msg += '\n'
             self._back_print(msg)
         else:
-            print msg
+            print(msg)
         self.prev_fancy = False
 
     def fancy_print(self, msg):

@@ -34,13 +34,13 @@ def main(args):
         torrent_hash = os.environ['TR_TORRENT_HASH']
         torrent_name = os.environ['TR_TORRENT_NAME']
     except KeyError:
-        print 'Enviroment variables not set'
+        print('Enviroment variables not set')
         exit()
 
     if args['--debug']:
-        print 'torrent_hash:', torrent_hash
-        print 'torrent_dir:', torrent_dir
-        print 'torrent_name:', torrent_name
+        print('torrent_hash:', torrent_hash)
+        print('torrent_dir:', torrent_dir)
+        print('torrent_name:', torrent_name)
 
     DownloadManager(torrent_hash, torrent_dir, torrent_name, debug=args['--debug'])
 

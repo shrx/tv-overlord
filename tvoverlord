@@ -1,4 +1,4 @@
-#!/usr/bin/python2
+#!/usr/bin/python3
 
 r"""Download and manage TV shows
 
@@ -51,6 +51,7 @@ Options:
 TVOverlord source code is available at https://github.com/8cylinder/tv-overlord
 Any feature requests, or bug reports should go there.
 """
+from __future__ import print_function
 import datetime
 import os
 import sqlite3
@@ -80,50 +81,50 @@ def edit_db(search_str):
     row = curs.fetchone()
 
     if not row:
-        print '"%s" not found' % search_str
+        print('"%s" not found' % search_str)
         exit()
 
     is_error = False
 
-    print 'While editing a field, hit <enter> to leave it unchanged.'
-    print 'Type "<ctrl> c" to cancel all edits.\n'
+    print('While editing a field, hit <enter> to leave it unchanged.')
+    print('Type "<ctrl> c" to cancel all edits.\n')
     try:
-        new_name = raw_input('Name: (%s) ' % (row['name']))
+        new_name = input('Name: (%s) ' % (row['name']))
         if not new_name:
             new_name = row['name']
 
-        new_search_engine_name = raw_input('Search engine title: (%s) ' % (row['search_engine_name']))
+        new_search_engine_name = input('Search engine title: (%s) ' % (row['search_engine_name']))
         if not new_search_engine_name:
             new_search_engine_name = row['search_engine_name']
 
-        new_season = raw_input('Current season: (%s) ' % (row['season']))
+        new_season = input('Current season: (%s) ' % (row['season']))
         if not new_season:
             new_season = str(row['season'])
 
-        new_episode = raw_input('Last episode: (%s) ' % (row['episode']))
+        new_episode = input('Last episode: (%s) ' % (row['episode']))
         if not new_episode:
             new_episode = str(row['episode'])
 
-        new_status = raw_input('Status: (%s) ' % (row['status']))
+        new_status = input('Status: (%s) ' % (row['status']))
         if not new_status:
             new_status = row['status']
 
-        print
+        print()
 
     except KeyboardInterrupt:
-        print '\nDatabase edit canceled.'
+        print('\nDatabase edit canceled.')
         exit()
 
     if not new_season.isdigit():
-        print 'Error: Season must be a number'
+        print('Error: Season must be a number')
         is_error = True
 
     if not new_episode.isdigit():
-        print 'Error: Episode must be a number'
+        print('Error: Episode must be a number')
         is_error = True
 
     if new_status not in ['active', 'inactive']:
-        print 'Error: Status must be either "active" or "inactive"'
+        print('Error: Status must be either "active" or "inactive"')
         is_error = True
 
     if is_error:
@@ -139,7 +140,7 @@ def edit_db(search_str):
 
     curs.execute(sql, row_values)
 
-    print 'Database updated'
+    print('Database updated')
 
     conn.commit()
     conn.close()
@@ -201,8 +202,8 @@ def init(docopt_args):
                 provider = p
                 break
         if not provider:
-            print 'Unknown provider: {}'.format(user_provider)
-            print 'Choices are: {}'.format(', '.join(Config.providers))
+            print('Unknown provider: {}'.format(user_provider))
+            print('Choices are: {}'.format(', '.join(Config.providers)))
             exit()
     else:
         provider = Config.providers[0]
@@ -342,10 +343,10 @@ def init(docopt_args):
                     if set_status == 'y':
                         series.set_inactive()
 
-        keys = show_info.keys()
+        keys = list(show_info.keys())
         keys.sort()
         for i in keys:
-            print show_info[i]
+            print(show_info[i])
 
     elif Args.calendar:
         if Args.no_color:
@@ -404,8 +405,8 @@ def init(docopt_args):
             days_row = U.hi_color(days_row, 225, header_color)
         months_row = (' ' * title_width) + (' ' * len(spacer)) + months_row
         days_row = (' ' * title_width) + (' ' * len(spacer)) + days_row
-        print months_row
-        print days_row
+        print(months_row)
+        print(days_row)
 
         # build shows rows
         step = 3
@@ -473,7 +474,7 @@ def init(docopt_args):
                     title = U.hi_color(title, 225, title_color_2)
                     broadcast_row = U.hi_color(broadcast_row, 225, date_color_2)
                 row = title + spacer + broadcast_row
-                print row
+                print(row)
 
                 if counter >= step:
                     counter = 0
@@ -497,7 +498,7 @@ def init(docopt_args):
         if Config.ip and not Args.ignore:
             L = Location()
             if L.ips_match(Config.ip):
-                print '%s not connected to VPN' % (U.effects(['redb', 'boldon'], ' Warning: '))
+                print('%s not connected to VPN' % (U.effects(['redb', 'boldon'], ' Warning: ')))
                 exit()
         if show_name:
             all_series.name_filter(show_name)
@@ -518,7 +519,7 @@ def init(docopt_args):
     elif Args.providers:
         providers = Config.providers
         for p in providers:
-            print p, '  http://%s' % p.replace('_', '.')
+            print(p, '  http://%s' % p.replace('_', '.'))
 
     elif Args.history:
         criteria = ''
@@ -552,4 +553,4 @@ if __name__ == '__main__':
     try:
         init(docopt_args)
     except KeyboardInterrupt:
-        print '\b\b<Quitting TV>'
+        print('\b\b<Quitting TV>')

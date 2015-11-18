@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-import urllib
+import urllib.request, urllib.parse, urllib.error
 from time import mktime
 from datetime import datetime
 from pprint import pprint as pp
@@ -35,7 +35,7 @@ class Provider(object):
                     season, episode, search_string))
 
         query = search_string
-        encoded_search = urllib.quote(query)
+        encoded_search = urllib.parse.quote(query)
         # cid=0 everything, cid=8 tv shows:
         url = '{}/rss.xml?type=search&cid=0&search=%s'.format(self.provider_url)
         full_url = url % encoded_search
@@ -61,7 +61,7 @@ class Provider(object):
             # feed has the URN hash, so we can build a magnet link from that.
             magnet_url = 'magnet:?xt=urn:btih:{}&dn={}'
             magnet_hash = show['info_hash']
-            magnet = magnet_url.format(magnet_hash, urllib.quote(title))
+            magnet = magnet_url.format(magnet_hash, urllib.parse.quote(title))
             seeds = show['seeders']
             if seeds == '---':
                 seeds = '0'

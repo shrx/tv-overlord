@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-import urllib
+import urllib.request, urllib.parse, urllib.error
 import re
 
 from bs4 import BeautifulSoup
@@ -43,13 +43,13 @@ class Provider (object):
         urls = '%s/search/ ' % self.provider_url
         for search in searches:
             pretty_name = search_string
-            search_string = urllib.quote(search)
+            search_string = urllib.parse.quote(search)
             url = '%s/search/%s/0/7/0' % (self.provider_url, search_string)
             urls += '%s/0/7/0 ' % search_string
             try:
                 r = requests.get(url)
             except requests.exceptions.ConnectionError:
-                print '\nThe PirateBay is unavailable'
+                print('\nThe PirateBay is unavailable')
                 exit()
             html = r.content
             soup = BeautifulSoup(html)
@@ -87,7 +87,7 @@ class Provider (object):
 
                 show_data.append([name, size, date, seeds, magnet])
 
-        print urls
+        print(urls)
         header = [
             [pretty_name, urls],
             ['Name', 'Size', 'Date', 'Seeds'],

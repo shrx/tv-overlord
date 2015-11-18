@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-import urllib
+import urllib.request, urllib.parse, urllib.error
 import os
 from time import mktime
 from datetime import datetime
@@ -202,7 +202,7 @@ class Provider(object):
             , 'more': '1'
         }
 
-        full_url = url + urllib.urlencode(query)
+        full_url = url + urllib.parse.urlencode(query)
 
         # print 'searching...'
         parsed = feedparser.parse(full_url)
@@ -249,7 +249,7 @@ class Provider(object):
             # Could be a movie or one off download.
             fullname = destination + '/' + filename
 
-        urllib.urlretrieve(href, fullname)
+        urllib.request.urlretrieve(href, fullname)
 
         return filename
 

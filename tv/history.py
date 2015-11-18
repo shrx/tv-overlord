@@ -82,7 +82,7 @@ class History:
                       'oneoff': oneoff,
                       'complete': complete}
 
-            print line.format(**fields)
+            print(line.format(**fields))
 
     def copy(self):
         title = 'Copy files to %s' % Config.tv_dir

@@ -28,7 +28,7 @@ for x in ddata:
     rage_name = s.getchildren()[0].getchildren()[1].text
     rage_id = s.getchildren()[0].getchildren()[0].text
 
-    print x['name'], '---', rage_name
+    print(x['name'], '---', rage_name)
     # print x['thetvdb_series_id'], rage_id
 
     # for title in s:
@@ -40,9 +40,9 @@ for x in ddata:
     update_sql = 'update shows set ragetv_series_id=:ragetv_series_id where thetvdb_series_id=:thetvdb_series_id'
     update_vals = {'ragetv_series_id': rage_id, 'thetvdb_series_id': x['thetvdb_series_id']}
     curs.execute(update_sql, update_vals)
-    print update_vals
+    print(update_vals)
 
-print 'closing db'
+print('closing db')
 conn.commit()
 conn.close()
 
