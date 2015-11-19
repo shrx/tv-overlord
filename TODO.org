@@ -1,29 +1,32 @@
 
-#+TITLE: Todo for tv project
+#+TITLE: Todo for TV Overlord
 
-* Big Things [1/4]
+* Big Things [1/5]
+
  - [X] Change helper scripts to one python class.
  - [ ] Speed up showmissing.
+ - [ ] Make the show data sources modular like the search providers
+       http://www.tvmaze.com/api
  - [ ] Rebuild config system, use SetBack.
- - [ ] Sync with remote server.
  - [ ] make work on a server enviroment
    1. [ ] make work with transmission deamon
    2. [ ] test with commandline torrent clients
    3. [ ] maybe use http://torcache.net/ for clients that don't
           support magnet links
-
+ - [ ] Sync with remote server.
 
 * Todo
 
-** For 1.0 release  [3/8]
- 1. [ ] debug all commands and options.
+** For 1.0 release  [5/10]
+ 1. [ ] package for pip
  2. [ ] bullet proof install
- 3. [X] test nzb's
- 4. [X] when adding new show, check if already added
- 5. [X] confirm working on linux
- 6. [ ] add a 'Future Plans' section to README.org
- 7. [ ] test config.ini for missing fields, or wrong values, etc.
- 8. [ ] don't save the download list array in tracking
+ 3. [ ] debug all commands and options.
+ 4. [ ] test config.ini for missing fields, or wrong values, etc.
+ 5. [X] test nzb's
+ 6. [X] when adding new show, check if already added
+ 7. [X] confirm working on linux
+ 8. [X] don't save the download list array in tracking
+ 9. [X] convert to python3
 
 ** Code cleanups  [3/6]
  1. [X] convert all filenames to lowercase
@@ -50,17 +53,17 @@
    http://docs.python-requests.org/en/latest/user/quickstart/#errors-and-exceptions
 
 ** Future releases
- 1. Fast showmissing
- 2. Make so can be package with cx_freeze
-    [[http://cx-freeze.sourceforge.net/]]
- 3. document all modules, classes and attributes
- 4. make sure each class can be imported into ipython
-    and used there
- 5. create a config class that unifies user, app, and in
-    program settings
- 6. move all hardcoded vars (eg. indent) into config object
- 7. internationalize strings
- 8. unify torrent helper scripts
+ 1. [ ] Fast showmissing
+ 2. [ ] Make so can be package with cx_freeze
+        [[http://cx-freeze.sourceforge.net/]]
+ 3. [ ] document all modules, classes and attributes
+ 4. [ ] make sure each class can be imported into ipython
+        and used there
+ 5. [ ] create a config class that unifies user, app, and in
+        program settings
+ 6. [ ] move all hardcoded vars (eg. indent) into config object
+ 7. [ ] internationalize strings
+ 8. [X] unify torrent helper scripts
 
 ** Documentaion
  - more details about search_provider format
@@ -72,11 +75,11 @@
 
 #+BEGIN_SRC text
 
-        \ /
-       <(. )>  [TV Overlord]
-         ^
-        /^\
-       //^\\
+   \/
+ <(. )>  [TV Overlord]
+   ^
+  /^\
+ //^\\
 
 #+END_SRC
 
