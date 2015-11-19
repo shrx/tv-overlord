@@ -144,11 +144,22 @@ defaults to the width of the console.
 
 **** History
 
-: tvoverlord history (list|copy|redownload) [CRITERIA]
+: tvoverlord history (list [-w FIELDS]|copy|redownload) [CRITERIA]
 
-The history command lets you view the status of previously downloaded
-episodes and recopy or redownload the episode.  CRITERIA can be a
-number, date or partial title of a show.
+- =CRITERIA= can be days, a date or a title or partial title
+- =FIELDS= is a comma seperated list if fields to show that only works
+  with the list command.  It may be any combination of these: date,
+  title, season, episode, magnet, oneoff, complete, filename.  If not
+  specified it defaults to ='date,title,complete'=.
+
+The =list= command generates a tab seperated list.  This is usefull for
+piping to various unix commands.  For example this command will format
+the output into columns.
+
+: tvoverlord history list -w 'title,date,complete' | column -ts$'\t'
+
+=copy= and =redownload= show a list where the user can choose an episode to
+redownload or copy a file to the destination set in the ini file.
 
 **** Info
 
@@ -193,25 +204,6 @@ one is the provider at the top of the list in config.ini.
 
 Edit the data in the database for show name.  You can manually set a
 show as 'inactive' here if you wish.
-
-**** History
-
-: tvoverlord history (list [-w FIELDS]|copy|redownload) [CRITERIA]
-
-- =CRITERIA= can be days, a date or a title or partial title
-- =FIELDS= is a comma seperated list if fields to show that only works
-  with the list command.  It may be any combination of these: date,
-  title, season, episode, magnet, oneoff, complete, filename.  If not
-  specified it defaults to ='date,title,complete'=.
-
-The =list= command generates a tab seperated list.  This is usefull for
-piping to various unix commands.  For example this command will format
-the output into columns.
-
-: tvoverlord history list -w 'title,date,complete' | column -ts$'\t'
-
-=copy= and =redownload= show a list where the user can choose an episode to
-redownload or copy a file to the destination set in the ini file.
 
 ** Configure
 

@@ -12,7 +12,7 @@ class Location:
             print('\nIP identification services are unavailable - http://api.ipify.org')
             exit()
 
-        self.ip = r.content
+        self.ip = str(r.content)
 
     def ips_match(self, ip):
         match = False

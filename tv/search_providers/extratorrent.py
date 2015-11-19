@@ -54,7 +54,6 @@ class Provider(object):
             date = dt.strftime('%b %d/%Y')
             size = U.pretty_filesize (show['size'])
             title = show['title']
-            title = title.encode('ascii', 'ignore')
 
             # the ExtraTorrent rss feed doesn't supply the magnet link, or any
             # usable links (They must be downloaded from the site).  But the

@@ -91,7 +91,7 @@ class History:
         torrent_hash = selected[3]
         torrent_dir, torrent_name = os.path.split(selected[2])
 
-        DownloadManager(torrent_hash, torrent_dir, torrent_name, debug=True)
+        DownloadManager(torrent_hash, torrent_dir, torrent_name)
 
     def download(self):
         title = 'Re-download'
