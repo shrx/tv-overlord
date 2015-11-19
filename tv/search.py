@@ -54,7 +54,7 @@ class Search(object):
         self.episode = episode
         self.show_name = search_string
 
-        msg = u'Searching for: {0:s}...'.format(search_string)
+        msg = 'Searching for: {0:s}...'.format(search_string)
         msg = U.hi_color(msg, foreground=16, background=184)
         sys.stdout.write(msg)
         sys.stdout.flush()
@@ -63,7 +63,7 @@ class Search(object):
 
         search_results = self.engine.search(search_string, season, episode)
 
-        print '%s%s' % (backspace, overwrite),
+        print('%s%s' % (backspace, overwrite), end=' ')
 
         return search_results
 
@@ -89,16 +89,16 @@ class Search(object):
                     subprocess.Popen([app, chosen_show])
 
                 except KeyError:
-                    print 'Unknown enviroment:', unknown_enviroment
+                    print('Unknown enviroment:', unknown_enviroment)
                     exit()
                 except OSError:
-                    print 'You do not seem to have a bittorent client installed'
+                    print('You do not seem to have a bittorent client installed')
                     exit()
             elif platform.system() == 'Darwin':
                 subprocess.Popen(["open", "--background", chosen_show])
             else:
                 unknown_system = platform.platform()
-                print 'Unknown system:', unknown_system
+                print('Unknown system:', unknown_system)
                 exit()
 
 
@@ -110,7 +110,7 @@ class Search(object):
                     self.show_name.replace(' ', '.'),
                     "S%sE%s" % (self.season.rjust(2, '0'), self.episode.rjust(2, '0'))
                 )
-                print final_name
+                print(final_name)
             downloaded_filename = self.engine.download(
                 chosen_show, destination, final_name)
 

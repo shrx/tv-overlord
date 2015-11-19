@@ -1,6 +1,6 @@
 import json
 import datetime
-import urlparse
+import urllib.parse
 from pprint import pprint as pp
 
 from tv.db import DB
@@ -52,11 +52,11 @@ class Tracking(DB):
     def _extract_hash(self, url):
         if not url.startswith('magnet:'):
             return ''
-        parsed_url = urlparse.urlparse(url)
-        magnet_hash = urlparse.parse_qs(parsed_url.query)['xt']
+        parsed_url = urllib.parse.urlparse(url)
+        magnet_hash = urllib.parse.parse_qs(parsed_url.query)['xt']
         if len(magnet_hash) > 1:
-            print 'multple hashes:'
-            print magnet_hash
+            print('multple hashes:')
+            print(magnet_hash)
 
         magnet_hash = magnet_hash[0].split(':')[-1]
 

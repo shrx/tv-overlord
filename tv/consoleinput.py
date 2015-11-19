@@ -17,7 +17,7 @@ def ask_user (question):
     fcntl.fcntl (fd, fcntl.F_SETFL, oldflags & ~os.O_NONBLOCK)
 
     # print '%s ' % (question),
-    print question,
+    print(question, end=' ')
 
     try:
         while 1:
@@ -35,7 +35,7 @@ def ask_user (question):
 
     if repr (result) == "'\\n'":
         result = '[enter]'
-    print result
+    print(result)
 
     return result
 
@@ -43,4 +43,4 @@ def ask_user (question):
 if __name__ == '__main__':
     question = 'Input any character:'
     result = ask_user (question)
-    print 'The key pressed was:', result
+    print('The key pressed was:', result)

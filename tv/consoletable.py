@@ -97,7 +97,7 @@ class ConsoleTable:
             foreground=self.colors['title_fg'],
             background=self.colors['title_bg'],
         ))
-        print title
+        print(title)
 
         # HEADER ROW ---------------------------------------
         header = self.table.header
@@ -108,7 +108,7 @@ class ConsoleTable:
         BAR_COUNT = len(header.widths)
         flex_width = self.console_columns - sum(header.widths) - NUMBER_SPACE - BAR_COUNT
 
-        for i, title, width, alignment in zip(range(len(header.widths)), header.titles, header.widths, header.alignments):
+        for i, title, width, alignment in zip(list(range(len(header.widths))), header.titles, header.widths, header.alignments):
             if width == 0:
                 width = flex_width
             if alignment == '<':
@@ -129,7 +129,7 @@ class ConsoleTable:
             )
         header_row = title_bar.join(header_row)
 
-        print header_row
+        print(header_row)
 
         # BODY ROWS -----------------------------------------
 
@@ -156,7 +156,7 @@ class ConsoleTable:
                 i = str(i)
                 if width == 0:
                     width = flex_width
-                row_item = i.encode('ascii', 'ignore')
+                row_item = i
                 row_item = U.snip(row_item, width)
                 row_item = row_item.strip()
 
@@ -174,7 +174,7 @@ class ConsoleTable:
                     row_item = U.hi_color(row_item, foreground=76)
 
                 row_arr.append(row_item)
-            print bar.join(row_arr)
+            print(bar.join(row_arr))
 
         # USER INPUT ---------------------------------------
         choice = False
@@ -199,7 +199,7 @@ class ConsoleTable:
             choice = 'mark'
         elif get in key:  # number/letter chosen
             choice_num = key.index(get)
-            if choice_num not in range(len(self.table.body)):
+            if choice_num not in list(range(len(self.table.body))):
                 self.display_error('Choice not between %s and %s, try again:' % (
                     key[0], key[len(self.table.body) - 1]))
             else:
@@ -220,7 +220,7 @@ class ConsoleTable:
             exit()
         elif get in key:  # number/letter chosen
             choice_num = key.index(get)
-            if choice_num not in range(len(self.table.body)):
+            if choice_num not in list(range(len(self.table.body))):
                 self.display_error('Choice not between %s and %s, try again:' % (
                     key[0], key[len(self.table.body) - 1]))
             else:
@@ -232,8 +232,8 @@ class ConsoleTable:
 
 
     def display_error(self, message):
-        print
-        print U.hi_color('[!]', 16, 178), U.hi_color(message, 178)
+        print()
+        print(U.hi_color('[!]', 16, 178), U.hi_color(message, 178))
 
 
 if __name__ == '__main__':
@@ -271,38 +271,38 @@ if __name__ == '__main__':
         tbl2.set_title('New title')
         tbl2.set_count(20)
         out = tbl2.generate()
-        print 'out:', out
+        print('out:', out)
 
     data = [['http://thepiratebay.org/search/ Utopia%20S02E03/0/7/0 Utopia%202x03/0/7/0 ',
             ['Name', 'Size', 'Date', 'Seeds'],
             [0, 11, 12, 6],
             ['<', '>', '<', '>']],
-           [[u'Utopia S02E03 HDTV x264-TLA [eztv]',
-             u'259.23\xa0MiB',
-             u'Today\xa007:11',
-             u'2040',
+           [['Utopia S02E03 HDTV x264-TLA [eztv]',
+             '259.23\xa0MiB',
+             'Today\xa007:11',
+             '2040',
              'magnet:?xt=urn:btih:318938a7a4c8f8b962a90704364138402879a8ad&dn=Utopia+S02E03+HDTV+x264-TLA+%5Beztv%5D&tr=udp%3A%2F%2Ftracker.openbittorrent.com%3A80&tr=udp%3A%2F%2Ftracker.publicbt.com%3A80&tr=udp%3A%2F%2Ftracker.istole.it%3A6969&tr=udp%3A%2F%2Fopen.demonii.com%3A1337'],
-            [u'Utopia S02E03 720p HDTV x264-TLA [eztv]',
-             u'797.83\xa0MiB',
-             u'Today\xa007:11',
-             u'881',
+            ['Utopia S02E03 720p HDTV x264-TLA [eztv]',
+             '797.83\xa0MiB',
+             'Today\xa007:11',
+             '881',
              'magnet:?xt=urn:btih:fb185c7c0bd81f8e97481f9c23754ff3e6b5fe15&dn=Utopia+S02E03+720p+HDTV+x264-TLA+%5Beztv%5D&tr=udp%3A%2F%2Ftracker.openbittorrent.com%3A80&tr=udp%3A%2F%2Ftracker.publicbt.com%3A80&tr=udp%3A%2F%2Ftracker.istole.it%3A6969&tr=udp%3A%2F%2Fopen.demonii.com%3A1337'],
-            [u'Utopia.S02E03.720p.HDTV.x264-TLA[rartv]',
-             u'797.83\xa0MiB',
-             u'Today\xa000:37',
-             u'527',
+            ['Utopia.S02E03.720p.HDTV.x264-TLA[rartv]',
+             '797.83\xa0MiB',
+             'Today\xa000:37',
+             '527',
              'magnet:?xt=urn:btih:33d01b26f48182f7e681a086e35bdb5132af8d93&dn=Utopia.S02E03.720p.HDTV.x264-TLA%5Brartv%5D&tr=udp%3A%2F%2Ftracker.openbittorrent.com%3A80&tr=udp%3A%2F%2Ftracker.publicbt.com%3A80&tr=udp%3A%2F%2Ftracker.istole.it%3A6969&tr=udp%3A%2F%2Fopen.demonii.com%3A1337'],
-            [u'Utopia.S02E03.HDTV.x264-TLA[rartv]',
-             u'265.27\xa0MiB',
-             u'Today\xa000:45',
-             u'230',
+            ['Utopia.S02E03.HDTV.x264-TLA[rartv]',
+             '265.27\xa0MiB',
+             'Today\xa000:45',
+             '230',
              'magnet:?xt=urn:btih:aae14da14213bb2e48963b9c40b5b313056897e7&dn=Utopia.S02E03.HDTV.x264-TLA%5Brartv%5D&tr=udp%3A%2F%2Ftracker.openbittorrent.com%3A80&tr=udp%3A%2F%2Ftracker.publicbt.com%3A80&tr=udp%3A%2F%2Ftracker.istole.it%3A6969&tr=udp%3A%2F%2Fopen.demonii.com%3A1337'],
-            [u'Utopia S02E03 480p HDTV x264-mSD ',
-             u'165.4\xa0MiB',
-             u'Today\xa001:18',
-             u'40',
+            ['Utopia S02E03 480p HDTV x264-mSD ',
+             '165.4\xa0MiB',
+             'Today\xa001:18',
+             '40',
              'magnet:?xt=urn:btih:c454da2eef2f4ed2ffae37fe479c8d99a9c7f5d3&dn=Utopia+S02E03+480p+HDTV+x264-mSD+&tr=udp%3A%2F%2Ftracker.openbittorrent.com%3A80&tr=udp%3A%2F%2Ftracker.publicbt.com%3A80&tr=udp%3A%2F%2Ftracker.istole.it%3A6969&tr=udp%3A%2F%2Fopen.demonii.com%3A1337']]]
 
     tbl1 = ConsoleTable(data)
     result = tbl1.generate()
-    print 'result>', result
+    print('result>', result)

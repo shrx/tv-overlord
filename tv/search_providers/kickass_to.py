@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-import urllib
+import urllib.request, urllib.parse, urllib.error
 from time import mktime
 from datetime import datetime
 import pprint
@@ -35,7 +35,7 @@ class Provider (object):
                     season, episode, search_string))
 
         query = search_string
-        encoded_search = urllib.quote (query)
+        encoded_search = urllib.parse.quote (query)
         url = '{}/usearch/%s/?rss=1&field=seeders&sorder=desc'.format(self.provider_url)
         full_url = url % encoded_search
 

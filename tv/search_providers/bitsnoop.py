@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-import urllib
+import urllib.request, urllib.parse, urllib.error
 from time import mktime
 from datetime import datetime
 from pprint import pprint as pp
@@ -34,7 +34,7 @@ class Provider(object):
                     season, episode, search_string))
 
         query = search_string
-        encoded_search = urllib.quote(query)
+        encoded_search = urllib.parse.quote(query)
         url = 'http://bitsnoop.com/search/all/{}/c/d/1/?fmt=rss'
         full_url = url.format(encoded_search)
 

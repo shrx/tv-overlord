@@ -82,7 +82,7 @@ class History:
                       'oneoff': oneoff,
                       'complete': complete}
 
-            print line.format(**fields)
+            print(line.format(**fields))
 
     def copy(self):
         title = 'Copy files to %s' % Config.tv_dir
@@ -91,7 +91,7 @@ class History:
         torrent_hash = selected[3]
         torrent_dir, torrent_name = os.path.split(selected[2])
 
-        DownloadManager(torrent_hash, torrent_dir, torrent_name, debug=True)
+        DownloadManager(torrent_hash, torrent_dir, torrent_name)
 
     def download(self):
         title = 'Re-download'

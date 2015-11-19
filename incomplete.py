@@ -12,11 +12,11 @@ def main():
 
     debug_command = '''export TR_TORRENT_NAME='%s'; export TR_TORRENT_DIR='%s'; export TR_TORRENT_HASH='%s'; python ~/projects/media-downloader/src/transmission_done.py'''
     for show in unfinished:
-        print
-        print show[0]
-        print '-' * len(show[0])
+        print()
+        print(show[0])
+        print('-' * len(show[0]))
         command = debug_command % ('', '/home/sm/Shows', show[1])
-        print command
+        print(command)
 
 if __name__ == '__main__':
     main()

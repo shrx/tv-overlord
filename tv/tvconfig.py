@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 import os
-import ConfigParser
+import configparser
 import shutil
 import sqlite3
 
@@ -26,7 +26,7 @@ class Config:
     user_config = '%s/%s' % (user_dir, config_filename)
 
     if not os.path.exists(user_dir):
-        print 'Config directory does not exist: %s' % user_dir
+        print('Config directory does not exist: %s' % user_dir)
         if ask('Create config directory and files? [y/n]') == 'y':
             # create dir and config.ini
             os.mkdir(user_dir)
@@ -66,14 +66,14 @@ class Config:
             curs.execute(sql)
             conn.commit()
             conn.close()
-            print 'Run tv --help, or tv addnew "show name" to add shows.'
+            print('Run tv --help, or tv addnew "show name" to add shows.')
             exit()  # since there is nothing in the db
         else:
             exit()
 
     defaults = {'ip':False, 'clean torrents':False, 'tv dir':False,
                 'torrents dir':False, 'torrent done':False}
-    cfg = ConfigParser.ConfigParser(allow_no_value=True)
+    cfg = configparser.ConfigParser(allow_no_value=True)
     cfg.read(user_config)
 
     # OPTIONAL FIELDS
@@ -100,11 +100,11 @@ class Config:
         # [The Pirate Bay Settings]
         pirateurl = cfg.get('The Pirate Bay Settings', 'url')
 
-    except ConfigParser.NoSectionError as err_msg:
-        print err_msg, "in config file"
+    except configparser.NoSectionError as err_msg:
+        print(err_msg, "in config file")
         exit()
-    except ConfigParser.NoOptionError as err_msg:
-        print err_msg, "in config file"
+    except configparser.NoOptionError as err_msg:
+        print(err_msg, "in config file")
         exit()
 
 

@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 r'''
 Usage:
@@ -28,9 +28,9 @@ def main(args):
     torrent_name = args['TORRENT_NAME']
 
     if args['--debug']:
-        print 'torrent_hash:', torrent_hash
-        print 'torrent_dir:', torrent_dir
-        print 'torrent_name:', torrent_name
+        print('torrent_hash:', torrent_hash)
+        print('torrent_dir:', torrent_dir)
+        print('torrent_name:', torrent_name)
 
     DownloadManager(torrent_hash, torrent_dir, torrent_name, debug=args['--debug'])
 
