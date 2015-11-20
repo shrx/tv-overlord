@@ -246,7 +246,7 @@ if __name__ == '__main__':
         paragraph = []
         for i in range(word_count):
             letter_count = random.randrange(1, 10)
-            word = random.sample(string.letters, letter_count)
+            word = random.sample(string.ascii_letters, letter_count)
             word = ''.join(word)
             word = word.replace(' ', '')
             word = word.replace('\t', '')

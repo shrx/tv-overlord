@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 import os
 import configparser
 import shutil
@@ -63,7 +62,7 @@ class Config:
                 '''
             conn = sqlite3.connect(user_db)
             curs = conn.cursor()
-            curs.execute(sql)
+            curs.executescript(sql)
             conn.commit()
             conn.close()
             print('Run tv --help, or tv addnew "show name" to add shows.')

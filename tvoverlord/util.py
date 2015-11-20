@@ -5,6 +5,7 @@ To see some simple tests, run:
 $ python Util.py
 """
 
+from __future__ import print_function
 import random
 import ctypes
 import threading

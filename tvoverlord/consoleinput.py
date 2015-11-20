@@ -1,3 +1,4 @@
+from __future__ import print_function
 import termios
 import fcntl
 import sys
@@ -16,8 +17,8 @@ def ask_user (question):
     oldflags = fcntl.fcntl (fd, fcntl.F_GETFL)
     fcntl.fcntl (fd, fcntl.F_SETFL, oldflags & ~os.O_NONBLOCK)
 
-    # print '%s ' % (question),
     print(question, end=' ')
+    sys.stdout.flush()
 
     try:
         while 1:
