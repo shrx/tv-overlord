@@ -6,13 +6,13 @@ import textwrap
 import tvdb_api
 from pprint import pprint as pp
 
-from tv.consoleinput import ask_user as ask
-from tv.search import Search, SearchError
-from tv.util import U
-from tv.tvconfig import Config
-from tv.consoletable import ConsoleTable
-from tv.tracking import Tracking
-from tv.db import DB
+from tvoverlord.consoleinput import ask_user as ask
+from tvoverlord.search import Search, SearchError
+from tvoverlord.util import U
+from tvoverlord.config import Config
+from tvoverlord.consoletable import ConsoleTable
+from tvoverlord.tracking import Tracking
+from tvoverlord.db import DB
 
 
 class Series:

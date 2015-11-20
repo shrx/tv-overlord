@@ -6,13 +6,13 @@ import datetime
 from dateutil import parser
 from pprint import pprint as pp
 
-from tv.tvconfig import Config
-from tv.db import DB
-from tv.consoletable import ConsoleTable
-from tv.consoleinput import ask_user
-from tv.downloadmanager import DownloadManager
-from tv.search import Search
-from tv.util import U
+from tvoverlord.config import Config
+from tvoverlord.db import DB
+from tvoverlord.consoletable import ConsoleTable
+from tvoverlord.consoleinput import ask_user
+from tvoverlord.downloadmanager import DownloadManager
+from tvoverlord.search import Search
+from tvoverlord.util import U
 
 
 class History:

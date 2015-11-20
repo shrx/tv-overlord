@@ -1,8 +1,8 @@
 import sqlite3
 
-from tv.series import Series
-from tv.tvconfig import Config
-from tv.tvutil import FancyPrint, dict_factory
+from tvoverlord.series import Series
+from tvoverlord.config import Config
+from tvoverlord.tvutil import FancyPrint, dict_factory
 
 
 class AllSeries:

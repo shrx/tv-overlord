@@ -1,4 +1,4 @@
-from tv.tvconfig import Config
+from tvoverlord.config import Config
 from pprint import pprint as pp
 import sqlite3
 

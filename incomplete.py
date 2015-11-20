@@ -1,8 +1,8 @@
 
 from pprint import pprint as pp
 
-from tv.tvconfig import Config
-from tv.db import DB
+from tvoverlord.config import Config
+from tvoverlord.db import DB
 
 
 def main():

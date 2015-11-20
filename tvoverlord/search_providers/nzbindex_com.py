@@ -8,7 +8,7 @@ from pprint import pprint as pp
 
 import feedparser
 
-from tv.util import U
+from tvoverlord.util import U
 
 
 class ProviderError(Exception):

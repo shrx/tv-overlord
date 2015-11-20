@@ -3,27 +3,34 @@ import sys
 import os
 import platform
 
-enviroment = None
-if platform.system() == 'Linux':
-    desktop = os.environ.get('DESKTOP_SESSION')
-    if desktop == 'gnome':
-        enviroment = 'gnome'
-        #from gi.repository import GObject
-        from gi.repository import Notify
-    elif desktop == 'kde':
-        pass
-    elif desktop == 'ubuntu':
-        pass
-
-elif platform.system() == 'OSX':
-    enviroment = 'osx'
-    from Foundation import NSUserNotification
-    from Foundation import NSUserNotificationCenter
-    from Foundation import NSUserNotificationDefaultSoundName
-
 
 class Tell:
     def __init__(self, message, title='TV'):
+
+        enviroment = None
+
+        if platform.system() == 'Linux':
+            desktop = os.environ.get('DESKTOP_SESSION')
+            if desktop == 'gnome':
+                enviroment = 'gnome'
+                # from inside virtualenv the Gnome
+                # gi object cannot be loaded
+                try:
+                    #from gi.repository import GObject
+                    from gi.repository import Notify
+                except(ImportError):
+                    eviroment = None
+            elif desktop == 'kde':
+                pass
+            elif desktop == 'ubuntu':
+                pass
+
+        elif platform.system() == 'OSX':
+            enviroment = 'osx'
+            from Foundation import NSUserNotification
+            from Foundation import NSUserNotificationCenter
+            from Foundation import NSUserNotificationDefaultSoundName
+
         if enviroment == 'osx':
             self.osx_message(title, message)
         elif enviroment == 'gnome':

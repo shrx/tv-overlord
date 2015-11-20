@@ -7,7 +7,7 @@ import pprint
 
 import feedparser
 
-from tv.util import U
+from tvoverlord.util import U
 
 
 class Provider (object):

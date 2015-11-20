@@ -7,8 +7,8 @@ import os, string
 from collections import namedtuple
 from pprint import pprint as pp
 
-from tv.consoleinput import ask_user
-from tv.util import U
+from tvoverlord.consoleinput import ask_user
+from tvoverlord.util import U
 
 
 class ConsoleTable:

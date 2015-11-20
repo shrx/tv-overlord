@@ -9,9 +9,9 @@ import sys
 from pprint import pprint as pp
 import logging
 
-from tv.tvconfig import Config
-from tv.db import DB
-from tv.notify import Tell
+from tvoverlord.config import Config
+from tvoverlord.db import DB
+from tvoverlord.notify import Tell
 
 
 class DownloadManager(DB):

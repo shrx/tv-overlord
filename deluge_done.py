@@ -19,7 +19,7 @@ Options:
 from docopt import docopt
 import os
 from pprint import pprint as pp
-from tv.downloadmanager import DownloadManager
+from tvoverlord.downloadmanager import DownloadManager
 
 
 def main(args):

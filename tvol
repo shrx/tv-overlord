@@ -61,14 +61,14 @@ from pprint import pprint as pp
 from dateutil import parser as date_parser
 from docopt import docopt
 
-from tv.allseries import AllSeries
-from tv.consoleinput import ask_user as ask
-from tv.series import Series
-from tv.tvconfig import Config
-from tv.tvutil import FancyPrint, dict_factory
-from tv.util import U
-from tv.location import Location
-from tv.history import History
+from tvoverlord.allseries import AllSeries
+from tvoverlord.consoleinput import ask_user as ask
+from tvoverlord.series import Series
+from tvoverlord.config import Config
+from tvoverlord.tvutil import FancyPrint, dict_factory
+from tvoverlord.util import U
+from tvoverlord.location import Location
+from tvoverlord.history import History
 
 
 def edit_db(search_str):
