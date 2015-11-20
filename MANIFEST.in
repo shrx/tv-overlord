@@ -1,0 +1,6 @@
+include README.rst
+include LICENSE
+include TODO.org
+
+include tvoverlord/search_providers/README.org
+

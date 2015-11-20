@@ -57,6 +57,10 @@ _tv()
         opts="list copy redownload"
 		COMPREPLY=( $(compgen -W "${opts}" -- $cur) )
         return 0
+    elif [[ "${prev}" == "list" ]]; then
+        opts="--what-to-show"
+		COMPREPLY=( $(compgen -W "${opts}" -- $cur) )
+        return 0
 	fi
 }
-complete -F _tv tv
+complete -F _tv tvol
