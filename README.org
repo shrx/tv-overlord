@@ -41,10 +41,37 @@ or a pull request.
 
 ** Install
 
-TV Downloader has been tested on Linux and Mac.  It would probably not
+TV Overlord has been tested on Linux and Mac.  It would probably not
 be to hard to make it work on windows, and if anyone is interested, I
 can take a look at making it work or alternatively send me a pull request.
 
+TV Overlord is a python 3 application and can be installed via pip3.
+If this method is used, all dependencies will be taken care of.
+
+: sudo pip3 install tvoverlord
+
+Otherwise if you want the most recent version you can install it manually:
+
+: sudo pip3 install tvdb_api beautifulsoup4 feedparser requests docopt python-dateutil
+: git clone https://github.com/smmcg/tv-overlord.git
+: cd tv-overlord
+: # the following will install bash completions if you are using bash:
+: sudo cp tvoverlord_util/tvoverlord-completion.bash /etc/bash_completion.d/
+
+After its installed, you run it by typing:
+
+: tvol
+
+And it will ask to create the config dir. Type =y= to allow it.  The
+config dir will be called =.tvoverlord/= and be in your home dir.
+
+After that you can start to use it, type:
+
+: tvol addnew 'Doctor Who'
+
+If this is the wrong show, try again but add the year:
+
+: tvol addnew 'Doctor Who 2005'
 
 *** Dependencies
 
@@ -64,34 +91,19 @@ the standard packages) to be installed:
      Some usefull extentions to the datetime module
 
 
-*** Install steps
-
-  1. =sudo pip install tvdb_api beautifulsoup4 feedparser requests docopt python-dateutil=
-  2. Create a dir somewhere and clone this repository: \\
-     =git clone https://github.com/smmcg/tv-downloader.git=
-  3. Put the dir on your $PATH or symlink tvoverlord to a dir that is
-     on the path.
-  4. type: =tvoverlord= \\
-     The first time its run, it will ask to create the
-     config dir.  Type =Y= to allow it.  The config directory will be
-     created in your home dir called =.tv-downloader/=
-  5. Type =tvoverlord addnew "someshow";= to start. \\
-     For example: =tvoverlord addnew 'some tv show name';=
-
-
 ** How to use
 
 **** Add new
 
-: tvoverlord addnew SHOWNAME
+: tvol addnew SHOWNAME
 
 TV Overlord will search thetvdb.com for a match to your show name.  If
 it can't find the show you are looking for, it usually helps to add the
-year to the name: =tvoverlord addnew 'show name year';=.
+year to the name: =tvol addnew 'show name year';=.
 
 **** Show missing
 
-: tvoverlord showmissing [--no-cache] [--today]
+: tvol showmissing [--no-cache] [--today]
 
 This will list any shows that are available to download.
 
@@ -102,8 +114,8 @@ This will list any shows that are available to download.
 
 **** Download
 
-: tvoverlord download [--no-cache] [--today] [--ignore-warning] [--count NUM]
-:                     [--location FILEPATH] [--provider NAME] [SHOWNAME]
+: tvol download [--no-cache] [--today] [--ignore-warning] [--count NUM]
+:               [--location FILEPATH] [--provider NAME] [SHOWNAME]
 
 For each show thats ready to download, it will ask you which one you
 want to download.
@@ -126,8 +138,8 @@ instead of downloading all.
 
 **** Calendar
 
-: tvoverlord calendar [--no-cache] [--today] [--sort-by-next]
-:                     [--no-color] [--days DAYS[,AFTER]] [SHOWNAME]
+: tvol calendar [--no-cache] [--today] [--sort-by-next]
+:               [--no-color] [--days DAYS[,AFTER]] [SHOWNAME]
 
 Display a calendar of all the current shows in your database.  It
 defaults to the width of the console.
@@ -144,7 +156,7 @@ defaults to the width of the console.
 
 **** History
 
-: tvoverlord history (list [-w FIELDS]|copy|redownload) [CRITERIA]
+: tvol history (list [-w FIELDS]|copy|redownload) [CRITERIA]
 
 - =CRITERIA= can be days, a date or a title or partial title
 - =FIELDS= is a comma seperated list if fields to show that only works
@@ -156,15 +168,15 @@ The =list= command generates a tab seperated list.  This is usefull for
 piping to various unix commands.  For example this command will format
 the output into columns.
 
-: tvoverlord history list -w 'title,date,complete' | column -ts$'\t'
+: tvol history list -w 'title,date,complete' | column -ts$'\t'
 
 =copy= and =redownload= show a list where the user can choose an episode to
 redownload or copy a file to the destination set in the ini file.
 
 **** Info
 
-: tvoverlord info [--no-cache] [--today] [--sort-by-next] [--show-links]
-:                 [--synopsis] [--ask-inactive] [SHOWNAME]
+: tvol info [--no-cache] [--today] [--sort-by-next] [--show-links]
+:           [--synopsis] [--ask-inactive] [SHOWNAME]
 
 This will show you what shows are next, and how many days till they
 are broadcast.  Called without arguments, it lists all show except
@@ -181,8 +193,8 @@ specified also.
 
 **** Search and download non tracked
 
-: tvoverlord nondbshow [--count NUM] [--location FILEPATH]
-:                      [--provider NAME] SEARCHTERM
+: tvol nondbshow [--count NUM] [--location FILEPATH]
+:                [--provider NAME] SEARCHTERM
 
 This will show you matches to your search.  Anything downloaded this
 way will not be recorded in your database.
@@ -193,17 +205,18 @@ way will not be recorded in your database.
 
 **** Providers
 
-: tvoverlord providers
+: tvol providers
 
 This will list search providers available to the program.  The default
 one is the provider at the top of the list in config.ini.
 
 **** Edit db info
 
-: tvoverlord editdbinfo SHOWNAME
+: tvol editdbinfo SHOWNAME
 
 Edit the data in the database for show name.  You can manually set a
 show as 'inactive' here if you wish.
+
 
 ** Configure
 
@@ -245,6 +258,7 @@ will create it.
  + =staging: FILEPATH= \\
    If using NZB searches, this is where the NZB files will be put.
 
+
 ** Screenshots
 
 [[http://i.imgur.com/jMP4T3h.gif]] \\
@@ -263,9 +277,8 @@ This show the info command.
 
 ** Command line
 
-=$ tvoverlord --help=
 #+BEGIN_EXAMPLE
-$ tvoverlord -h
+$ tvol --help
 Download and manage TV shows
 
 Usage:

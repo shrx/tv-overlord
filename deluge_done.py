@@ -4,8 +4,8 @@ r'''
 Usage:
   deluge_done.py [--debug] TORRENT_HASH TORRENT_NAME TORRENT_DIR
 
-This script passes the enviroment variables from deluge to
-the torrent manager.
+This script passes the enviroment variables
+from deluge to tvoverlord.
 
 The execute plugin is needed for this to work.
 http://dev.deluge-torrent.org/wiki/Plugins/Execute

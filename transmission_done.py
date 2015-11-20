@@ -4,8 +4,8 @@ r'''
 Usage:
   transmission_done.py [--debug]
 
-This script passes the enviroment variables from transmission to
-the torrent manager.
+This script passes the enviroment variables from
+transmission to tvoverlord.
 
 Options:
   -d --debug    Output debut info

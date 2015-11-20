@@ -18,8 +18,7 @@ class Config:
 
     config_filename = 'config.ini'
     user_dir = os.path.join(
-        os.environ['HOME'],  # '/Users/sm/'
-        '.tv-downloader'
+        os.environ['HOME'], '.tvoverlord'
     )
     user_db = '%s/%s' % (user_dir, 'shows.sqlite3')
     user_config = '%s/%s' % (user_dir, config_filename)

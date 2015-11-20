@@ -18,6 +18,7 @@ class Tell:
                 try:
                     #from gi.repository import GObject
                     from gi.repository import Notify
+                    self.Notify = Notify
                 except(ImportError):
                     eviroment = None
             elif desktop == 'kde':
@@ -43,9 +44,9 @@ class Tell:
             self.windows_notify(title, message)
 
     def gnome_message(self, title, message):
-        Notify.init('TV')
+        self.Notify.init('TV')
         icon = ''
-        n = Notify.Notification.new(title, message, icon)
+        n = self.Notify.Notification.new(title, message, icon)
         n.show()
 
     def osx_message(self, title, message):

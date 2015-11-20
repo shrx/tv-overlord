@@ -82,23 +82,20 @@ class Search(object):
                 if isX:
                     app = 'xdg-open'
                 else:
-                    print('Non X usage is not supported')
+                    sys.exit('\nNon X usage is not supported')
 
                 try:
                     subprocess.Popen([app, chosen_show])
 
                 except KeyError:
-                    print('Unknown enviroment:', unknown_enviroment)
-                    exit()
+                    sys.exit('\nUnknown enviroment:', unknown_enviroment)
                 except OSError:
-                    print('You do not seem to have a bittorent client installed')
-                    exit()
+                    sys.exit('\nYou do not seem to have a bittorent client installed')
             elif platform.system() == 'Darwin':
                 subprocess.Popen(["open", "--background", chosen_show])
             else:
                 unknown_system = platform.platform()
-                print('Unknown system:', unknown_system)
-                exit()
+                sys.exit('\nUnknown system:', unknown_system)
 
 
         else:  # is a nzb file
