@@ -42,7 +42,7 @@ Options:
   --days DAYS      The number of days to show in the calendar
   --no-color       Don't use color in output. Useful if output is to be
                    used in email or text file.
-  -w, FIELDS --what-to-show FIELDS
+  -w FIELDS, --what-to-show FIELDS
                    An optional list of information to show seperated by commas.
                    It can be any of these: date, title, season, episode, magnet,
                    oneoff, complete, filename
