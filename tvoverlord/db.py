@@ -16,7 +16,7 @@ class DB(object):
         pass
 
     def run_sql(self, sql, values=False, named_fields=False):
-        conn = sqlite3.connect(Config.user_db)
+        conn = sqlite3.connect(Config.db_file)
         if named_fields:
             conn.row_factory = dict_factory
         curs = conn.cursor()

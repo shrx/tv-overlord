@@ -3,7 +3,8 @@ import os
 import sys
 
 if sys.version_info[0] == 2:
-    sys.exit("!!!!!\nSorry, TVOverlord does not support python 2.\nUse: 'pip3 install tvoverlord' instead\n!!!!!")
+    dividers = '!' * 40
+    sys.exit("{}\nSorry, TVOverlord does not support python 2.\nUse: 'pip3 install tvoverlord' instead\n{}".format(dividers, dividers))
 
 f = open(os.path.join(os.path.dirname(__file__), 'README.txt'))
 long_description = f.read()
@@ -27,8 +28,9 @@ setup(
         'requests',
         'docopt',
         'python-dateutil',
+        'appdirs',
     ],
-    version = '0.9.11',
+    version = '0.9.14',
     description = 'TV Overlord is a command line tool to download and manage TV shows from newsgroups or bittorent',
     long_description = long_description,
     license = 'MIT',
