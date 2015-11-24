@@ -52,7 +52,7 @@ If this method is used, all dependencies will be taken care of.
 
 Otherwise if you want the most recent version you can install it manually:
 
-: sudo pip3 install tvdb_api beautifulsoup4 feedparser requests docopt python-dateutil
+: sudo pip3 install tvdb_api beautifulsoup4 feedparser requests docopt python-dateutil appdirs
 : git clone https://github.com/smmcg/tv-overlord.git
 : cd tv-overlord
 : # the following will install bash completions if you are using bash:
@@ -72,23 +72,6 @@ After that you can start to use it, type:
 If this is the wrong show, try again but add the year:
 
 : tvol addnew 'Doctor Who 2005'
-
-*** Dependencies
-
-TV Overlord requires some additional python libraries (not part of
-the standard packages) to be installed:
-  1. *tvdb_api* - [[https://github.com/dbr/tvdb_api]] \\
-     Python library to access the thetvdb.com api
-  2. *Requests* - http://docs.python-requests.org/en/latest/  \\
-     Library to download html pages
-  3. *Beautiful Soup* - http://www.crummy.com/software/BeautifulSoup/bs4/doc/ \\
-     Python library used to scrap thepiratebay.org since they don't have an api
-  4. *Feedparser* - https://pypi.python.org/pypi/feedparser \\
-     For sites that provide an xml api this library is used to parse them
-  5. *Docopt* - [[http://docopt.org/]] \\
-     The best library for handling command line arguments
-  6. *Dateutil* - https://labix.org/python-dateutil \\
-     Some usefull extentions to the datetime module
 
 
 ** How to use

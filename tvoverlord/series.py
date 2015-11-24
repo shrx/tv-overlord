@@ -48,7 +48,8 @@ class Series:
         return fixed
 
 
-    def __init__(self, provider, dbdata=False, show_type='current'):
+    def __init__(self, provider, tv, dbdata=False, show_type='current'):
+        self.tv = tv
         typelist = ('new', 'nondb', 'current')
         if show_type not in typelist:
             raise Exception('incorrect show type')
@@ -112,9 +113,8 @@ class Series:
 
         """
 
-        tv = tvdb_api.Tvdb(apikey=Config.thetvdb_apikey, cache=Config.use_cache)
         try:
-            series = tv[self.db_name]
+            series = self.tv[self.db_name]
             self.show_exists = True
         except tvdb_api.tvdb_shownotfound:
             print('Show not found: %s' % self.db_name)

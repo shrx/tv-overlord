@@ -1,4 +1,5 @@
 import sqlite3
+import tvdb_api
 
 from tvoverlord.series import Series
 from tvoverlord.config import Config
@@ -23,6 +24,7 @@ class AllSeries:
         self.provider = provider
         self.sqlfilter = ''
         self.sort_field = "replace (name, 'The ', '')"
+        self.tv = tvdb_api.Tvdb(apikey=Config.thetvdb_apikey, cache=Config.use_cache)
 
     def __iter__(self):
         self.dbdata = self._query_db(self.sqlfilter)
@@ -33,7 +35,7 @@ class AllSeries:
     def __next__(self):
         if self.i == len(self.dbdata):
             raise StopIteration
-        series = Series(self.provider, dbdata=self.dbdata[self.i])
+        series = Series(self.provider, dbdata=self.dbdata[self.i], tv=self.tv)
         self.i += 1
         return series
 
