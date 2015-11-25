@@ -50,11 +50,7 @@ class Provider (object):
         for show in parsed['entries']:
             dt = datetime.fromtimestamp(mktime(show['published_parsed']))
             date = dt.strftime('%b %d/%Y')
-
             size = U.pretty_filesize (show['torrent_contentlength'])
-
-            # title = U.snip (show['title'].ljust (title_w), title_w)
-            # title = title.replace ('avi', U.fg_color ('green', 'avi'))
             title = show['title']
 
             show_data.append([
@@ -62,11 +58,11 @@ class Provider (object):
                 size,                     # show size
                 date,                     # date
                 show['torrent_seeds'],    # seeds
+                'KA',                     # kickass identifier
                 show['torrent_magneturi'] # id (download magnet url)
             ])
 
-        #show_data.sort(key=lambda x: int(x[3]), reverse=True) # sort by seeds
-        return [header] + [show_data]
+        return show_data
 
     def download (self, chosen_show, destination, final_name):
 

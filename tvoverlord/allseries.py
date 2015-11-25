@@ -20,8 +20,7 @@ class AllSeries:
       default 'name'
     """
 
-    def __init__(self, provider):
-        self.provider = provider
+    def __init__(self):
         self.sqlfilter = ''
         self.sort_field = "replace (name, 'The ', '')"
         self.tv = tvdb_api.Tvdb(apikey=Config.thetvdb_apikey, cache=Config.use_cache)
@@ -35,7 +34,7 @@ class AllSeries:
     def __next__(self):
         if self.i == len(self.dbdata):
             raise StopIteration
-        series = Series(self.provider, dbdata=self.dbdata[self.i], tv=self.tv)
+        series = Series(dbdata=self.dbdata[self.i], tv=self.tv)
         self.i += 1
         return series
 

@@ -26,8 +26,6 @@ class Provider(object):
         return fixed
 
     def search(self, search_string, season=False, episode=False):
-        #http://bitsnoop.com/search/all/supernatural+s01e01+OR+1x01/c/d/1/?fmt=rss
-
         if season and episode:
             search_string = '%s' % (
                 self.se_ep(
@@ -39,16 +37,9 @@ class Provider(object):
         full_url = url.format(encoded_search)
 
         parsed = feedparser.parse(full_url)
-        header = [
-            [search_string, full_url],
-            ['Name', 'Size', 'Date', 'Seeds'],
-            [0, 10, 6, 6],
-            ['<', '>', '=', '>']]
         show_data = []
 
         for show in parsed['entries']:
-            #pp(show)
-
             if show['published_parsed']:
                 dt = datetime.fromtimestamp(mktime(show['published_parsed']))
                 date = dt.strftime('%b %d/%Y')
@@ -64,12 +55,11 @@ class Provider(object):
                 size,
                 date,
                 seeds,
+                'BS', # bitsnoop identifier
                 magnet
             ])
 
-        show_data.sort(key=lambda x: int(x[3]), reverse=True) # sort by seeds
-        return [header] + [show_data]
-
+        return show_data
 
     def download (self, chosen_show, destination, final_name):
         pass

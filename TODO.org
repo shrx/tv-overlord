@@ -1,10 +1,12 @@
 
 #+TITLE: Todo for TV Overlord
 
-* Big Things [1/5]
+* Big Things [2/7]
 
  - [X] Change helper scripts to one python class.
+ - [X] Search all provider at the same time using Futures
  - [ ] Speed up showmissing.
+       https://docs.python.org/3/library/concurrent.futures.html
  - [ ] Make the show data sources modular like the search providers
        http://www.tvmaze.com/api
  - [ ] Rebuild config system, use SetBack.
@@ -17,16 +19,17 @@
 
 * Todo
 
-** For 1.0 release  [5/10]
- 1. [ ] package for pip
- 2. [ ] bullet proof install
- 3. [ ] debug all commands and options.
- 4. [ ] test config.ini for missing fields, or wrong values, etc.
- 5. [X] test nzb's
- 6. [X] when adding new show, check if already added
- 7. [X] confirm working on linux
- 8. [X] don't save the download list array in tracking
- 9. [X] convert to python3
+** For 1.0 release  [7/10]
+ 1. [X] package for pip
+ 2. [X] user AppDir to determine user dirs
+ 3. [ ] bullet proof install
+ 4. [ ] debug all commands and options.
+ 5. [ ] test config.ini for missing fields, or wrong values, etc.
+ 6. [X] test nzb's
+ 7. [X] when adding new show, check if already added
+ 8. [X] confirm working on linux
+ 9. [X] don't save the download list array in tracking
+ 10. [X] convert to python3
 
 ** Code cleanups  [3/6]
  1. [X] convert all filenames to lowercase
@@ -57,7 +60,7 @@
  2. [ ] Make so can be package with cx_freeze
         [[http://cx-freeze.sourceforge.net/]]
  3. [ ] document all modules, classes and attributes
- 4. [ ] make sure each class can be imported into ipython
+ 4. [X] make sure each class can be imported into ipython
         and used there
  5. [ ] create a config class that unifies user, app, and in
         program settings

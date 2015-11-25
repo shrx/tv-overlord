@@ -4,14 +4,13 @@ r"""Download and manage TV shows
 
 Usage:
   tvol
-  tvol download    [-n] [-t] [-i] [-c COUNT] [-l LOCATION] [-p PROVIDER] [SHOW_NAME]
+  tvol download    [-n] [-t] [-i] [-c COUNT] [-l LOCATION] [SHOW_NAME]
   tvol showmissing [-n] [-t]
   tvol info        [-n] [-a] [-x] [--ask-inactive] [--show-links] [--synopsis] [SHOW_NAME]
   tvol calendar    [-n] [-a] [-x] [--no-color] [--days DAYS] [SHOW_NAME]
   tvol addnew      SHOW_NAME
-  tvol nondbshow   SEARCH_STRING [-c COUNT] [-l LOCATION] [-p PROVIDER]
+  tvol nondbshow   SEARCH_STRING [-c COUNT] [-l LOCATION]
   tvol editdbinfo  SHOW_NAME
-  tvol providers
   tvol history     (list [-w FIELDS]|copy|redownload) [CRITERIA]
 
   With no arguments, tv runs showmissing
@@ -24,13 +23,10 @@ Usage:
 Options:
   -h, --help
   -c COUNT, --count COUNT
-                   Count of search results to list. [default: 5]
+                   Count of search results to list. [default: 10]
   -l DOWNLOAD_LOCATION, --location DOWNLOAD_LOCATION
                    Location to download the nzb files to
   -n, --no-cache   Re-download the show data instead of using the cached data
-  -p SEARCH_PROVIDER, --search-provider SEARCH_PROVIDER
-                   Specify a different search engine instead of the one
-                   in the config file.
   -i, --ignore-warning
                    Ignore 'Not connected to vpn' warning
   -a, --show-all   Show all shows including the ones marked inactive
@@ -165,7 +161,6 @@ def init(docopt_args):
         addnew          = docopt_args['addnew']
         nondbshow       = docopt_args['nondbshow']
         editdbinfo      = docopt_args['editdbinfo']
-        providers       = docopt_args['providers']
         history         = docopt_args['history']
         # arguments
         search_string   = docopt_args['SEARCH_STRING']
@@ -178,7 +173,6 @@ def init(docopt_args):
         count           = docopt_args['--count']
         location        = docopt_args['--location']
         no_cache        = docopt_args['--no-cache']
-        search_provider = docopt_args['--search-provider']
         show_all        = docopt_args['--show-all']
         sort_by_next    = docopt_args['--sort-by-next']
         ask_inactive    = docopt_args['--ask-inactive']
@@ -195,20 +189,6 @@ def init(docopt_args):
     if Args.no_cache:
         Config.use_cache = False
 
-    if Args.search_provider:
-        provider = False
-        user_provider = Args.search_provider
-        for p in Config.providers:
-            if user_provider in p:
-                provider = p
-                break
-        if not provider:
-            print('Unknown provider: {}'.format(user_provider))
-            print('Choices are: {}'.format(', '.join(Config.providers)))
-            exit()
-    else:
-        provider = Config.providers[0]
-
     count = int(Args.count)  # convert --count to int
     Config.episode_display_count = count
 
@@ -221,7 +201,6 @@ def init(docopt_args):
         not Args.addnew and
         not Args.nondbshow and
         not Args.editdbinfo and
-        not Args.providers and
         not Args.history):
 
         Args.showmissing = True
@@ -230,7 +209,7 @@ def init(docopt_args):
         show_info = {}
         counter = 0
         show_name = Args.show_name
-        all_shows = AllSeries(provider)
+        all_shows = AllSeries()
 
         # When the user specifies a single show, turn on --show-all
         # because the show they are asking for might an inactive show
@@ -414,7 +393,7 @@ def init(docopt_args):
         color_row = False
         counter = 1
         season_marker = '-'
-        all_series = AllSeries(provider)
+        all_series = AllSeries()
         if Args.sort_by_next:
             all_series.sort_by_date()
         show_name = Args.show_name
@@ -486,7 +465,7 @@ def init(docopt_args):
 
     elif Args.showmissing:
         fp = FancyPrint()
-        for series in AllSeries(provider):
+        for series in AllSeries():
             if series.is_missing(Args.today):
                 fp.standard_print(series.show_missing())
             else:
@@ -494,7 +473,7 @@ def init(docopt_args):
         fp.done()
 
     elif Args.download:
-        all_series = AllSeries(provider)
+        all_series = AllSeries()
         show_name = Args.show_name
         if Config.ip and not Args.ignore:
             L = Location()
@@ -507,11 +486,11 @@ def init(docopt_args):
             series.download_missing(Config.episode_display_count, Args.today)
 
     elif Args.addnew:
-        new_show = Series(provider, show_type='new')
+        new_show = Series(show_type='new')
         new_show.add_new(name=Args.show_name)
 
     elif Args.nondbshow:
-        nons = Series(provider, show_type='nondb')
+        nons = Series(show_type='nondb')
         nons.non_db(Args.search_string, Config.episode_display_count)
 
     elif Args.editdbinfo:

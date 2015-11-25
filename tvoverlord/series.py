@@ -48,7 +48,7 @@ class Series:
         return fixed
 
 
-    def __init__(self, provider, tv, dbdata=False, show_type='current'):
+    def __init__(self, tv=False, dbdata=False, show_type='current'):
         self.tv = tv
         typelist = ('new', 'nondb', 'current')
         if show_type not in typelist:
@@ -60,10 +60,10 @@ class Series:
         if show_type == 'current':
             self._set_db_data(dbdata)
             self._get_thetvdb_series_data()
-            self.search_provider = Search(provider)
+            self.search_provider = Search()
 
         if show_type == 'nondb':
-            self.search_provider = Search(provider)
+            self.search_provider = Search()
 
         self.console_rows, self.console_columns = os.popen('stty size', 'r').read().split()
 

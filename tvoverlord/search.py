@@ -3,34 +3,38 @@ import sys
 import subprocess
 import os
 import platform
+import time
+import concurrent.futures
+from pprint import pprint as pp
+import socket
 
 from tvoverlord.util import U
-
+from tvoverlord.search_providers import extratorrent
+from tvoverlord.search_providers import bitsnoop
+from tvoverlord.search_providers import kickass_to
+from tvoverlord.search_providers import thepiratebay_sx
 
 class SearchError(Exception):
     def __init__(self, value):
         self.value = value
-
 
     def __str__(self):
         return repr(self.value)
 
 
 class Search(object):
-    def __init__(self, provider):
-
-        mod_name = 'tvoverlord.search_providers.' + provider
-        mod = __import__(mod_name, fromlist=["Provider"])
-        engine = getattr(mod, 'Provider')
-        self.engine = engine()
-
+    def __init__(self):
         self.season = ''
         self.episode = ''
         self.show_name = ''
 
+    def job(self, engine, search_string, season, episode):
+        search = engine.Provider()
+        search_results = search.search(search_string, season, episode)
 
-    def search(self, search_string, season=False,
-               episode=False):
+        return search_results
+
+    def search(self, search_string, season=False, episode=False):
         """
         Return an array of values:
 
@@ -60,11 +64,31 @@ class Search(object):
         backspace = '\b' * len(msg)
         overwrite = ' ' * len(msg)
 
-        search_results = self.engine.search(search_string, season, episode)
+        header = [
+            [search_string, ''],
+            ['Name', 'Size', 'Date', 'Seeds', 'SE'],
+            [0, 10, 12, 6, 2],
+            ['<', '>', '<', '>', '<']]
+
+        engines = [bitsnoop, extratorrent, thepiratebay_sx, kickass_to]
+
+        #socket.setdefaulttimeout(1)
+        episodes = []
+        with concurrent.futures.ThreadPoolExecutor(max_workers=8) as executor:
+            res = {executor.submit(self.job, engine, search_string, season, episode):engine for engine in engines}
+            for future in concurrent.futures.as_completed(res):
+                something = res[future]
+                results = future.result()
+                episodes = episodes + results
+
+        episodes.sort(key=lambda x: int(x[3]), reverse=True) # sort by seeds
+        #pp(episodes)
+        #exit()
 
         print('%s%s' % (backspace, overwrite), end=' ')
 
-        return search_results
+        #return search_results
+        return [header] + [episodes]
 
 
     def download(self, chosen_show, destination):

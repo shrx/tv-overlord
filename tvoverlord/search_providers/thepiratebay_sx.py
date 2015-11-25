@@ -85,18 +85,9 @@ class Provider (object):
 
                 magnet = tds[0].find('a', href=re.compile('magnet:.*')).attrs['href']
 
-                show_data.append([name, size, date, seeds, magnet])
+                show_data.append([name, size, date, seeds, 'PB', magnet])
 
-        print(urls)
-        header = [
-            [pretty_name, urls],
-            ['Name', 'Size', 'Date', 'Seeds'],
-            [0, 11, 12, 6],
-            ['<', '>', '<', '>']]
-
-        show_data.sort(key=lambda torrent: int(torrent[3]), reverse=True)
-        return [header] + [show_data]
-
+        return show_data
 
 
 if __name__ == '__main__':

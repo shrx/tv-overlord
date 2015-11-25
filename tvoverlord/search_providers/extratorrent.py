@@ -29,6 +29,9 @@ class Provider(object):
 
     def search(self, search_string, season=False, episode=False):
 
+        #search_string = 'Doctor Who 2005'
+        #print("search_string", search_string)
+
         if season and episode:
             search_string = '%s' % (
                 self.se_ep(
@@ -41,12 +44,6 @@ class Provider(object):
         full_url = url % encoded_search
 
         parsed = feedparser.parse(full_url)
-
-        header = [
-            [search_string, full_url],
-            ['Name', 'Size', 'Date', 'Seeds'],
-            [0, 10, 12, 6],
-            ['<', '>', '<', '>']]
         show_data = []
 
         for show in parsed['entries']:
@@ -70,11 +67,11 @@ class Provider(object):
                 size,
                 date,
                 seeds,
+                'ET', # extratorrent identifier
                 magnet
             ])
 
-        show_data.sort(key=lambda x: int(x[3]), reverse=True) # sort by seeds
-        return [header] + [show_data]
+        return show_data
 
     def download (self, chosen_show, destination, final_name):
         pass
