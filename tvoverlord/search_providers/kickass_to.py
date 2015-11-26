@@ -13,7 +13,9 @@ from tvoverlord.util import U
 class Provider (object):
     #provider_url = 'http://kickass.to'
     #provider_url = 'http://thekat.tv'
-    provider_url = 'http://kat.cr'
+    provider_urls = [
+        'http://kat.cr'
+    ]
     name = 'Kickass Torrents'
 
 
@@ -36,32 +38,38 @@ class Provider (object):
 
         query = search_string
         encoded_search = urllib.parse.quote (query)
-        url = '{}/usearch/%s/?rss=1&field=seeders&sorder=desc'.format(self.provider_url)
-        full_url = url % encoded_search
-
-        parsed = feedparser.parse(full_url)
-        header = [
-            [search_string, full_url],
-            ['Name', 'Size', 'Date', 'Seeds'],
-            [0, 10, 12, 6],
-            ['<', '>', '<', '>']]
         show_data = []
+        for try_url in self.provider_urls:
+            url = '{}/usearch/%s/?rss=1&field=seeders&sorder=desc'.format(try_url)
+            full_url = url % encoded_search
+            #print('>', full_url)
 
-        for show in parsed['entries']:
-            dt = datetime.fromtimestamp(mktime(show['published_parsed']))
-            date = dt.strftime('%b %d/%Y')
-            size = U.pretty_filesize (show['torrent_contentlength'])
-            title = show['title']
+            parsed = feedparser.parse(full_url)
+            if len(parsed['entries']) == 0:
+                continue
 
-            show_data.append([
-                title,                    # title
-                size,                     # show size
-                date,                     # date
-                show['torrent_seeds'],    # seeds
-                'KA',                     # kickass identifier
-                show['torrent_magneturi'] # id (download magnet url)
-            ])
+            header = [
+                [search_string, full_url],
+                ['Name', 'Size', 'Date', 'Seeds'],
+                [0, 10, 12, 6],
+                ['<', '>', '<', '>']]
 
+            for show in parsed['entries']:
+                dt = datetime.fromtimestamp(mktime(show['published_parsed']))
+                date = dt.strftime('%b %d/%Y')
+                size = U.pretty_filesize (show['torrent_contentlength'])
+                title = show['title']
+
+                show_data.append([
+                    title,                    # title
+                    size,                     # show size
+                    date,                     # date
+                    show['torrent_seeds'],    # seeds
+                    'KA',                     # kickass identifier
+                    show['torrent_magneturi'] # id (download magnet url)
+                ])
+
+            return show_data
         return show_data
 
     def download (self, chosen_show, destination, final_name):

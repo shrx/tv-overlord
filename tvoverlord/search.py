@@ -71,8 +71,9 @@ class Search(object):
             ['<', '>', '<', '>', '<']]
 
         engines = [bitsnoop, extratorrent, thepiratebay_sx, kickass_to]
+        #engines = [bitsnoop]
 
-        #socket.setdefaulttimeout(1)
+        socket.setdefaulttimeout(3.05)
         episodes = []
         with concurrent.futures.ThreadPoolExecutor(max_workers=8) as executor:
             res = {executor.submit(self.job, engine, search_string, season, episode):engine for engine in engines}
@@ -82,8 +83,6 @@ class Search(object):
                 episodes = episodes + results
 
         episodes.sort(key=lambda x: int(x[3]), reverse=True) # sort by seeds
-        #pp(episodes)
-        #exit()
 
         print('%s%s' % (backspace, overwrite), end=' ')
 

@@ -86,13 +86,6 @@ class Config:
         # [File Locations]
         staging = os.path.expanduser(cfg.get('File Locations', 'staging'))
 
-        # [Search Providers]
-        #for i in cfg.items('Search Providers'):
-            #providers.append(i[0])
-
-        # [The Pirate Bay Settings]
-        pirateurl = cfg.get('The Pirate Bay Settings', 'url')
-
     except configparser.NoSectionError as err_msg:
         print(err_msg, "in config file")
         exit()

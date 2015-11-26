@@ -12,7 +12,9 @@ from tvoverlord.util import U
 
 class Provider(object):
 
-    provider_url = 'http://bitsnoop.com/'
+    provider_urls = [
+        'http://bitsnoop.com',            # do not add a trailing slash for bitsnoop
+    ]                                     # it causes the search to fail
     name = 'BitSnoop'
 
     @staticmethod
@@ -33,33 +35,41 @@ class Provider(object):
 
         query = search_string
         encoded_search = urllib.parse.quote(query)
-        url = 'http://bitsnoop.com/search/all/{}/c/d/1/?fmt=rss'
-        full_url = url.format(encoded_search)
 
-        parsed = feedparser.parse(full_url)
         show_data = []
+        for try_url in self.provider_urls:
+            url = '%s/search/all/{}/c/d/1/?fmt=rss' % (try_url)
+            full_url = url.format(encoded_search)
+            #print('>', full_url)
 
-        for show in parsed['entries']:
-            if show['published_parsed']:
-                dt = datetime.fromtimestamp(mktime(show['published_parsed']))
-                date = dt.strftime('%b %d/%Y')
-            else:
-                date = '-'
-            size = U.pretty_filesize (show['size'])
-            title = show['title']
-            seeds = show['numseeders']
-            magnet = show['magneturi']
+            parsed = feedparser.parse(full_url)
+            if len(parsed['entries']) == 0:
+                continue
 
-            show_data.append([
-                title,
-                size,
-                date,
-                seeds,
-                'BS', # bitsnoop identifier
-                magnet
-            ])
+            for show in parsed['entries']:
+                if show['published_parsed']:
+                    dt = datetime.fromtimestamp(mktime(show['published_parsed']))
+                    date = dt.strftime('%b %d/%Y')
+                else:
+                    date = '-'
+                size = U.pretty_filesize (show['size'])
+                title = show['title']
+                seeds = show['numseeders']
+                magnet = show['magneturi']
+
+                show_data.append([
+                    title,
+                    size,
+                    date,
+                    seeds,
+                    'BS', # bitsnoop identifier
+                    magnet
+                ])
+
+            return show_data
 
         return show_data
+
 
     def download (self, chosen_show, destination, final_name):
         pass
