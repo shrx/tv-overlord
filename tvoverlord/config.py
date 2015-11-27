@@ -62,37 +62,24 @@ class Config:
         conn.commit()
         conn.close()
         print('The database and config.ini have been created in "{}"'.format(user_dir))
-        print('Run tv --help, or tv addnew "show name" to add shows.')
+        print('Run "tv --help", or "tv addnew \'show name\'" to add shows.')
         exit()  # since there is nothing in the db
 
-    defaults = {'ip':False, 'clean torrents':False, 'tv dir':False,
-                'torrents dir':False, 'torrent done':False}
     cfg = configparser.ConfigParser(allow_no_value=True)
     cfg.read(user_config)
 
     # OPTIONAL FIELDS
     # [App Settings]
     ip = cfg.get('App Settings', 'ip')
-    #torrent_done = cfg.get('App Settings', 'torrent done')
-    clean_torrents = cfg.get('App Settings', 'clean torrents')
+    clean_torrents = True if cfg.get('App Settings', 'clean torrents') == 'yes' else False
+    search_type = 'newsgroup' if cfg.get('App Settings', 'search type') == 'newsgroup' else 'torrent'
 
     # [File Locations]
     tv_dir = os.path.expanduser(cfg.get('File Locations', 'tv dir'))
-    #torrents_dir = os.path.expanduser(cfg.get('File Locations', 'torrents dir'))
-
-    # REQUIRED FIELDS
-    #providers = []
-    try:
-        # [File Locations]
-        staging = os.path.expanduser(cfg.get('File Locations', 'staging'))
-
-    except configparser.NoSectionError as err_msg:
-        print(err_msg, "in config file")
-        exit()
-    except configparser.NoOptionError as err_msg:
-        print(err_msg, "in config file")
-        exit()
+    staging = os.path.expanduser(cfg.get('File Locations', 'staging'))
 
 
 if __name__ == '__main__':
+    c = Config()
+    print(c.staging)
     pass
