@@ -495,11 +495,6 @@ def init(docopt_args):
     elif Args.editdbinfo:
         edit_db(Args.show_name)
 
-    elif Args.providers:
-        providers = Config.providers
-        for p in providers:
-            print(p, '  http://%s' % p.replace('_', '.'))
-
     elif Args.history:
         criteria = ''
         # try to parse criteria as an int, then as a date.  If neither don't
