@@ -6,6 +6,7 @@ import time
 import datetime
 import subprocess
 import sys
+import psutil
 from pprint import pprint as pp
 import logging
 
@@ -66,7 +67,7 @@ class DownloadManager(DB):
         filename = os.path.join(path, filename)
         self.save_info(torrent_hash, filename)
 
-        debug_command = '''export TR_TORRENT_NAME='%s'; export TR_TORRENT_DIR='%s'; export TR_TORRENT_HASH='%s'; python ~/projects/media-downloader/src/transmission_done.py'''
+        debug_command = '''export TR_TORRENT_NAME='%s'; export TR_TORRENT_DIR='%s'; export TR_TORRENT_HASH='%s'; ~/projects/media-downloader/src/transmission_done.py'''
         logging.info(debug_command, filename, path, torrent_hash)
 
         if self.is_oneoff(torrent_hash):
@@ -87,12 +88,22 @@ class DownloadManager(DB):
             destination_file = os.path.join(destination_dir, pretty_filename)
 
             logging.info('copying %s to %s' % (source, destination_file))
-            self.copy(source, destination_file)
-            Tell('%s done' % pretty_filename)
-
-        self.set_torrent_complete(torrent_hash)
+            if self.copy(source, destination_file):
+                Tell('%s done' % pretty_filename)
+                self.set_torrent_complete(torrent_hash)
+            else:
+                logging.info('Destination full')
+                Tell('Destination full')
+                sys.exit('Destination full')
 
     def copy(self, source, destination):
+        # check if there is space at the destination
+        source_size = self.get_size(source)
+        destination_dir = os.path.dirname(destination)
+        destination_free = psutil.disk_usage(destination_dir).free
+        if source_size > destination_free:
+            return False
+
         """Copy files or dirs using the platform's copy tool"""
         cmd = None
         if sys.platform.startswith(('darwin', 'linux')):
@@ -101,6 +112,20 @@ class DownloadManager(DB):
             cmd = ['xcopy', source, destination, '/K/O/X']
 
         subprocess.call(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        return True
+
+    def get_size(self, start_path):
+        if os.path.isfile(start_path):
+            return os.path.getsize(start_path)
+        elif os.path.isdir(start_path):
+            total_size = 0
+            for dirpath, dirnames, filenames in os.walk(start_path):
+                for f in filenames:
+                    fp = os.path.join(dirpath, f)
+                    total_size += os.path.getsize(fp)
+            return total_size
+        else:
+            sys.exit('{} does not exist'.format(start_path))
 
     def pretty_names(self, filename, torrent_hash):
         """Generate a file name and dir name based on data from the database
