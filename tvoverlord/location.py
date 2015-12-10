@@ -1,24 +1,28 @@
-"""
-
-"""
+import sys
 import requests
 
+
 class Location:
+    """Compare our current ip with the ip supplied from our ISP
+
+    Location uses ipify.org to get our real ip.  The first 3 octets
+    are compared since the last octet is regularaly changed by the ISP.
+
+    """
+
     def __init__(self):
         url = 'http://api.ipify.org'
         try:
             r = requests.get(url)
         except requests.exceptions.ConnectionError:
-            print('\nIP identification services are unavailable - http://api.ipify.org')
-            exit()
-
-        self.ip = str(r.content)
+            sys.exit('\nIP identification services are unavailable: {}'.format(
+                url))
+        self.ip = r.text
 
     def ips_match(self, ip):
-        match = False
         part_ip = ip.split('.')
-        part_ip = '%s.%s' % (part_ip[0], part_ip[1])
+        part_ip = '.'.join(part_ip[:2])
         if self.ip.startswith(part_ip):
-            match = True
-
-        return match
+            return True
+        else:
+            return False
