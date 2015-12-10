@@ -1,4 +1,3 @@
-from __future__ import print_function
 import termios
 import fcntl
 import sys

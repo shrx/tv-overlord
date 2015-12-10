@@ -48,7 +48,6 @@ TVOverlord source code is available at https://github.com/8cylinder/tv-overlord
 Any feature requests, or bug reports should go there.
 """
 
-from __future__ import print_function
 import datetime
 import os
 import sqlite3
