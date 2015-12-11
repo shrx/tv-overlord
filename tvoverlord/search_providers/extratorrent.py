@@ -14,27 +14,27 @@ class Provider(object):
 
     name = 'ExtraTorrent'
     provider_urls = [
+        'http://extratorrent.cc',
+        'http://etmirror.com',
+        'http://etproxy.com',
+
         'https://extratorrent.unblocked.pe',
         'https://extratorrent.unblocked.la',
-        'http://extratorrent.cc',
-        'http://195.144.21.16/'
+        'http://extratorrentonline.com',
+        'http://extratorrent.works',
+        'http://extratorrentlive.com',
+        #'http://195.144.21.16/'
     ]
 
     @staticmethod
     def se_ep (season, episode, show_title):
         season_just = str (season).rjust (2, '0')
         episode = str (episode).rjust (2, '0')
-        #fixed = '"%s S%sE%s" OR "%s %sx%s"' % (
-            #show_title, season_just, episode, show_title, season, episode)
         fixed = '%s S%sE%s' % (
             show_title, season_just, episode)
         return fixed
 
     def search(self, search_string, season=False, episode=False):
-
-        #search_string = 'Doctor Who 2005'
-        #print("search_string", search_string)
-
         if season and episode:
             search_string = '%s' % (
                 self.se_ep(
@@ -45,11 +45,14 @@ class Provider(object):
 
         show_data = []
         for try_url in self.provider_urls:
-            #print(url)
             # cid=0 everything, cid=8 tv shows:
-            url = '{}/rss.xml?type=search&cid=0&search=%s'.format(try_url)
+            lookfor = 0
+            if season and episode:
+                lookfor = 8  # tv only
+
+            url = '{}/rss.xml?type=search&cid={}&search=%s'.format(try_url, lookfor)
             full_url = url % encoded_search
-            #print('>', full_url)
+            # print('>', full_url)
 
             parsed = feedparser.parse(full_url)
 
@@ -61,6 +64,16 @@ class Provider(object):
                 date = dt.strftime('%b %d/%Y')
                 size = U.pretty_filesize (show['size'])
                 title = show['title']
+
+                # extratorrent returns results that match any word in the
+                # search, so the results end up with a bunch of stuff we aren't
+                # interested in and we need to filter them out.
+                stop = False
+                for i in search_string.split(' '):
+                    if i.lower() not in title.lower():
+                        stop = True
+                if stop:
+                    continue
 
                 # the ExtraTorrent rss feed doesn't supply the magnet link, or any
                 # usable links (They must be downloaded from the site).  But the

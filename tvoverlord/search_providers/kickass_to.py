@@ -48,12 +48,6 @@ class Provider (object):
             if len(parsed['entries']) == 0:
                 continue
 
-            header = [
-                [search_string, full_url],
-                ['Name', 'Size', 'Date', 'Seeds'],
-                [0, 10, 12, 6],
-                ['<', '>', '<', '>']]
-
             for show in parsed['entries']:
                 dt = datetime.fromtimestamp(mktime(show['published_parsed']))
                 date = dt.strftime('%b %d/%Y')

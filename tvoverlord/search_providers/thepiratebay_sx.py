@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 
 import urllib.request, urllib.parse, urllib.error
 import re
@@ -57,7 +56,7 @@ class Provider (object):
                     # if can't connect, go to the next url
                     continue
                 html = r.content
-                soup = BeautifulSoup(html)
+                soup = BeautifulSoup(html, 'lxml')
 
                 search_results = soup.find('table', id='searchResult')
                 if not search_results:
@@ -80,7 +79,7 @@ class Provider (object):
                     try:
                         details = tds[0].find('font').contents[0].split(', ')
                         date = details[0].replace('Uploaded ', '')
-                        size = details[1].replace('Size ', '')
+                        size = details[1].replace('Size ', '').replace('MiB', 'MB').replace('GiB', 'GB')
                         seeds = tds[1].string
                     except IndexError:
                         # sometimes some fields are empty, so trying to
