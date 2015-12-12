@@ -99,30 +99,39 @@ class History:
 
         torrent_hash = selected[3]
         url = selected[-1]
-        search = Search(Config.providers[0])
+        search = Search()
         downloaded_filename = search.download(chosen_show=url, destination=Config.staging)
 
     def display_list(self, title, download=False):
         sqldata = self.sqldata
-        data = [
-            [
-                'title',
-                ['Date downloaded', 'Show name, episode', 'Local file'],
-                [16, 25, 0],
-                ['<', '<', '<']
-            ]
-        ]
         records = []
 
         if download:
+            data = [
+                [
+                    'title',
+                    ['Date downloaded', 'Show name, episode', 'Magnet link'],
+                    [16, 25, 0],
+                    ['<', '<', '<']
+                ]
+            ]
             for i in sqldata:
+                print(i)
                 records.append([
                     self.format_date(i[0]),
                     self.episode(i[1], i[4], i[5]),
-                    i[6],
-                    i[6]]
+                    i[9],
+                    i[9]]
                 )
         else:
+            data = [
+                [
+                    'title',
+                    ['Date downloaded', 'Show name, episode', 'Local file'],
+                    [16, 25, 0],
+                    ['<', '<', '<']
+                ]
+            ]
             for i in sqldata:
                 records.append([
                     self.format_date(i[0]),
