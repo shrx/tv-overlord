@@ -3,7 +3,6 @@
 r"""Download and manage TV shows
 
 Usage:
-  tvol
   tvol download    [-n] [-t] [-i] [-c COUNT] [-l LOCATION] [SHOW_NAME]
   tvol showmissing [-n] [-t]
   tvol info        [-n] [-a] [-x] [--ask-inactive] [--show-links] [--synopsis] [SHOW_NAME]
@@ -142,8 +141,6 @@ def edit_db(search_str):
     conn.close()
 
 def init(docopt_args):
-    #print docopt_args
-    #exit()
     class Args:
         """Mapping from docopt args to object
 
@@ -190,19 +187,6 @@ def init(docopt_args):
 
     count = int(Args.count)  # convert --count to int
     Config.episode_display_count = count
-
-    # set the default action to showmissing
-    # if no option is set on the command line
-    if (not Args.download and
-        not Args.showmissing and
-        not Args.info and
-        not Args.calendar and
-        not Args.addnew and
-        not Args.nondbshow and
-        not Args.editdbinfo and
-        not Args.history):
-
-        Args.showmissing = True
 
     if Args.info:
         show_info = {}

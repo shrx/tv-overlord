@@ -29,6 +29,7 @@ setup(
         'docopt',
         'python-dateutil',
         'appdirs',
+        'psutil',
     ],
     version = '0.9.14',
     description = 'TV Overlord is a command line tool to download and manage TV shows from newsgroups or bittorent',
