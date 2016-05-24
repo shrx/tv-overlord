@@ -11,6 +11,7 @@ def dict_factory(cursor, row):
         d[col[0]] = row[idx]
     return d
 
+
 class DB(object):
     def named_sql(self, sql, values=False):
         pass
@@ -57,11 +58,17 @@ class DB(object):
         values = {'hash': hash, 'filename': filename}
         self.run_sql(sql, values)
 
+    def save_dest(self, hash, destination):
+        sql = '''UPDATE tracking SET destination = :destination
+                 WHERE lower(chosen_hash) = lower(:hash)'''
+        values = {'hash': hash, 'destination': destination}
+        self.run_sql(sql, values)
+
     def set_torrent_complete(self, hash):
         sql = '''UPDATE tracking SET complete = 1
                  WHERE lower(chosen_hash) = lower(:hash)'''
         values = {'hash': hash}
-        data = self.run_sql(sql, values)
+        self.run_sql(sql, values)
 
     def show_exists(self, id):
         sql = '''SELECT thetvdb_series_id, status FROM shows
@@ -76,7 +83,7 @@ class DB(object):
 
     def get_downloaded_days(self, days=0):
         sql = '''SELECT download_date, show_title, filename, chosen_hash, season,
-                   episode, chosen, one_off, complete, chosen FROM tracking
+                   episode, chosen, one_off, complete, chosen, destination FROM tracking
                  WHERE julianday(date(download_date))
                        > (julianday(date('now'))-:days)'''
         values = {'days': days}
@@ -85,7 +92,7 @@ class DB(object):
 
     def get_downloaded_date(self, date):
         sql = '''SELECT download_date, show_title, filename, chosen_hash, season,
-                   episode, chosen, one_off, complete, chosen FROM tracking
+                   episode, chosen, one_off, complete, chosen, destination FROM tracking
                  WHERE date(download_date) = :date'''
         date_str = date.strftime('%Y-%m-%d')
         values = {'date': date_str}
@@ -94,7 +101,7 @@ class DB(object):
 
     def get_downloaded_title(self, title):
         sql = '''SELECT download_date, show_title, filename, chosen_hash, season,
-                   episode, chosen, one_off, complete, chosen FROM tracking
+                   episode, chosen, one_off, complete, chosen, destination FROM tracking
                  WHERE show_title like :title'''
         values = {'title': "%{}%".format(title)}
         data = self.run_sql(sql, values)
@@ -102,7 +109,7 @@ class DB(object):
 
     def get_missing(self):
         sql = '''SELECT download_date, show_title, filename, chosen_hash, season,
-                   episode, chosen, one_off, complete, chosen FROM tracking
+                   episode, chosen, one_off, complete, chosen, destination FROM tracking
                  WHERE complete IS NULL'''
         data = self.run_sql(sql)
         return data

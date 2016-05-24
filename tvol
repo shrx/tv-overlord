@@ -40,7 +40,7 @@ Options:
   -w FIELDS, --what-to-show FIELDS
                    An optional list of information to show seperated by commas.
                    It can be any of these: date, title, season, episode, magnet,
-                   oneoff, complete, filename
+                   oneoff, complete, filename, destination
                    eg. --what-to-show 'title,filename,magnet'
 
 TVOverlord source code is available at https://github.com/8cylinder/tv-overlord

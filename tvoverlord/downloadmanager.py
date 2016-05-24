@@ -86,6 +86,7 @@ class DownloadManager(DB):
                 logging.info('creating dir: %s' % destination_dir)
 
             destination_file = os.path.join(destination_dir, pretty_filename)
+            self.save_dest(torrent_hash, destination_file)
 
             logging.info('copying %s to %s' % (source, destination_file))
             if self.copy(source, destination_file):

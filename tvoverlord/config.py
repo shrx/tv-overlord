@@ -53,7 +53,8 @@ class Config:
                 chosen_hash TEXT,
                 one_off INTERGER,
                 complete INTERGER,
-                filename TEXT
+                filename TEXT,
+                destination TEXT
             );
             '''
         conn = sqlite3.connect(db_file)

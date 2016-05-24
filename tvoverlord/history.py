@@ -61,7 +61,7 @@ class History:
             for i in what:
                 line = line + '{%s}\t' % i
         else:
-            line = '{date}\t{title}\t{complete}\t{filename}'
+            line = '{date}\t{title}\t{complete}\t{destination}'
 
         for row in self.sqldata:
             date = self.format_date(row[0])
@@ -72,10 +72,12 @@ class History:
             magnet = row[6]
             oneoff = 'one off' if row[7] else 'tracked'
             complete = 'complete' if row[8] else 'incomplete'
+            destination = self.exists(row[10])
 
             fields = {'date': date,
                       'title': title,
                       'filename': filename,
+                      'destination': destination,
                       'season': season,
                       'episode': episode,
                       'magnet': magnet,
