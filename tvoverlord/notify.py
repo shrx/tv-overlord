@@ -1,5 +1,4 @@
 
-import sys
 import os
 import platform
 
@@ -16,7 +15,9 @@ class Tell:
                 # from inside virtualenv the Gnome
                 # gi object cannot be loaded
                 try:
-                    #from gi.repository import GObject
+                    # from gi.repository import GObject
+                    import gi
+                    gi.require_version('Notify', '0.7')
                     from gi.repository import Notify
                     self.Notify = Notify
                 except(ImportError):
