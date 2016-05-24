@@ -1,8 +1,5 @@
 
 import os
-import re
-import sqlite3
-import time
 import datetime
 import subprocess
 import sys
@@ -172,12 +169,10 @@ class DownloadManager(DB):
 
         pretty_filename = newname + file_type
 
-        #pretty_filename = '{}.{}{}{}'.format(file_show_name, seep, res, file_type)
-
         # new dir name
-        pretty_dirname = show_name #.replace(' ', '_')
+        pretty_dirname = show_name  # .replace(' ', '_')
 
-        #print '>>>', pretty_filename, pretty_dirname
+        # print '>>>', pretty_filename, pretty_dirname
         logging.info('Pretty names: %s, %s' % (pretty_filename, pretty_dirname))
         return pretty_filename, pretty_dirname
 
@@ -203,11 +198,4 @@ class DownloadManager(DB):
                 size = os.stat(full_filename).st_size
                 files_sizes.append([size, full_filename])
         files_sizes.sort(key=lambda torrent: int(torrent[0]), reverse=True)
-        #pp(files_sizes)
         return files_sizes[0][1]
-
-
-
-
-
-

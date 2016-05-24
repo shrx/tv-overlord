@@ -33,13 +33,15 @@ class Tracking(DB):
 
         sql = '''
             INSERT INTO tracking(
-                download_date, show_title, season, episode, chosen, chosen_hash, one_off)
+                download_date, show_title, season,
+                episode, chosen, chosen_hash, one_off)
             VALUES(
-                :date, :show_title, :season, :episode, :chosen, :hash, :one_off);'''
+                :date, :show_title, :season, :episode,
+                :chosen, :hash, :one_off);'''
 
         values = {
             'date': date,
-            'show_title' : show_title,
+            'show_title': show_title,
             'season': season,
             'episode': episode,
             'chosen': chosen_url,

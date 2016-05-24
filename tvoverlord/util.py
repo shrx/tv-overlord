@@ -6,12 +6,6 @@ $ python Util.py
 """
 
 import random
-import ctypes
-import threading
-import sys
-import os
-import time
-import unicodedata
 
 
 class U:
@@ -154,8 +148,8 @@ class U:
 
     @staticmethod
     def snip(text, length):
-        #sep = '+'
-        #sep = '0xE2 0x80 0xA6'
+        # sep = '+'
+        # sep = '0xE2 0x80 0xA6'
         sep = "\u2026"
 
         if len(text) <= length:
@@ -169,7 +163,7 @@ class U:
         short_mid = int(length / 2)
         start = text[0: short_mid]
         end = text[short_mid + end_half - short_mid * 2: len(text)]
-        #color_sep = U.__greenf + U.__boldon + sep + U.__reset
+        # color_sep = U.__greenf + U.__boldon + sep + U.__reset
         color_sep = sep
 
         return start + color_sep + end

@@ -1,9 +1,8 @@
 import sqlite3
-import tvdb_api
 
 from tvoverlord.series import Series
 from tvoverlord.config import Config
-from tvoverlord.tvutil import FancyPrint, dict_factory
+from tvoverlord.tvutil import dict_factory
 
 
 class AllSeries:
@@ -67,7 +66,7 @@ class AllSeries:
             self.sort_field
         )
         conn = sqlite3.connect(Config.db_file)
-        #conn.row_factory = tv_util.dict_factory
+        # conn.row_factory = tv_util.dict_factory
         conn.row_factory = dict_factory
         curs = conn.cursor()
         ddata = curs.execute(sql)

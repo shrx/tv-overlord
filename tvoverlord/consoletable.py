@@ -3,7 +3,8 @@
 Build a table to display data in a terminal.
 """
 
-import os, string
+import os
+import string
 from collections import namedtuple
 from pprint import pprint as pp
 
@@ -108,7 +109,9 @@ class ConsoleTable:
         BAR_COUNT = len(header.widths)
         flex_width = self.console_columns - sum(header.widths) - NUMBER_SPACE - BAR_COUNT
 
-        for i, title, width, alignment in zip(list(range(len(header.widths))), header.titles, header.widths, header.alignments):
+        for i, title, width, alignment in zip(list(range(len(header.widths))),
+                                              header.titles, header.widths,
+                                              header.alignments):
             if width == 0:
                 width = flex_width
             if alignment == '<':
@@ -136,12 +139,9 @@ class ConsoleTable:
         # key has the s, r, q, m removed to not interfere with the
         # ask_user options.  This list can have anything, as long as
         # they are single characters.  This is aprox 90 characters.
-        key = ('a','b','c','d','e','f','g','h','i','j','k','l','n','o','p',
-               't','u','v','w','x','y','z','A','B','C','D','E','F','G','H',
-               'I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W',
-               'X','Y','Z','0','1','2','3','4','5','6','7','8','9','!','"',
-               '#','$','%','&',"'",'(',')','*','+',',','-','.','/',':',';',
-               '<','=','>','?','@','[','\\',']','^','_','`','{','|','}','~')
+        key = """abcdefghijklnoptuvwxyzABCDEFGHIJKLMNOPQRSTUVW"""
+        key += """XYZ0123456789!#$%&()*+-./:;<=>?@[\\]^_`{|}"'~"""
+        key = list(key)
 
         self.table.body = self.table.body[:self.display_count]
         for row, counter in zip(self.table.body, key):
@@ -211,7 +211,6 @@ class ConsoleTable:
 
         return choice
 
-
     def ask_postdownload(self, key):
         get = ask_user('\nLetter or [q]uit: ')
         choice = False
@@ -230,79 +229,10 @@ class ConsoleTable:
 
         return choice
 
-
     def display_error(self, message):
         print()
         print(U.hi_color('[!]', 16, 178), U.hi_color(message, 178))
 
 
 if __name__ == '__main__':
-    import string
-    import random
-    from pprint import pprint as pp
-
-    def get_paragraph(min_count, max_count):
-        word_count = random.randrange(min_count, max_count)
-        paragraph = []
-        for i in range(word_count):
-            letter_count = random.randrange(1, 10)
-            word = random.sample(string.ascii_letters, letter_count)
-            word = ''.join(word)
-            word = word.replace(' ', '')
-            word = word.replace('\t', '')
-            paragraph.append(word)
-        return ' '.join(paragraph)
-
-    rows = 10
-    data = [['This is a title',
-             [get_paragraph(1,2), get_paragraph(1,2), get_paragraph(9,10), get_paragraph(9,10), 'RET'],
-             [0, 10, 20, 30, 10],
-             ['<', '>', '=', '<', '<']],
-
-             [[get_paragraph(1,30),
-               get_paragraph(1,30),
-               get_paragraph(1,10),
-               get_paragraph(1,10),
-               get_paragraph(1,2)] for i in range(rows)]
-           ]
-
-    for i in range(10):
-        tbl2 = ConsoleTable(data)
-        tbl2.set_title('New title')
-        tbl2.set_count(20)
-        out = tbl2.generate()
-        print('out:', out)
-
-    data = [['http://thepiratebay.org/search/ Utopia%20S02E03/0/7/0 Utopia%202x03/0/7/0 ',
-            ['Name', 'Size', 'Date', 'Seeds'],
-            [0, 11, 12, 6],
-            ['<', '>', '<', '>']],
-           [['Utopia S02E03 HDTV x264-TLA [eztv]',
-             '259.23\xa0MiB',
-             'Today\xa007:11',
-             '2040',
-             'magnet:?xt=urn:btih:318938a7a4c8f8b962a90704364138402879a8ad&dn=Utopia+S02E03+HDTV+x264-TLA+%5Beztv%5D&tr=udp%3A%2F%2Ftracker.openbittorrent.com%3A80&tr=udp%3A%2F%2Ftracker.publicbt.com%3A80&tr=udp%3A%2F%2Ftracker.istole.it%3A6969&tr=udp%3A%2F%2Fopen.demonii.com%3A1337'],
-            ['Utopia S02E03 720p HDTV x264-TLA [eztv]',
-             '797.83\xa0MiB',
-             'Today\xa007:11',
-             '881',
-             'magnet:?xt=urn:btih:fb185c7c0bd81f8e97481f9c23754ff3e6b5fe15&dn=Utopia+S02E03+720p+HDTV+x264-TLA+%5Beztv%5D&tr=udp%3A%2F%2Ftracker.openbittorrent.com%3A80&tr=udp%3A%2F%2Ftracker.publicbt.com%3A80&tr=udp%3A%2F%2Ftracker.istole.it%3A6969&tr=udp%3A%2F%2Fopen.demonii.com%3A1337'],
-            ['Utopia.S02E03.720p.HDTV.x264-TLA[rartv]',
-             '797.83\xa0MiB',
-             'Today\xa000:37',
-             '527',
-             'magnet:?xt=urn:btih:33d01b26f48182f7e681a086e35bdb5132af8d93&dn=Utopia.S02E03.720p.HDTV.x264-TLA%5Brartv%5D&tr=udp%3A%2F%2Ftracker.openbittorrent.com%3A80&tr=udp%3A%2F%2Ftracker.publicbt.com%3A80&tr=udp%3A%2F%2Ftracker.istole.it%3A6969&tr=udp%3A%2F%2Fopen.demonii.com%3A1337'],
-            ['Utopia.S02E03.HDTV.x264-TLA[rartv]',
-             '265.27\xa0MiB',
-             'Today\xa000:45',
-             '230',
-             'magnet:?xt=urn:btih:aae14da14213bb2e48963b9c40b5b313056897e7&dn=Utopia.S02E03.HDTV.x264-TLA%5Brartv%5D&tr=udp%3A%2F%2Ftracker.openbittorrent.com%3A80&tr=udp%3A%2F%2Ftracker.publicbt.com%3A80&tr=udp%3A%2F%2Ftracker.istole.it%3A6969&tr=udp%3A%2F%2Fopen.demonii.com%3A1337'],
-            ['Utopia S02E03 480p HDTV x264-mSD ',
-             '165.4\xa0MiB',
-             'Today\xa001:18',
-             '40',
-             'magnet:?xt=urn:btih:c454da2eef2f4ed2ffae37fe479c8d99a9c7f5d3&dn=Utopia+S02E03+480p+HDTV+x264-mSD+&tr=udp%3A%2F%2Ftracker.openbittorrent.com%3A80&tr=udp%3A%2F%2Ftracker.publicbt.com%3A80&tr=udp%3A%2F%2Ftracker.istole.it%3A6969&tr=udp%3A%2F%2Fopen.demonii.com%3A1337']]]
-
-    tbl1 = ConsoleTable(data)
-    result = tbl1.generate()
-    print('result>', result)
+    pass

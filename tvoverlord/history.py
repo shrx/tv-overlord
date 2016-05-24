@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 
 import os
-import re
 import datetime
 from dateutil import parser
 from pprint import pprint as pp
@@ -9,7 +8,6 @@ from pprint import pprint as pp
 from tvoverlord.config import Config
 from tvoverlord.db import DB
 from tvoverlord.consoletable import ConsoleTable
-from tvoverlord.consoleinput import ask_user
 from tvoverlord.downloadmanager import DownloadManager
 from tvoverlord.search import Search
 from tvoverlord.util import U
@@ -38,8 +36,6 @@ class History:
         return full
 
     def exists(self, filename):
-        ok = 76
-        missing = 160
         if filename is None:
             return ''
         elif os.path.exists(filename):
@@ -99,10 +95,9 @@ class History:
         title = 'Re-download'
         selected = self.display_list(title, download=True)
 
-        torrent_hash = selected[3]
         url = selected[-1]
         search = Search()
-        downloaded_filename = search.download(chosen_show=url, destination=Config.staging)
+        search.download(chosen_show=url, destination=Config.staging)
 
     def display_list(self, title, download=False):
         sqldata = self.sqldata
@@ -153,22 +148,5 @@ class History:
         return selected
 
 
-        '''
-        SELECT DATE(download_date) AS dt,
-               COUNT(download_date)
-        FROM tracking
-        GROUP BY dt
-
-        SELECT DATE(download_date) AS dt,
-        	COUNT(download_date) AS count,
-        	JULIANDAY(DATE('now')) - JULIANDAY(DATE(download_date)) AS days
-        FROM tracking
-        GROUP by dt
-
-        '''
-
-
 if __name__ == '__main__':
-    args = docopt(__doc__, version='0.1')
-    #print args
-    main(args)
+    pass

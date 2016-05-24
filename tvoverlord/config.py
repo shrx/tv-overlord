@@ -5,7 +5,6 @@ import sqlite3
 from appdirs import AppDirs
 
 from pprint import pprint as pp
-from tvoverlord.consoleinput import ask_user as ask
 
 
 class Config:

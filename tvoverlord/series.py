@@ -39,14 +39,12 @@ class Series:
     episodename
     """
 
-
     def se_ep(self, season, episode):
         season_just = str(season).rjust(2, '0')
         episode = str(episode).rjust(2, '0')
         fixed = 'S%sE%s' % (season_just, episode)
 
         return fixed
-
 
     def __init__(self, dbdata=False, show_type='current'):
         typelist = ('new', 'nondb', 'current')
@@ -80,7 +78,6 @@ class Series:
         self.db_search_engine_name = dbdata['search_engine_name']
         self.db_status = dbdata['status']
 
-
     def _get_thetvdb_series_data(self):
         """Dynamicaly add all the data from Thetvdb.com
 
@@ -112,14 +109,18 @@ class Series:
 
         """
 
-        tv = tvdb_api.Tvdb(apikey=Config.thetvdb_apikey, cache=Config.use_cache)
+        tv = tvdb_api.Tvdb(apikey=Config.thetvdb_apikey,
+                           cache=Config.use_cache)
         try:
             series = tv[self.db_name]
             self.show_exists = True
+        except KeyError:
+            print('TheTVDB is down or very slow, try again.')
+            exit()
         except tvdb_api.tvdb_shownotfound:
             print('Show not found: %s' % self.db_name)
             self.show_exists = False
-            #exit()
+            # exit()
             return
         except tvdb_api.tvdb_error as e_msg:
             print('\n')
@@ -135,7 +136,6 @@ class Series:
         for i in series.data:
             setattr(self, i, series.data[i])
         self.series = series
-
 
     def download_missing(self, episode_display_count, download_today=False):
         missing = self._get_missing(download_today)
@@ -176,12 +176,13 @@ class Series:
                 continue
             elif showid == 'mark':
                 # mark the episode as watched, but don't download it
-                self._update_db(season=episode['season'], episode=episode['episode'])
+                self._update_db(season=episode['season'],
+                                episode=episode['episode'])
                 continue
 
             self._download(showid)
-            self._update_db(season=episode['season'], episode=episode['episode'])
-
+            self._update_db(season=episode['season'],
+                            episode=episode['episode'])
 
     def is_missing(self, download_today=False):
         missing = self._get_missing(download_today)
@@ -196,7 +197,6 @@ class Series:
 
         return ret
 
-
     def show_missing(self):
         missing = self.missing
         if len(missing) == 0:
@@ -207,12 +207,14 @@ class Series:
         indent = '    '
         missing_list = []
         for s in missing:
-            se = 'S%sE%s' % (s['season'].rjust(2, '0'), s['episode'].rjust(2, '0'))
+            se = 'S%sE%s' % (s['season'].rjust(2, '0'),
+                             s['episode'].rjust(2, '0'))
             missing_list.append(se)
-        ret += textwrap.fill(', '.join(missing_list), width=int(self.console_columns),
-                             initial_indent=indent, subsequent_indent=indent)
+        ret += textwrap.fill(', '.join(missing_list),
+                             width=int(self.console_columns),
+                             initial_indent=indent,
+                             subsequent_indent=indent)
         return ret
-
 
     def add_new(self, name):
         self.db_name = name
@@ -230,25 +232,23 @@ class Series:
         print()
         print('%sFirst aired: %s' % (indent, self.firstaired))
         print('%sStatus: %s' % (indent, self.status))
-        #print '%sAirs: %s, %s' % (indent, self.airs_time, self.airs_dayofweek)
         print()
         correct = ask('Is this the correct show? [y/n]')
 
         if correct == 'y':
             self._add_new_db()
 
-
     def non_db(self, search_str, display_count):
         self.db_name = search_str
         try:
-            show_data = self._ask(self.search_provider.search(search_str), None, None, display_count)
+            show_data = self._ask(self.search_provider.search(search_str),
+                                  None, None, display_count)
             if not show_data:
                 return
         except SearchError:
             print('No matches')
             return
         self._download(show_data)
-
 
     def _get_missing(self, download_today=False):
         """Returns a list of missing episodes"""
@@ -283,7 +283,7 @@ class Series:
                 broadcast_date = datetime.date(
                     int(split_date[0]), int(split_date[1]), int(split_date[2]))
 
-                if download_today == False:
+                if not download_today:
                     # download yesterday's and older shows
                     if broadcast_date >= today:  # unaired future date
                         # since this date is the next future date, put
@@ -304,28 +304,26 @@ class Series:
                     break  # don't display the S00E01 or S05E00 type special episodes
 
                 if last_watched < last_broadcast:
-                    missing.append({'season': last_season, 'episode': last_episode})
-
+                    missing.append({'season': last_season,
+                                    'episode': last_episode})
         return missing
 
-
     def set_next_episode(self, next_date):
-        #print '>>>', self.series['seriesname'], self.id, next_date, '<<<'
-        #exit()
+        # print '>>>', self.series['seriesname'], self.id, next_date, '<<<'
+        # exit()
 
-        #sql = 'UPDATE shows SET next_episode=:next_date WHERE thetvdb_series_id=:tvdb_id'
+        # sql = 'UPDATE shows SET next_episode=:next_date WHERE thetvdb_series_id=:tvdb_id'
         sql = 'UPDATE shows SET next_episode=:next_date WHERE name=:show_name'
-        conn = sqlite3.connect (Config.db_file)
+        conn = sqlite3.connect(Config.db_file)
         curs = conn.cursor()
-        #values = {'next_date': next_date.isoformat(), 'tvdb_id':self.id}
-        values = {'next_date': next_date.isoformat(), 'show_name':self.db_name}
+        # values = {'next_date': next_date.isoformat(), 'tvdb_id':self.id}
+        values = {'next_date': next_date.isoformat(), 'show_name': self.db_name}
         # print values
         # return
-        #print '----', values
-        curs.execute (sql, values)
+        # print '----', values
+        curs.execute(sql, values)
         conn.commit()
         conn.close()
-
 
     def _ask(self, shows, season, episode, display_count):
         print()
@@ -346,7 +344,8 @@ class Series:
             show_title = '%s  ' % shows[0][0][0]
             url = shows[0][0][1]
 
-        show_title_color = U.hi_color(show_title, foreground=color['title_fg'], background=color['title_bg'])
+        show_title_color = U.hi_color(show_title, foreground=color['title_fg'],
+                                      background=color['title_bg'])
         show_title_color = U.effects(['boldon'], show_title_color)
 
         space_before_title = 2
@@ -368,21 +367,22 @@ class Series:
 
         return show_to_dl
 
-
     def _download(self, show_data):
         msg = U.hi_color('Downloading...', foreground=16, background=184)
         sys.stdout.write(msg)
         sys.stdout.flush()
 
-        filename = self.search_provider.download(chosen_show=show_data, destination=Config.staging)
+        filename = self.search_provider.download(
+            chosen_show=show_data, destination=Config.staging)
 
         backspace = '\b' * len(msg)
         done = U.hi_color(filename.ljust(len(msg)), foreground=34)
         print('%s%s' % (backspace, done))
 
-
     def set_inactive(self):
-        sql = 'UPDATE shows SET status="inactive" WHERE thetvdb_series_id=:tvdb_id'
+        sql = '''UPDATE shows
+                 SET status="inactive"
+                 WHERE thetvdb_series_id=:tvdb_id'''
         conn = sqlite3.connect(Config.db_file)
         curs = conn.cursor()
         values = {'tvdb_id': self.db_thetvdb_series_id}
@@ -391,17 +391,18 @@ class Series:
         conn.commit()
         conn.close()
 
-
     def _update_db(self, season, episode):
-        sql = "UPDATE shows SET season=:season, episode=:episode WHERE thetvdb_series_id=:tvdb_id"
+        sql = """UPDATE shows
+                 SET season=:season, episode=:episode
+                 WHERE thetvdb_series_id=:tvdb_id"""
         conn = sqlite3.connect(Config.db_file)
         curs = conn.cursor()
-        values = {'season': season, 'episode': episode, 'tvdb_id': self.db_thetvdb_series_id}
+        values = {'season': season, 'episode': episode,
+                  'tvdb_id': self.db_thetvdb_series_id}
         curs.execute(sql, values)
 
         conn.commit()
         conn.close()
-
 
     def _add_new_db(self, season=0, episode=0):
         if self.db.show_exists(self.id):
@@ -411,9 +412,12 @@ class Series:
             print()
             print('%s is already in the db. Its status is now set to "active"' % self.seriesname)
         else:
-            sql = '''insert into shows (
-                network_status, status, thetvdb_series_id, name, season, episode)
-                values (:network_status, :status, :thetvdb_id, :name, :season, :episode)'''
+            sql = '''
+                INSERT INTO shows (
+                  network_status, status, thetvdb_series_id,
+                  name, season, episode)
+                VALUES (:network_status, :status, :thetvdb_id,
+                        :name, :season, :episode)'''
             values = {'network_status': self.status,
                       'status': 'active',
                       'thetvdb_id': self.id,

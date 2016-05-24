@@ -2,7 +2,6 @@ import sys
 import subprocess
 import os
 import platform
-import time
 import concurrent.futures
 from pprint import pprint as pp
 import socket
@@ -12,6 +11,7 @@ from tvoverlord.search_providers import extratorrent
 from tvoverlord.search_providers import bitsnoop
 from tvoverlord.search_providers import kickass_to
 from tvoverlord.search_providers import thepiratebay_sx
+
 
 class SearchError(Exception):
     def __init__(self, value):
@@ -70,24 +70,23 @@ class Search(object):
             ['<', '>', '<', '>', '<']]
 
         engines = [bitsnoop, extratorrent, thepiratebay_sx, kickass_to]
-        #engines = [bitsnoop]
+        # engines = [bitsnoop]
 
         socket.setdefaulttimeout(3.05)
         episodes = []
         with concurrent.futures.ThreadPoolExecutor(max_workers=8) as executor:
-            res = {executor.submit(self.job, engine, search_string, season, episode):engine for engine in engines}
+            res = {executor.submit(self.job, engine, search_string, season, episode): engine for engine in engines}
             for future in concurrent.futures.as_completed(res):
-                something = res[future]
+                # something = res[future]
                 results = future.result()
                 episodes = episodes + results
 
-        episodes.sort(key=lambda x: int(x[3]), reverse=True) # sort by seeds
+        episodes.sort(key=lambda x: int(x[3]), reverse=True)  # sort by seeds
 
         print('%s%s' % (backspace, overwrite), end=' ')
 
-        #return search_results
+        # return search_results
         return [header] + [episodes]
-
 
     def download(self, chosen_show, destination):
         """
@@ -108,17 +107,13 @@ class Search(object):
 
                 try:
                     subprocess.Popen([app, chosen_show])
-
-                except KeyError:
-                    sys.exit('\nUnknown enviroment:', unknown_enviroment)
                 except OSError:
-                    sys.exit('\nYou do not seem to have a bittorent client installed')
+                    sys.exit('\nYou do not have a bittorent client installed')
             elif platform.system() == 'Darwin':
                 subprocess.Popen(["open", "--background", chosen_show])
             else:
                 unknown_system = platform.platform()
                 sys.exit('\nUnknown system:', unknown_system)
-
 
         else:  # is a nzb file
             final_name = ''
@@ -126,7 +121,8 @@ class Search(object):
             if self.season and self.episode:
                 final_name = '%s.%s.nzb' % (
                     self.show_name.replace(' ', '.'),
-                    "S%sE%s" % (self.season.rjust(2, '0'), self.episode.rjust(2, '0'))
+                    "S%sE%s" % (self.season.rjust(2, '0'),
+                                self.episode.rjust(2, '0'))
                 )
                 print(final_name)
             downloaded_filename = self.engine.download(
