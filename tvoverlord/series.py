@@ -227,8 +227,11 @@ class Series:
         print()
         print(self.seriesname)
         print('-' * len(self.seriesname))
-        print(textwrap.fill(self.overview, width=int(self.console_columns),
-                            initial_indent=indent, subsequent_indent=indent))
+        if self.overview:
+            print(textwrap.fill(self.overview, width=int(self.console_columns),
+                                initial_indent=indent, subsequent_indent=indent))
+        else:
+            print('No description provided.')
         print()
         print('%sFirst aired: %s' % (indent, self.firstaired))
         print('%sStatus: %s' % (indent, self.status))
