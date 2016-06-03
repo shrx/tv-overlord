@@ -5,9 +5,6 @@ import re
 from bs4 import BeautifulSoup
 import requests
 
-from tvoverlord.util import U
-from tvoverlord.config import Config
-
 
 class Provider (object):
 
@@ -17,9 +14,12 @@ class Provider (object):
     ]
 
     name = 'The Pirate Bay'
+    url = ''
 
     @staticmethod
     def se_ep(show_title, season, episode):
+        season = str(season)
+        episode = str(episode)
         search_one = '%s S%sE%s' % (
             show_title,
             season.rjust(2, '0'),
@@ -45,9 +45,11 @@ class Provider (object):
         for try_url in self.provider_urls:
             urls = '%s/search/ ' % try_url
             for search in searches:
+                # print('>>>', search)
                 pretty_name = search_string
                 search_string = urllib.parse.quote(search)
                 url = '%s/search/%s/0/7/0' % (try_url, search_string)
+                self.url = self.url + ' ' + url
                 urls += '%s/0/7/0 ' % search_string
                 #print('>', url)
                 try:
@@ -97,5 +99,23 @@ class Provider (object):
 
 
 if __name__ == '__main__':
+
+    import timeit
+
+    p = Provider()
+    # x = timeit.timeit("p.search('game of thrones', season=6, episode=6)", globals=globals())
+    # print(x)
+
+    # results = p.search('game of thrones')
+    results = p.search('game of thrones', season=6, episode=6)
+    # time: 0:04.74
+    print('>>>len', len(results))
+
+    results = p.search('luther', season=1, episode=5)
+    print('>>>len', len(results))
+
+
+    results = p.search('adf asdf asdf asdf asdf asdf asd f', season=1, episode=5)
+    print('>>>len', len(results))
 
     pass

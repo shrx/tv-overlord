@@ -13,6 +13,7 @@ from tvoverlord.util import U
 class Provider(object):
 
     name = 'ExtraTorrent'
+    url = ''
     provider_urls = [
         'http://extratorrent.cc',
         'http://etmirror.com',
@@ -58,6 +59,8 @@ class Provider(object):
 
             if len(parsed['entries']) == 0:
                 continue
+
+            self.url = self.url + ' ' + full_url
 
             for show in parsed['entries']:
                 dt = datetime.fromtimestamp(mktime(show['published_parsed']))

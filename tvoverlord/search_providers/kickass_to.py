@@ -42,6 +42,7 @@ class Provider (object):
         for try_url in self.provider_urls:
             url = '{}/usearch/%s/?rss=1&field=seeders&sorder=desc'.format(try_url)
             full_url = url % encoded_search
+            self.url = full_url
             #print('>', full_url)
 
             parsed = feedparser.parse(full_url)

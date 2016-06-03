@@ -40,6 +40,7 @@ class Provider(object):
         for try_url in self.provider_urls:
             url = '%s/search/all/{}/c/d/1/?fmt=rss' % (try_url)
             full_url = url.format(encoded_search)
+            self.url = full_url
             #print('>', full_url)
 
             parsed = feedparser.parse(full_url)
