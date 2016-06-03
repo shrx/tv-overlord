@@ -19,6 +19,11 @@ Usage:
   if "fam" is used, "Family Guy" and "Modern Family" will be
   displayed.
 
+  CRITERIA can be days, a date or a show title.  If its days, it will
+  show results from now to X days ago.  If it is a date, it will show
+  downloads for that date, and if its a title or partial title, it
+  will show all downloads for that show.
+
 Options:
   -h, --help
   -c COUNT, --count COUNT

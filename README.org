@@ -21,7 +21,7 @@ script will extract the video file from the downloaded folder, rename
 it, and put it in a seperate folder organized into sub folders named
 for each tv show.
 
-There are serveral bittorent search providers and two NZB search
+There are several bittorent search providers and two NZB search
 providers and new ones can be added fairly easily.  See the
 search providers [[https://github.com/8cylinder/tv-overlord/tree/master/tv/search_providers][README.org]], or by making a feature request in issues
 or a pull request.
@@ -62,8 +62,8 @@ After its installed, you run it by typing:
 
 : tvol
 
-And it will ask to create the config dir. Type =y= to allow it.  The
-config dir will be called =.tvoverlord/= and be in your home dir.
+The first time it's run, it will create the apropriate config dir for
+your platform.
 
 After that you can start to use it, type:
 
@@ -72,7 +72,6 @@ After that you can start to use it, type:
 If this is the wrong show, try again but add the year:
 
 : tvol addnew 'Doctor Who 2005'
-
 
 ** How to use
 
@@ -144,17 +143,18 @@ defaults to the width of the console.
 - =CRITERIA= can be days, a date or a title or partial title
 - =FIELDS= is a comma seperated list if fields to show that only works
   with the list command.  It may be any combination of these: date,
-  title, season, episode, magnet, oneoff, complete, filename.  If not
-  specified it defaults to ='date,title,complete'=.
+  title, season, episode, magnet, oneoff, complete, filename,
+  destination.  If not specified it defaults to
+  ='date,title,complete,destination'=.
 
 The =list= command generates a tab seperated list.  This is usefull for
-piping to various unix commands.  For example this command will format
-the output into columns.
+piping to various unix commands or for import into a spreadsheet.  For
+example this command will format the output into columns.
 
 : tvol history list -w 'title,date,complete' | column -ts$'\t'
 
 =copy= and =redownload= show a list where the user can choose an episode to
-redownload or copy a file to the destination set in the ini file.
+redownload or recopy a file to the destination set in the ini file.
 
 **** Info
 
@@ -185,13 +185,6 @@ way will not be recorded in your database.
  + =--count= is the number of search results to display
  + =--location= is where to download nzb files to
  + =--provider= will set the provider to use.  NAME can be a partial name
-
-**** Providers
-
-: tvol providers
-
-This will list search providers available to the program.  The default
-one is the provider at the top of the list in config.ini.
 
 **** Edit db info
 
@@ -227,17 +220,16 @@ will create it.
    If no, then whatever was downloaded gets copied to the "tv dir" and
    put into the "Z Nation" directory
 
-=[Search Providers]=
- + This is a list of search providers that come with the application.
-   The first one is the default.  The search engine used can be
-   overridden on the command line with =--provider=PROVIDERNAME=
+ + =search type: (torrent|newsgroup)=\\
+   search type can be torrent or newsgroup.  If it's unspecified, it
+   will use torrent
 
 =[File Locations]=
- + =db file: FILEPATH= \\
-   The location of the database.
  + =tv dir: FILEPATH= \\
-   If specified, this is where the post download script will put the
-   episodes.
+   If you use the transmission_done.py or deluge_done.py scripts, then
+   this is where the finished video files will be copied to and
+   organized into folders under the show's name
+
  + =staging: FILEPATH= \\
    If using NZB searches, this is where the NZB files will be put.
 
@@ -261,20 +253,17 @@ This show the info command.
 ** Command line
 
 #+BEGIN_EXAMPLE
-$ tvol --help
 Download and manage TV shows
 
 Usage:
-  tv
-  tv download    [-n] [-t] [-i] [-c COUNT] [-l LOCATION] [-p PROVIDER] [SHOW_NAME]
-  tv showmissing [-n] [-t]
-  tv info        [-n] [-a] [-x] [--ask-inactive] [--show-links] [--synopsis] [SHOW_NAME]
-  tv calendar    [-n] [-a] [-x] [--no-color] [--days DAYS] [SHOW_NAME]
-  tv addnew SHOW_NAME
-  tv nondbshow SEARCH_STRING [-c COUNT] [-l LOCATION] [-p PROVIDER]
-  tv editdbinfo SHOW_NAME
-  tv providers
-  tv history (list|copy|redownload) [CRITERIA]
+  tvol download    [-n] [-t] [-i] [-c COUNT] [-l LOCATION] [SHOW_NAME]
+  tvol showmissing [-n] [-t]
+  tvol info        [-n] [-a] [-x] [--ask-inactive] [--show-links] [--synopsis] [SHOW_NAME]
+  tvol calendar    [-n] [-a] [-x] [--no-color] [--days DAYS] [SHOW_NAME]
+  tvol addnew      SHOW_NAME
+  tvol nondbshow   SEARCH_STRING [-c COUNT] [-l LOCATION]
+  tvol editdbinfo  SHOW_NAME
+  tvol history     (list [-w FIELDS]|copy|redownload) [CRITERIA]
 
   With no arguments, tv runs showmissing
 
@@ -283,29 +272,51 @@ Usage:
   if "fam" is used, "Family Guy" and "Modern Family" will be
   displayed.
 
+  CRITERIA can be days, a date or a show title.  If its days, it will
+  show results from now to X days ago.  If it is a date, it will show
+  downloads for that date, and if its a title or partial title, it
+  will show all downloads for that show.
+
 Options:
   -h, --help
   -c COUNT, --count COUNT
-                    Count of search results to list. [default: 5]
+                   Count of search results to list. [default: 10]
   -l DOWNLOAD_LOCATION, --location DOWNLOAD_LOCATION
-                    Location to download the nzb files to
-  -n, --no-cache    Re-download the show data instead of using the cached data
-  -p SEARCH_PROVIDER, --search-provider SEARCH_PROVIDER
-                    Specify a different search engine instead of the one
-                    in the config file.
+                   Location to download the nzb files to
+  -n, --no-cache   Re-download the show data instead of using the cached data
   -i, --ignore-warning
-                    Ignore 'Not connected to vpn' warning
-  -a, --show-all    Show all shows including the ones marked inactive
+                   Ignore 'Not connected to vpn' warning
+  -a, --show-all   Show all shows including the ones marked inactive
   -x, --sort-by-next  Sort by release date instead of the default alphabetical
-  -t, --today       Show or download today's episodes
-  --ask-inactive    Ask to make inactive shows that are cancelled
-  --show-links      Show links to IMDB.com and TheTVDb.com for each show
-  -s --synopsis     Display the show synopsis
-  --days DAYS       The number of days to show in the calendar
-  --no-color        Don't use color in output. Useful if output is to be
-                    used in email or text file.
+  -t, --today      Show or download today's episodes
+  --ask-inactive   Ask to make inactive shows that are cancelled
+  --show-links     Show links to IMDB.com and TheTVDb.com for each show
+  -s --synopsis    Display the show synopsis
+  --days DAYS      The number of days to show in the calendar
+  --no-color       Don't use color in output. Useful if output is to be
+                   used in email or text file.
+  -w FIELDS, --what-to-show FIELDS
+                   An optional list of information to show seperated by commas.
+                   It can be any of these: date, title, season, episode, magnet,
+                   oneoff, complete, filename, destination
+                   eg. --what-to-show 'title,filename,magnet'
+
+TVOverlord source code is available at https://github.com/8cylinder/tv-overlord
+Any feature requests, or bug reports should go there.
 #+END_EXAMPLE
 
+** Usefull shell commands
+
+=tvol calendar --days -$(date '+%u'),7 -x= \\
+This will show all the available shows for the current week from Sun
+to Sat.
+
+=tvol history list 1 | column -ts$'\t';= \\
+Todays downloads formated into columns
+
+=tvol history list 365 > shows.tab= \\
+All episodes downloaded in the last year in a file that can be
+imported into any spreadsheet program
 
 ** A note on pirating
 
