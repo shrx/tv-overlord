@@ -5,12 +5,17 @@ import platform
 import concurrent.futures
 from pprint import pprint as pp
 import socket
+# from urllib.parse import urlparse
+import urllib
 
 from tvoverlord.util import U
 from tvoverlord.search_providers import extratorrent
 from tvoverlord.search_providers import bitsnoop
 from tvoverlord.search_providers import kickass_to
 from tvoverlord.search_providers import thepiratebay_sx
+from tvoverlord.search_providers import onethreethreesevenx_to
+from tvoverlord.search_providers import torrentdownloads_me
+from tvoverlord.search_providers import rarbg_to
 
 
 class SearchError(Exception):
@@ -30,6 +35,9 @@ class Search(object):
     def job(self, engine, search_string, season, episode):
         search = engine.Provider()
         search_results = search.search(search_string, season, episode)
+
+        ## for info about each search
+        print(search.name, len(search_results), search.url)
 
         return search_results
 
@@ -69,24 +77,56 @@ class Search(object):
             [0, 10, 12, 6, 2],
             ['<', '>', '<', '>', '<']]
 
-        engines = [bitsnoop, extratorrent, thepiratebay_sx, kickass_to]
-        # engines = [bitsnoop]
+        engines = [bitsnoop, extratorrent, thepiratebay_sx, kickass_to, onethreethreesevenx_to, torrentdownloads_me, rarbg_to]
 
         socket.setdefaulttimeout(3.05)
         episodes = []
         with concurrent.futures.ThreadPoolExecutor(max_workers=8) as executor:
-            res = {executor.submit(self.job, engine, search_string, season, episode): engine for engine in engines}
+            res = {
+                executor.submit(self.job, engine, search_string, season, episode): engine for engine in engines
+            }
             for future in concurrent.futures.as_completed(res):
+                # print(future)
                 # something = res[future]
                 results = future.result()
                 episodes = episodes + results
 
         episodes.sort(key=lambda x: int(x[3]), reverse=True)  # sort by seeds
 
+        #for i, episode in enumerate(episodes):
+        #    seeds = int(episode[3])
+        #    print(episode[0])
+        #    if not seeds:
+        #        print('    ', seeds, episode[0])
+        #        del episodes[i]
+
+        # remove duplicates since different sites might have the same torrent
+        titles = []
+        for i, episode in enumerate(episodes):
+            title = episode[0]
+            if title in titles:
+                # print('---', episode[0])
+                del episodes[i]
+            else:
+                titles.append(title)
+
+        # the following will remove duplicates based on the magnet hash
+        hashes = []
+        for i, episode in enumerate(episodes):
+            o = urllib.parse.urlparse(episode[5])
+            torrent_hash = urllib.parse.parse_qs(o.query)['xt']
+            torrent_hash = torrent_hash[0].split(':')[-1]
+            if torrent_hash in hashes:
+                # print('---', torrent_hash, episode[0])
+                del episodes[i]
+            else:
+                hashes.append(torrent_hash)
+
         print('%s%s' % (backspace, overwrite), end=' ')
 
         # return search_results
         return [header] + [episodes]
+
 
     def download(self, chosen_show, destination):
         """
