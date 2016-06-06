@@ -509,6 +509,16 @@ def init(docopt_args):
             history.download()
 
 
+def main():
+    docopt_args = docopt(__doc__, version='0.1')
+    #print docopt_args
+    #exit()
+    try:
+        init(docopt_args)
+    except KeyboardInterrupt:
+        print('\b\b<Quitting TV>')
+
+
 if __name__ == '__main__':
     docopt_args = docopt(__doc__, version='0.1')
     #print docopt_args

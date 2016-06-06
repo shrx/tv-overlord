@@ -2,3 +2,5 @@ MANIFEST
 README.rst
 README.txt
 /dist
+/venv
+/tvoverlord.egg-info

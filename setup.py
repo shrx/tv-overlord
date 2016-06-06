@@ -12,16 +12,25 @@ f.close()
 
 setup(
     name='tvoverlord',
-    packages = ['tvoverlord', 'tvoverlord_util', 'tvoverlord/search_providers'],
-    package_data = {
+    packages=[
+        'tvoverlord',
+        'tvoverlord/search_providers'
+    ],
+    package_data={
         'tvoverlord': ['config.ini'],
         'tvoverlord_util': ['*'],
     },
-    data_files = [
-        ('/etc/bash_completion.d', ['tvoverlord_util/tvoverlord-completion.bash']),
+    data_files=[
+        ('/etc/bash_completion.d',
+         ['tvoverlord_util/tvoverlord-completion.bash']),
     ],
-    scripts = ['tvol', 'transmission_done.py', 'deluge_done.py'],
-    install_requires = [
+    entry_points='''
+        [console_scripts]
+        deluge_done=tvoverlord.deluge_done:main
+        transmission_done=tvoverlord.transmission_done:main
+        tvol=tvoverlord.tvol:main
+    ''',
+    install_requires=[
         'tvdb_api',
         'beautifulsoup4',
         'feedparser',
@@ -31,15 +40,15 @@ setup(
         'appdirs',
         'psutil',
     ],
-    version = '0.9.15',
-    description = 'TV Overlord is a command line tool to download and manage TV shows from newsgroups or bittorent',
-    long_description = long_description,
-    license = 'MIT',
-    author = 'Sheldon McGrandle',
-    author_email = 'developer@8cylinder.com',
-    url = 'https://github.com/8cylinder/tv-overlord',
-    keywords = [],
-    classifiers = [
+    version='0.9.15',
+    description='TV Overlord is a command line tool to download and manage TV shows from newsgroups or bittorent',
+    long_description=long_description,
+    license='MIT',
+    author='Sheldon McGrandle',
+    author_email='developer@8cylinder.com',
+    url='https://github.com/8cylinder/tv-overlord',
+    keywords=[],
+    classifiers=[
         'Programming Language :: Python',
         'Programming Language :: Python :: 3',
         'Programming Language :: Python :: 3 :: Only',

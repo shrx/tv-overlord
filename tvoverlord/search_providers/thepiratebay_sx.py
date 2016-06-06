@@ -58,7 +58,7 @@ class Provider (object):
                     # if can't connect, go to the next url
                     continue
                 html = r.content
-                soup = BeautifulSoup(html, 'lxml')
+                soup = BeautifulSoup(html, 'html.parser')
 
                 search_results = soup.find('table', id='searchResult')
                 if not search_results:

@@ -34,7 +34,7 @@ class Provider():
                 continue
 
             html = r.content
-            soup = BeautifulSoup(html, 'lxml')
+            soup = BeautifulSoup(html, 'html.parser')
             search_results = soup.find('div', class_='tab-detail')
             if search_results == None:
                 continue
@@ -79,7 +79,7 @@ class Provider():
             return
 
         html = r.content
-        soup = BeautifulSoup(html, 'lxml')
+        soup = BeautifulSoup(html, 'html.parser')
         section = soup.find('div', class_='category-detail')
         magnet = section.find_all('a')[1]['href']
 
