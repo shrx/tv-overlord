@@ -28,7 +28,7 @@ setup(
         [console_scripts]
         deluge_done=tvoverlord.deluge_done:main
         transmission_done=tvoverlord.transmission_done:main
-        tvol=tvoverlord.tvol:main
+        tvol=tvoverlord.tvol:tvol
     ''',
     install_requires=[
         'tvdb_api',

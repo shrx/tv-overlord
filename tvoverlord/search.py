@@ -37,7 +37,7 @@ class Search(object):
         search_results = search.search(search_string, season, episode)
 
         ## for info about each search
-        print(search.name, len(search_results), search.url)
+        # print(search.name, len(search_results), search.url)
 
         return search_results
 

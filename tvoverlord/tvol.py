@@ -1,57 +1,5 @@
 #!/usr/bin/env python3
 
-r"""Download and manage TV shows
-
-Usage:
-  tvol download    [-n] [-t] [-i] [-c COUNT] [-l LOCATION] [SHOW_NAME]
-  tvol showmissing [-n] [-t]
-  tvol info        [-n] [-a] [-x] [--ask-inactive] [--show-links] [--synopsis] [SHOW_NAME]
-  tvol calendar    [-n] [-a] [-x] [--no-color] [--days DAYS] [SHOW_NAME]
-  tvol addnew      SHOW_NAME
-  tvol nondbshow   SEARCH_STRING [-c COUNT] [-l LOCATION]
-  tvol editdbinfo  SHOW_NAME
-  tvol history     (list [-w FIELDS]|copy|redownload) [CRITERIA]
-
-  With no arguments, tv runs showmissing
-
-  SHOW_NAME is a full or partial name of a tv show.  If SHOW_NAME is
-  specified, tv will only act on matches to that name.  For example,
-  if "fam" is used, "Family Guy" and "Modern Family" will be
-  displayed.
-
-  CRITERIA can be days, a date or a show title.  If its days, it will
-  show results from now to X days ago.  If it is a date, it will show
-  downloads for that date, and if its a title or partial title, it
-  will show all downloads for that show.
-
-Options:
-  -h, --help
-  -c COUNT, --count COUNT
-                   Count of search results to list. [default: 10]
-  -l DOWNLOAD_LOCATION, --location DOWNLOAD_LOCATION
-                   Location to download the nzb files to
-  -n, --no-cache   Re-download the show data instead of using the cached data
-  -i, --ignore-warning
-                   Ignore 'Not connected to vpn' warning
-  -a, --show-all   Show all shows including the ones marked inactive
-  -x, --sort-by-next  Sort by release date instead of the default alphabetical
-  -t, --today      Show or download today's episodes
-  --ask-inactive   Ask to make inactive shows that are cancelled
-  --show-links     Show links to IMDB.com and TheTVDb.com for each show
-  -s --synopsis    Display the show synopsis
-  --days DAYS      The number of days to show in the calendar
-  --no-color       Don't use color in output. Useful if output is to be
-                   used in email or text file.
-  -w FIELDS, --what-to-show FIELDS
-                   An optional list of information to show seperated by commas.
-                   It can be any of these: date, title, season, episode, magnet,
-                   oneoff, complete, filename, destination
-                   eg. --what-to-show 'title,filename,magnet'
-
-TVOverlord source code is available at https://github.com/8cylinder/tv-overlord
-Any feature requests, or bug reports should go there.
-"""
-
 import datetime
 import os
 import sqlite3
@@ -59,7 +7,8 @@ import textwrap
 
 from pprint import pprint as pp
 from dateutil import parser as date_parser
-from docopt import docopt
+# from docopt import docopt
+import click
 
 from tvoverlord.allseries import AllSeries
 from tvoverlord.consoleinput import ask_user as ask
@@ -145,385 +94,484 @@ def edit_db(search_str):
     conn.commit()
     conn.close()
 
-def init(docopt_args):
-    class Args:
-        """Mapping from docopt args to object
+CONTEXT_SETTINGS = {
+    'help_option_names': ['-h', '--help'],
+    'token_normalize_func': lambda x: x.lower(),
+}
 
-        Makes it easier to change command line options.
 
-        Instead of: args['--search-provider']
-        write as:   args.search_provider
-        """
-        # subgroups
-        download        = docopt_args['download']
-        showmissing     = docopt_args['showmissing']
-        info            = docopt_args['info']
-        calendar        = docopt_args['calendar']
-        addnew          = docopt_args['addnew']
-        nondbshow       = docopt_args['nondbshow']
-        editdbinfo      = docopt_args['editdbinfo']
-        history         = docopt_args['history']
-        # arguments
-        search_string   = docopt_args['SEARCH_STRING']
-        show_name       = docopt_args['SHOW_NAME']
-        criteria        = docopt_args['CRITERIA']
-        show            = docopt_args['list']
-        copy            = docopt_args['copy']
-        redownload      = docopt_args['redownload']
-        # options
-        count           = docopt_args['--count']
-        location        = docopt_args['--location']
-        no_cache        = docopt_args['--no-cache']
-        show_all        = docopt_args['--show-all']
-        sort_by_next    = docopt_args['--sort-by-next']
-        ask_inactive    = docopt_args['--ask-inactive']
-        show_links      = docopt_args['--show-links']
-        synopsis        = docopt_args['--synopsis']
-        days            = docopt_args['--days']
-        no_color        = docopt_args['--no-color']
-        today           = docopt_args['--today']
-        ignore          = docopt_args['--ignore-warning']
-        what            = docopt_args['--what-to-show']
+@click.group(context_settings=CONTEXT_SETTINGS)
+@click.option('--no-cache', '-n', is_flag=True,
+              help='Re-download the show data instead of using the cached data.')
+def tvol(no_cache):
+    """Download and manage tv shows.
 
-    if Args.location:
-        Config.staging = Args['--location']
-    if Args.no_cache:
+    Use `tvol COMMAND -h` to get help for each command.
+
+    \b
+    TVOverlord source code is available at
+    https://github.com/8cylinder/tv-overlord
+    Any feature requests or bug reports should go there.
+    """
+    if no_cache:
         Config.use_cache = False
+    else:
+        Config.use_cache = True
 
-    count = int(Args.count)  # convert --count to int
-    Config.episode_display_count = count
 
-    if Args.info:
-        show_info = {}
-        counter = 0
-        show_name = Args.show_name
-        all_shows = AllSeries()
+@tvol.command(context_settings=CONTEXT_SETTINGS)
+@click.argument('show_name', required=False)
+@click.option('--show-all', '-a', is_flag=True,
+              help='Show all shows including the ones marked inactive')
+@click.option('--sort-by-next', '-x', is_flag=True,
+              help='Sort by release date instead of the default alphabetical')
+@click.option('--ask-inactive', is_flag=True,
+              help='Ask to make inactive shows that are cancelled')
+@click.option('--show-links', is_flag=True,
+              help='Show links to IMDB.com and TheTVDb.com for each show')
+@click.option('--synopsis', is_flag=True,
+              help='Display the show synopsis')
+def info(show_name, show_all, sort_by_next,
+         ask_inactive, show_links, synopsis):
+    """Show information about your tv shows.
 
-        # When the user specifies a single show, turn on --show-all
-        # because the show they are asking for might an inactive show
-        # and turn on --synopsis and --show-links since its only one
-        # show we may as well show everything
-        if show_name:
-            Args.show_all = True
-            Args.synopsis = True
-            Args.show_links = True
-            all_shows.name_filter(show_name)
+    SHOW_NAME can be a full or partial name of a show.  If used, it
+    will show information about any shows that match that string, else
+    it will show informaton about all your shows.
+    """
+    show_info = {}
+    counter = 0
+    all_shows = AllSeries()
 
-        for series in all_shows:
-            title = series.db_name
+    # When the user specifies a single show, turn on --show-all
+    # because the show they are asking for might an inactive show
+    # and turn on --synopsis and --show-links since its only one
+    # show we may as well show everything
+    if show_name:
+        show_all = True
+        synopsis = True
+        show_links = True
+        all_shows.name_filter(show_name)
 
-            # check if the series object has a status attribute. if it
-            # doesn't then its probably a show that nothing is known
-            # about it yet.
-            if 'status' not in dir(series):
-                continue
+    for series in all_shows:
+        title = series.db_name
 
-            if series.status == 'Ended':
-                status = U.hi_color(series.status, foreground=196)
-            else:
-                status = ''
+        # check if the series object has a status attribute. if it
+        # doesn't then its probably a show that nothing is known
+        # about it yet.
+        if 'status' not in dir(series):
+            continue
 
-            # build first row of info for each show
-            se = 'Last downloaded: S%sE%s' % (
-                str(series.db_current_season).rjust(2, '0'),
-                str(series.db_last_episode).rjust(2, '0'),
-            )
-            se = U.hi_color(se, foreground=48)
-
-            imdb_url = thetvdb_url = ''
-            if Args.show_links:
-                imdb_url = U.hi_color('\n    IMDB.com:    http://imdb.com/title/%s' % series.imdb_id, foreground=20)
-                thetvdb_url = U.hi_color('\n    TheTVDB.com: http://thetvdb.com/?tab=series&id=%s' % series.id,
-                                         foreground=20)
-
-            synopsis = ''
-            if Args.synopsis and series.overview:
-                paragraph = series.overview
-                indent = '    '
-                fill_width = 80
-                if int(series.console_columns) < fill_width:
-                    fill_width = series.console_columns
-                paragraph = textwrap.fill(paragraph, width=int(fill_width), initial_indent=indent,
-                                          subsequent_indent=indent)
-                synopsis = '\n%s' % paragraph
-
-            first_row_a = []
-            fancy_title = U.effects(['boldon'], title)
-            for i in [fancy_title + ',', se, status, imdb_url, thetvdb_url, synopsis]:
-                if i: first_row_a.append(i)
-            first_row = ' '.join(first_row_a)
-
-            # build 'upcoming episodes' list
-            today = datetime.datetime.today()
-            first_time = True
-            episodes_list = []
-            counter += 1
-            for i in series.series:  # season
-                for j in series.series[i]:  # episode
-                    b_date = series.series[i][j]['firstaired']
-                    if not b_date: continue  # some episode have no broadcast date?
-
-                    split_date = b_date.split('-')
-                    broadcast_date = datetime.datetime(
-                        int(split_date[0]), int(split_date[1]), int(split_date[2]))
-
-                    if not Args.show_all:
-                        if broadcast_date < today:
-                            continue
-
-                    future_date = date_parser.parse(b_date)
-                    diff = future_date - today
-                    fancy_date = future_date.strftime('%b %-d')
-                    if broadcast_date >= today:
-                        episodes_list.append('S%sE%s, %s (%s)' % (
-                            series.series[i][j]['seasonnumber'].rjust(2, '0'),
-                            series.series[i][j]['episodenumber'].rjust(2, '0'),
-                            fancy_date,
-                            diff.days + 1,
-                        ))
-
-                    if first_time:
-                        first_time = False
-                        if Args.sort_by_next:
-                            sort_key = str(diff.days).rjust(5, '0') + str(counter)
-                        else:
-                            sort_key = series.db_name.replace('The ', '')
-
-            if not first_time:
-                if episodes_list:
-                    indent = '    '
-                    episode_list = 'Future episodes: ' + ' - '.join(episodes_list)
-                    episodes = textwrap.fill(
-                        U.hi_color(episode_list, foreground=22),
-                        width=int(series.console_columns),
-                        initial_indent=indent,
-                        subsequent_indent=indent
-                    )
-                    show_info[sort_key] = first_row + '\n' + episodes
-                else:
-                    show_info[sort_key] = first_row
-
-            if Args.ask_inactive:
-                if series.status == 'Ended' and first_time:
-                    set_status = ask(
-                        '%s has ended, and all have been downloaded. Set as inactive? [y/n]: ' %
-                        title)
-                    if set_status == 'y':
-                        series.set_inactive()
-
-        keys = list(show_info.keys())
-        keys.sort()
-        for i in keys:
-            print(show_info[i])
-
-    elif Args.calendar:
-        if Args.no_color:
-            use_color = False
+        if series.status == 'Ended':
+            status = U.hi_color(series.status, foreground=196)
         else:
-            use_color = True
+            status = ''
 
-        # set colors for ui elements
-        header_color = 17
-        date_color_1 = 17
-        date_color_2 = 0
-        title_color_1 = 18
-        title_color_2 = 0
+        # build first row of info for each show
+        se = 'Last downloaded: S%sE%s' % (
+            str(series.db_current_season).rjust(2, '0'),
+            str(series.db_last_episode).rjust(2, '0'),
+        )
+        se = U.hi_color(se, foreground=48)
 
-        title_width = 20  # width of show titles column
-        console_columns = int(os.popen('stty size', 'r').read().split()[1])
-        spacer = ' '  # can be any string, any length
+        imdb_url = thetvdb_url = ''
+        if show_links:
+            imdb_url = U.hi_color('\n    IMDB.com:    http://imdb.com/title/%s' % series.imdb_id, foreground=20)
+            thetvdb_url = U.hi_color('\n    TheTVDB.com: http://thetvdb.com/?tab=series&id=%s' % series.id,
+                                     foreground=20)
+
+        if synopsis and series.overview:
+            paragraph = series.overview
+            indent = '    '
+            fill_width = 80
+            if int(series.console_columns) < fill_width:
+                fill_width = series.console_columns
+            paragraph = textwrap.fill(paragraph, width=int(fill_width),
+                                      initial_indent=indent,
+                                      subsequent_indent=indent)
+            synopsis = '\n%s' % paragraph
+
+        first_row_a = []
+        fancy_title = U.effects(['boldon'], title)
+        for i in [fancy_title + ',', se, status, imdb_url, thetvdb_url, synopsis]:
+            if i: first_row_a.append(i)
+        first_row = ' '.join(first_row_a)
+
+        # build 'upcoming episodes' list
         today = datetime.datetime.today()
+        first_time = True
+        episodes_list = []
+        counter += 1
+        for i in series.series:  # season
+            for j in series.series[i]:  # episode
+                b_date = series.series[i][j]['firstaired']
+                if not b_date: continue  # some episode have no broadcast date?
 
-        days = Args.days
-        if days:
-            days = days.split(',')
-            days = [int(x) for x in days]
-            if len(days) == 2:
-                today = today + datetime.timedelta(days=days[0])
-                calendar_columns = days[1]
-            if len(days) == 1:
-                calendar_columns = days[0]
-        else:
-            calendar_columns = console_columns - (title_width + len(spacer))
+                split_date = b_date.split('-')
+                broadcast_date = datetime.datetime(
+                    int(split_date[0]), int(split_date[1]), int(split_date[2]))
 
-        # Days_chars can be any string of seven chars. eg: 'mtwtfSS'
-        days_chars = '.....::'  # first char is monday
-        monthstart = '|'  # marker used to indicate the begining of month
+                if not show_all:
+                    if broadcast_date < today:
+                        continue
 
-        # build date title row
-        months_row = today.strftime('%b') + (' ' * calendar_columns)
-        days_row = ''
-        daybefore = today - datetime.timedelta(days=1)
-        for days in range(calendar_columns):
-            cur_date = today + datetime.timedelta(days=days)
+                future_date = date_parser.parse(b_date)
+                diff = future_date - today
+                fancy_date = future_date.strftime('%b %-d')
+                if broadcast_date >= today:
+                    episodes_list.append('S%sE%s, %s (%s)' % (
+                        series.series[i][j]['seasonnumber'].rjust(2, '0'),
+                        series.series[i][j]['episodenumber'].rjust(2, '0'),
+                        fancy_date,
+                        diff.days + 1,
+                    ))
 
-            if cur_date.month != daybefore.month:
-                days_row += monthstart
-                month = cur_date.strftime('%b')
-                month_len = len(month)
-                months_row = months_row[:days] + month + months_row[(days + month_len):]
-            else:
-                days_row += days_chars[cur_date.weekday()]
-
-            daybefore = cur_date
-
-        months_row = months_row[:calendar_columns]  # chop off any extra spaces created by adding the months
-        if use_color:
-            months_row = U.hi_color(months_row, 225, header_color)
-            days_row = U.hi_color(days_row, 225, header_color)
-        months_row = (' ' * title_width) + (' ' * len(spacer)) + months_row
-        days_row = (' ' * title_width) + (' ' * len(spacer)) + days_row
-        print(months_row)
-        print(days_row)
-
-        # build shows rows
-        step = 3
-        color_row = False
-        counter = 1
-        season_marker = '-'
-        all_series = AllSeries()
-        if Args.sort_by_next:
-            all_series.sort_by_date()
-        show_name = Args.show_name
-        if show_name:
-            all_series.name_filter(show_name)
-        for series in all_series:
-            broadcast_row = ''
-            title = series.db_name[:title_width].ljust(title_width)
-            has_episode = False
-            first_display_date = True
-            last_days_away = 0
-            last_date = 0
-            for i in series.series:  # season
-                for j in series.series[i]:  # episode
-                    episode_number = series.series[i][j]['episodenumber']
-                    b_date = series.series[i][j]['firstaired']
-                    if not b_date:
-                        continue  # some episode have no broadcast date?
-                    split_date = b_date.split('-')
-                    broadcast_date = datetime.datetime(
-                        int(split_date[0]), int(split_date[1]), int(split_date[2]))
-                    if broadcast_date == last_date:
-                        continue  # sometimes multiple episodes have the same date, don't repeat them.
-                    last_date = broadcast_date
-                    if broadcast_date.date() < today.date():
-                        continue  # don't include episodes before today
-                    days_away = (broadcast_date - today).days + 1
-                    if days_away >= calendar_columns:
-                        continue  # don't include days after the width of the screen
-                    if series.series[i][j]['seasonnumber'] == '0':
-                        continue  # not interested in season 0 episodes.
-
-                    if first_display_date:
-                        if int(episode_number) > 1:
-                            before_first = season_marker * days_away
-                        else:
-                            before_first = ' ' * days_away
-                        broadcast_row = before_first + episode_number
-                        first_display_date = False
-                        # set the next episode date in the db while we're here:
-                        series.set_next_episode(broadcast_date.date())
+                if first_time:
+                    first_time = False
+                    if sort_by_next:
+                        sort_key = str(diff.days).rjust(5, '0') + str(counter)
                     else:
-                        episode_char_len = len(str(int(episode_number) - 1))
-                        broadcast_row = broadcast_row + (
-                            season_marker * (days_away - last_days_away - episode_char_len)) + episode_number
+                        sort_key = series.db_name.replace('The ', '')
 
-                    last_days_away = days_away
-
-                    has_episode = True
-
-            broadcast_row = broadcast_row[:calendar_columns].ljust(calendar_columns)
-
-            if has_episode or Args.show_all:
-                if use_color and color_row:
-                    title = U.hi_color(title, 225, title_color_1)
-                    broadcast_row = U.hi_color(broadcast_row, 225, date_color_1)
-                elif use_color and not color_row:
-                    title = U.hi_color(title, 225, title_color_2)
-                    broadcast_row = U.hi_color(broadcast_row, 225, date_color_2)
-                row = title + spacer + broadcast_row
-                print(row)
-
-                if counter >= step:
-                    counter = 0
-                    color_row = True
-                else:
-                    color_row = False
-                    counter += 1
-
-    elif Args.showmissing:
-        fp = FancyPrint()
-        for series in AllSeries():
-            if series.is_missing(Args.today):
-                fp.standard_print(series.show_missing())
+        if not first_time:
+            if episodes_list:
+                indent = '    '
+                episode_list = 'Future episodes: ' + ' - '.join(episodes_list)
+                episodes = textwrap.fill(
+                    U.hi_color(episode_list, foreground=22),
+                    width=int(series.console_columns),
+                    initial_indent=indent,
+                    subsequent_indent=indent
+                )
+                show_info[sort_key] = first_row + '\n' + episodes
             else:
-                fp.fancy_print('Show up to date: %s' % series.db_name)
-        fp.done()
+                show_info[sort_key] = first_row
 
-    elif Args.download:
-        all_series = AllSeries()
-        show_name = Args.show_name
-        if Config.ip and not Args.ignore:
-            L = Location()
-            if L.ips_match(Config.ip):
-                print('%s not connected to VPN' % (U.effects(['redb', 'boldon'], ' Warning: ')))
-                exit()
-        if show_name:
-            all_series.name_filter(show_name)
-        for series in all_series:
-            series.download_missing(Config.episode_display_count, Args.today)
+        if ask_inactive:
+            if series.status == 'Ended' and first_time:
+                set_status = ask(
+                    '%s has ended, and all have been downloaded. Set as inactive? [y/n]: ' %
+                    title)
+                if set_status == 'y':
+                    series.set_inactive()
 
-    elif Args.addnew:
-        new_show = Series(show_type='new')
-        new_show.add_new(name=Args.show_name)
+    keys = list(show_info.keys())
+    keys.sort()
+    for i in keys:
+        print(show_info[i])
 
-    elif Args.nondbshow:
-        nons = Series(show_type='nondb')
-        nons.non_db(Args.search_string, Config.episode_display_count)
 
-    elif Args.editdbinfo:
-        edit_db(Args.show_name)
+@tvol.command(context_settings=CONTEXT_SETTINGS)
+@click.argument('show_name', required=False)
+@click.option('--show-all', '-a', is_flag=True,
+              help='Show all shows including the ones marked inactive')
+@click.option('--sort-by-next', '-x', is_flag=True,
+              help='Sort by release date instead of the default alphabetical')
+@click.option('--no-color', is_flag=True,
+              help="Don't use color in output.  Useful if output is to be used in email or text file.")
+@click.option('--days',
+              help='The number of days to show in the calendar')
+def calendar(show_name, show_all, sort_by_next, no_color, days):
+    """Display a calendar of upcoming episodes.
 
-    elif Args.history:
-        criteria = ''
-        # try to parse criteria as an int, then as a date.  If neither don't
-        # work, pass it on as a string which should be a show title
+    If SHOW_NAME is used, it will display a calendar for any shows that
+    match that string.
+
+    --days can be one number or two numbers.  If one number is used, it will
+    show that many days ahead.  If two numbers are used, the first number is
+    where the calendar will start and the second number is where it will end.
+    The two number must be seperated by a comma with no spaces.
+
+    \b
+    --days 10      will show from today to 10 days in the future
+    --days 10,20   will start ten days from now and then show 20 days ahead.
+    --days -20,10  will go back 20 days from today and then show ahead from there.
+    """
+    if no_color:
+        use_color = False
+    else:
+        use_color = True
+
+    # set colors for ui elements
+    header_color = 17
+    date_color_1 = 17
+    date_color_2 = 0
+    title_color_1 = 18
+    title_color_2 = 0
+
+    title_width = 20  # width of show titles column
+    console_columns = int(os.popen('stty size', 'r').read().split()[1])
+    spacer = ' '  # can be any string, any length
+    today = datetime.datetime.today()
+
+    if days:
+        days = days.split(',')
+        days = [int(x) for x in days]
+        if len(days) == 2:
+            today = today + datetime.timedelta(days=days[0])
+            calendar_columns = days[1]
+        if len(days) == 1:
+            calendar_columns = days[0]
+    else:
+        calendar_columns = console_columns - (title_width + len(spacer))
+
+    # Days_chars can be any string of seven chars. eg: 'mtwtfSS'
+    days_chars = '.....::'  # first char is monday
+    monthstart = '|'  # marker used to indicate the begining of month
+
+    # build date title row
+    months_row = today.strftime('%b') + (' ' * calendar_columns)
+    days_row = ''
+    daybefore = today - datetime.timedelta(days=1)
+    for days in range(calendar_columns):
+        cur_date = today + datetime.timedelta(days=days)
+
+        if cur_date.month != daybefore.month:
+            days_row += monthstart
+            month = cur_date.strftime('%b')
+            month_len = len(month)
+            months_row = months_row[:days] + month + months_row[(days + month_len):]
+        else:
+            days_row += days_chars[cur_date.weekday()]
+
+        daybefore = cur_date
+
+    months_row = months_row[:calendar_columns]  # chop off any extra spaces created by adding the months
+    if use_color:
+        months_row = U.hi_color(months_row, 225, header_color)
+        days_row = U.hi_color(days_row, 225, header_color)
+    months_row = (' ' * title_width) + (' ' * len(spacer)) + months_row
+    days_row = (' ' * title_width) + (' ' * len(spacer)) + days_row
+    print(months_row)
+    print(days_row)
+
+    # build shows rows
+    step = 3
+    color_row = False
+    counter = 1
+    season_marker = '-'
+    all_series = AllSeries()
+    if sort_by_next:
+        all_series.sort_by_date()
+    if show_name:
+        all_series.name_filter(show_name)
+    for series in all_series:
+        broadcast_row = ''
+        title = series.db_name[:title_width].ljust(title_width)
+        has_episode = False
+        first_display_date = True
+        last_days_away = 0
+        last_date = 0
+        for i in series.series:  # season
+            for j in series.series[i]:  # episode
+                episode_number = series.series[i][j]['episodenumber']
+                b_date = series.series[i][j]['firstaired']
+                if not b_date:
+                    continue  # some episode have no broadcast date?
+                split_date = b_date.split('-')
+                broadcast_date = datetime.datetime(
+                    int(split_date[0]), int(split_date[1]), int(split_date[2]))
+                if broadcast_date == last_date:
+                    continue  # sometimes multiple episodes have the same date, don't repeat them.
+                last_date = broadcast_date
+                if broadcast_date.date() < today.date():
+                    continue  # don't include episodes before today
+                days_away = (broadcast_date - today).days + 1
+                if days_away >= calendar_columns:
+                    continue  # don't include days after the width of the screen
+                if series.series[i][j]['seasonnumber'] == '0':
+                    continue  # not interested in season 0 episodes.
+
+                if first_display_date:
+                    if int(episode_number) > 1:
+                        before_first = season_marker * days_away
+                    else:
+                        before_first = ' ' * days_away
+                    broadcast_row = before_first + episode_number
+                    first_display_date = False
+                    # set the next episode date in the db while we're here:
+                    series.set_next_episode(broadcast_date.date())
+                else:
+                    episode_char_len = len(str(int(episode_number) - 1))
+                    broadcast_row = broadcast_row + (
+                        season_marker * (days_away - last_days_away - episode_char_len)) + episode_number
+
+                last_days_away = days_away
+
+                has_episode = True
+
+        broadcast_row = broadcast_row[:calendar_columns].ljust(calendar_columns)
+
+        if has_episode or show_all:
+            if use_color and color_row:
+                title = U.hi_color(title, 225, title_color_1)
+                broadcast_row = U.hi_color(broadcast_row, 225, date_color_1)
+            elif use_color and not color_row:
+                title = U.hi_color(title, 225, title_color_2)
+                broadcast_row = U.hi_color(broadcast_row, 225, date_color_2)
+            row = title + spacer + broadcast_row
+            print(row)
+
+            if counter >= step:
+                counter = 0
+                color_row = True
+            else:
+                color_row = False
+                counter += 1
+
+
+@tvol.command(context_settings=CONTEXT_SETTINGS)
+@click.option('--today', '-t', is_flag=True,
+              help="Also show today's episodes")
+def showmissing(today):
+    """List episodes that are ready to download.
+    """
+    fp = FancyPrint()
+    for series in AllSeries():
+        if series.is_missing(today):
+            fp.standard_print(series.show_missing())
+        else:
+            fp.fancy_print('Show up to date: %s' % series.db_name)
+    fp.done()
+
+
+@tvol.command(context_settings=CONTEXT_SETTINGS)
+@click.argument('show_name', required=False)
+@click.option('--today', '-t', is_flag=True,
+              help="Also download today's episodes")
+@click.option('--ignore', '-i', is_flag=True,
+              help="Ignore 'Not connected to vpn' warning")
+@click.option('--count', '-c', type=int, default=10,
+              help='Number of search results to list. (default: 5)')
+@click.option('--location', '-l',
+              type=click.Path(exists=True, resolve_path=True),
+              help='Directory to download the nzb files to')
+def download(show_name, today, ignore, count, location):
+    """Download available episodes.
+
+    If SHOW_NAME is used, it will download any shows that match that title
+    """
+    all_series = AllSeries()
+    if Config.ip and not ignore:
+        L = Location()
+        if L.ips_match(Config.ip):
+            print('%s not connected to VPN' % (U.effects(['redb', 'boldon'], ' Warning: ')))
+            exit()
+    if show_name:
+        all_series.name_filter(show_name)
+    for series in all_series:
+        series.download_missing(count, today)
+
+
+@tvol.command(context_settings=CONTEXT_SETTINGS)
+@click.argument('show_name')
+def addnew(show_name):
+    """Add a new tv show to the database.
+
+    The SHOW_NAME can be a partial name, but the more accurate the name
+    the better the search will be.  It helps to add the year to the name
+    as well.
+
+    If you search for 'Doctor Who', the result will be the original series,
+    but if you want the modern one, search for 'Doctor Who 2005'
+    """
+    new_show = Series(show_type='new')
+    new_show.add_new(name=show_name)
+
+
+@tvol.command(context_settings=CONTEXT_SETTINGS)
+@click.argument('search_string')
+@click.option('--count', '-c', type=int, default=10,
+              help='Number of search results to list. (default: 5)')
+@click.option('--location', '-l',
+              type=click.Path(exists=True, resolve_path=True),
+              help='Directory to download the nzb files to')
+def nondbshow(search_string, count, location):
+    """Download anything, ignoring the database.
+
+    This just does a simple search and passes you choise to the bittorrent
+    client.  The download is not recorded in the database.
+    """
+    nons = Series(show_type='nondb')
+    nons.non_db(search_string, count)
+
+
+@tvol.command(context_settings=CONTEXT_SETTINGS)
+@click.argument('show_name')
+def editdbinfo(show_name):
+    """Edit the contents of the database.
+
+    This allows you to change the fields in the database for a show.
+    The fields affected are:
+
+    \b
+    Name:                This is what is used for searching and folder names.
+    Search engine title: Sometimes a different name searches better.  If this
+                         is set, it will be used when searching.
+    Current season:      Setting this can be usefull if you add a new show to
+                         the db, but want to download starting at a later season.
+    Last episode:        Set this to change the last episode downloaded.
+    Status:              This can be 'active' or 'inactive'.  This can be used
+                         to turn off a show.
+    """
+    edit_db(show_name)
+
+
+def parse_history(criteria):
+    # try to parse criteria as an int, then as a date.  If neither don't
+    # work, pass it on as a string which should be a show title
+    try:
+        criteria = int(criteria)
+    except:
         try:
-            criteria = int(Args.criteria)
+            criteria = date_parser.parse(criteria)
         except:
-            try:
-                criteria = date_parser.parse(Args.criteria)
-            except:
-                #print 'CRITERIA is not a number or a date'
-                #exit()
-                criteria = Args.criteria
-
-        #print '...', Args.criteria, criteria
-
-        history = History(criteria)
-        if Args.show:
-            history.show(Args.what)
-        elif Args.copy:
-            history.copy()
-        elif Args.redownload:
-            history.download()
+            criteria = criteria
+    return criteria
 
 
-def main():
-    docopt_args = docopt(__doc__, version='0.1')
-    #print docopt_args
-    #exit()
-    try:
-        init(docopt_args)
-    except KeyboardInterrupt:
-        print('\b\b<Quitting TV>')
+@tvol.command(context_settings=CONTEXT_SETTINGS)
+@click.argument('criteria', required=False)
+@click.option('--what-to-show', '-w', type=str,
+              help="An optional list of information to show seperated by commas. It can be any of these: date, title, season, episode, magnet, oneoff, complete, filename, destination eg. --what-to-show 'title,filename,magnet'")
+def history(criteria, what_to_show):
+    """Show a list of downloaded episodes.
+
+    CRITERIA can be days, a date or a show title.  If its days, it
+    will show results from now to X days ago.  If it is a date, it
+    will show downloads for that date, and if its a title or partial
+    title, it will show all downloads for that show.
+    """
+    criteria = parse_history(criteria)
+    hist = History(criteria)
+    hist.show(what_to_show)
 
 
-if __name__ == '__main__':
-    docopt_args = docopt(__doc__, version='0.1')
-    #print docopt_args
-    #exit()
-    try:
-        init(docopt_args)
-    except KeyboardInterrupt:
-        print('\b\b<Quitting TV>')
+@tvol.command(context_settings=CONTEXT_SETTINGS)
+@click.argument('criteria', required=False)
+def copy(criteria):
+    """Re copy a show to the library location.
+
+    CRITERIA can be days, a date or a show title.  If its days, it
+    will show results from now to X days ago.  If it is a date, it
+    will show downloads for that date, and if its a title or partial
+    title, it will show all downloads for that show.
+    """
+    criteria = parse_history(criteria)
+    hist = History(criteria)
+    hist.copy()
+
+
+@tvol.command(context_settings=CONTEXT_SETTINGS)
+@click.argument('criteria', required=False)
+def redownload(criteria):
+    """Re download a show.
+
+    CRITERIA can be days, a date or a show title.  If its days, it
+    will show results from now to X days ago.  If it is a date, it
+    will show downloads for that date, and if its a title or partial
+    title, it will show all downloads for that show.
+    """
+    criteria = parse_history(criteria)
+    hist = History(criteria)
+    hist.download()
