@@ -141,18 +141,19 @@ def info(show_name, show_all, sort_by_next,
     """
     show_info = {}
     counter = 0
-    all_shows = AllSeries()
 
     # When the user specifies a single show, turn on --show-all
     # because the show they are asking for might an inactive show
     # and turn on --synopsis and --show-links since its only one
     # show we may as well show everything
+    filter_name = ''
     if show_name:
         show_all = True
         synopsis = True
         show_links = True
-        all_shows.name_filter(show_name)
+        filter_name = show_name
 
+    all_shows = AllSeries(name_filter=filter_name)
     for series in all_shows:
         title = series.db_name
 
@@ -350,11 +351,12 @@ def calendar(show_name, show_all, sort_by_next, no_color, days):
     color_row = False
     counter = 1
     season_marker = '-'
-    all_series = AllSeries()
     if sort_by_next:
-        all_series.sort_by_date()
+        filter_date = True
     if show_name:
-        all_series.name_filter(show_name)
+        filter_name = show_name
+
+    all_series = AllSeries(name_filter=filter_name, by_date=filter_date)
     for series in all_series:
         broadcast_row = ''
         title = series.db_name[:title_width].ljust(title_width)
@@ -420,6 +422,14 @@ def calendar(show_name, show_all, sort_by_next, no_color, days):
                 counter += 1
 
 
+def tfunct(series):
+    try:
+        title = series.db_name
+    except AttributeError:
+        title = ''
+    return title
+
+
 @tvol.command(context_settings=CONTEXT_SETTINGS)
 @click.option('--today', '-t', is_flag=True,
               help="Also show today's episodes")
@@ -427,13 +437,17 @@ def showmissing(today):
     """List episodes that are ready to download.
     """
     fp = FancyPrint()
-    for series in AllSeries():
-        if series.is_missing(today):
-            fp.standard_print(series.show_missing())
-        else:
-            fp.fancy_print('Show up to date: %s' % series.db_name)
-    fp.done()
 
+    all_series = AllSeries()
+    with click.progressbar(
+            all_series, item_show_func=tfunct, show_percent=False,
+            show_eta=False, width=50, empty_char='\u00B7',
+            fill_char=click.style('\u2588', fg='blue'),
+    ) as bar:
+        for series in bar:
+            if series.is_missing(today):
+                fp.standard_print(series.show_missing())
+    fp.done()
 
 @tvol.command(context_settings=CONTEXT_SETTINGS)
 @click.argument('show_name', required=False)

@@ -2,7 +2,7 @@ import os
 import configparser
 import shutil
 import sqlite3
-from appdirs import AppDirs
+import click
 
 from pprint import pprint as pp
 
@@ -14,9 +14,8 @@ class Config:
     thetvdb_apikey = 'DFDB0A667C844513'
     use_cache = True
 
-    dirs = AppDirs('tvoverlord')
     config_filename = 'config.ini'
-    user_dir = dirs.user_config_dir
+    user_dir = click.get_app_dir('tvoverlord')
 
     db_file = '%s/%s' % (user_dir, 'shows.sqlite3')
     user_config = '%s/%s' % (user_dir, config_filename)

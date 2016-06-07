@@ -19,12 +19,19 @@ class AllSeries:
       default 'name'
     """
 
-    def __init__(self):
-        self.sqlfilter = ''
-        self.sort_field = "replace (name, 'The ', '')"
+    def __init__(self, name_filter='', by_date=False):
+        sqlfilter = ''
+        if name_filter:
+            sqlfilter = self.filter_by_name(name_filter)
+
+        if by_date:
+            self.sort_field = self.sort_by_date()
+        else:
+            self.sort_field = "replace (name, 'The ', '')"
+        self.dbdata = self._query_db(sqlfilter)
+        self.show_count = len(self.dbdata)
 
     def __iter__(self):
-        self.dbdata = self._query_db(self.sqlfilter)
         self.index = len(self.dbdata)
         self.i = 0
         return self
@@ -36,9 +43,16 @@ class AllSeries:
         self.i += 1
         return series
 
-    def name_filter(self, name):
+    def __len__(self):
+        return self.show_count
+
+    def length(self):
+        return self.show_count
+
+    def filter_by_name(self, name):
         show_name = 'name LIKE "%%%s%%"' % name
         self.sqlfilter = show_name
+        return show_name
 
     def sort_by_date(self):
         self.sort_field = 'next_episode, name'
@@ -73,6 +87,7 @@ class AllSeries:
         data = []
         for i in ddata:
             data.append(i)
+        self.show_count = len(data)
         conn.commit()
         conn.close()
         return data
