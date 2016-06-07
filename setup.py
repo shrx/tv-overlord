@@ -18,12 +18,7 @@ setup(
     ],
     package_data={
         'tvoverlord': ['config.ini'],
-        'tvoverlord_util': ['*'],
     },
-    data_files=[
-        ('/etc/bash_completion.d',
-         ['tvoverlord_util/tvoverlord-completion.bash']),
-    ],
     entry_points='''
         [console_scripts]
         deluge_done=tvoverlord.deluge_done:main
@@ -35,10 +30,9 @@ setup(
         'beautifulsoup4',
         'feedparser',
         'requests',
-        'docopt',
         'python-dateutil',
-        'appdirs',
         'psutil',
+        'click',
     ],
     version='0.9.15',
     description='TV Overlord is a command line tool to download and manage TV shows from newsgroups or bittorent',
