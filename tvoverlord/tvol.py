@@ -11,7 +11,6 @@ from dateutil import parser as date_parser
 import click
 
 from tvoverlord.allseries import AllSeries
-from tvoverlord.consoleinput import ask_user as ask
 from tvoverlord.series import Series
 from tvoverlord.config import Config
 from tvoverlord.tvutil import FancyPrint, dict_factory
@@ -250,9 +249,11 @@ def info(show_name, show_all, sort_by_next,
 
         if ask_inactive:
             if series.status == 'Ended' and first_time:
-                set_status = ask(
+                click.echo(
                     '%s has ended, and all have been downloaded. Set as inactive? [y/n]: ' %
                     title)
+                set_status = click.getchar()
+                click.echo(set_status)
                 if set_status == 'y':
                     series.set_inactive()
 

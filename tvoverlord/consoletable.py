@@ -7,8 +7,8 @@ import os
 import string
 from collections import namedtuple
 from pprint import pprint as pp
+import click
 
-from tvoverlord.consoleinput import ask_user
 from tvoverlord.util import U
 
 
@@ -186,7 +186,9 @@ class ConsoleTable:
         return choice
 
     def ask(self, key):
-        get = ask_user('\nLetter, [s]kip, skip [r]est of show, [q]uit, [m]ark as watched, or [enter] for #1: ')
+        click.echo('\nLetter, [s]kip, skip [r]est of show, [q]uit, [m]ark as watched, or [enter] for #1: ', nl=False)
+        get = click.getchar()
+        click.echo(get)
         choice = False
 
         if get == 'q':  # quit
@@ -212,7 +214,9 @@ class ConsoleTable:
         return choice
 
     def ask_postdownload(self, key):
-        get = ask_user('\nLetter or [q]uit: ')
+        click.echo('\nLetter or [q]uit: ')
+        get = click.getchar()
+        click.echo(get)
         choice = False
 
         if get == 'q':

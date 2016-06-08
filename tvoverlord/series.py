@@ -5,8 +5,8 @@ import sys
 import textwrap
 import tvdb_api
 from pprint import pprint as pp
+import click
 
-from tvoverlord.consoleinput import ask_user as ask
 from tvoverlord.search import Search, SearchError
 from tvoverlord.util import U
 from tvoverlord.config import Config
@@ -236,7 +236,9 @@ class Series:
         print('%sFirst aired: %s' % (indent, self.firstaired))
         print('%sStatus: %s' % (indent, self.status))
         print()
-        correct = ask('Is this the correct show? [y/n]')
+        click.echo('Is this the correct show? [y/n]', nl=False)
+        correct = click.getchar(echo=False)
+        click.echo(' %s' % correct)
 
         if correct == 'y':
             self._add_new_db()
