@@ -183,10 +183,9 @@ def info(show_name, show_all, sort_by_next,
         if synopsis and series.overview:
             paragraph = series.overview
             indent = '    '
-            fill_width = 80
             if int(series.console_columns) < fill_width:
                 fill_width = series.console_columns
-            paragraph = textwrap.fill(paragraph, width=int(fill_width),
+            paragraph = textwrap.fill(paragraph,
                                       initial_indent=indent,
                                       subsequent_indent=indent)
             synopsis = '\n%s' % paragraph
@@ -239,7 +238,6 @@ def info(show_name, show_all, sort_by_next,
                 episode_list = 'Future episodes: ' + ' - '.join(episodes_list)
                 episodes = textwrap.fill(
                     U.hi_color(episode_list, foreground=22),
-                    width=int(series.console_columns),
                     initial_indent=indent,
                     subsequent_indent=indent
                 )
@@ -259,8 +257,10 @@ def info(show_name, show_all, sort_by_next,
 
     keys = list(show_info.keys())
     keys.sort()
+    full_output = ''
     for i in keys:
-        print(show_info[i])
+        full_output = full_output + show_info[i] + '\n\n'
+    click.echo_via_pager(full_output)
 
 
 @tvol.command(context_settings=CONTEXT_SETTINGS)
