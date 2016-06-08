@@ -16,6 +16,7 @@ from tvoverlord.search_providers import thepiratebay_sx
 from tvoverlord.search_providers import onethreethreesevenx_to
 from tvoverlord.search_providers import torrentdownloads_me
 from tvoverlord.search_providers import rarbg_to
+from tvoverlord.search_providers import eztv_ag
 
 
 class SearchError(Exception):
@@ -37,7 +38,7 @@ class Search(object):
         search_results = search.search(search_string, season, episode)
 
         ## for info about each search
-        # print(search.name, len(search_results), search.url)
+        # print(search.name, len(search_results))
 
         return search_results
 
@@ -77,7 +78,7 @@ class Search(object):
             [0, 10, 12, 6, 2],
             ['<', '>', '<', '>', '<']]
 
-        engines = [bitsnoop, extratorrent, thepiratebay_sx, kickass_to, onethreethreesevenx_to, torrentdownloads_me, rarbg_to]
+        engines = [bitsnoop, extratorrent, thepiratebay_sx, kickass_to, onethreethreesevenx_to, rarbg_to, eztv_ag]  # , torrentdownloads_me
 
         socket.setdefaulttimeout(3.05)
         episodes = []
@@ -104,7 +105,6 @@ class Search(object):
         for i, episode in enumerate(episodes):
             title = episode[0]
             if title in titles:
-                # print('---', episode[0])
                 del episodes[i]
             else:
                 titles.append(title)
@@ -116,7 +116,6 @@ class Search(object):
             torrent_hash = urllib.parse.parse_qs(o.query)['xt']
             torrent_hash = torrent_hash[0].split(':')[-1]
             if torrent_hash in hashes:
-                # print('---', torrent_hash, episode[0])
                 del episodes[i]
             else:
                 hashes.append(torrent_hash)
