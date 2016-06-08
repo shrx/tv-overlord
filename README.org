@@ -250,61 +250,6 @@ This shows the calendar.
 This show the info command.
 
 
-** Command line
-
-#+BEGIN_EXAMPLE
-Download and manage TV shows
-
-Usage:
-  tvol download    [-n] [-t] [-i] [-c COUNT] [-l LOCATION] [SHOW_NAME]
-  tvol showmissing [-n] [-t]
-  tvol info        [-n] [-a] [-x] [--ask-inactive] [--show-links] [--synopsis] [SHOW_NAME]
-  tvol calendar    [-n] [-a] [-x] [--no-color] [--days DAYS] [SHOW_NAME]
-  tvol addnew      SHOW_NAME
-  tvol nondbshow   SEARCH_STRING [-c COUNT] [-l LOCATION]
-  tvol editdbinfo  SHOW_NAME
-  tvol history     (list [-w FIELDS]|copy|redownload) [CRITERIA]
-
-  With no arguments, tv runs showmissing
-
-  SHOW_NAME is a full or partial name of a tv show.  If SHOW_NAME is
-  specified, tv will only act on matches to that name.  For example,
-  if "fam" is used, "Family Guy" and "Modern Family" will be
-  displayed.
-
-  CRITERIA can be days, a date or a show title.  If its days, it will
-  show results from now to X days ago.  If it is a date, it will show
-  downloads for that date, and if its a title or partial title, it
-  will show all downloads for that show.
-
-Options:
-  -h, --help
-  -c COUNT, --count COUNT
-                   Count of search results to list. [default: 10]
-  -l DOWNLOAD_LOCATION, --location DOWNLOAD_LOCATION
-                   Location to download the nzb files to
-  -n, --no-cache   Re-download the show data instead of using the cached data
-  -i, --ignore-warning
-                   Ignore 'Not connected to vpn' warning
-  -a, --show-all   Show all shows including the ones marked inactive
-  -x, --sort-by-next  Sort by release date instead of the default alphabetical
-  -t, --today      Show or download today's episodes
-  --ask-inactive   Ask to make inactive shows that are cancelled
-  --show-links     Show links to IMDB.com and TheTVDb.com for each show
-  -s --synopsis    Display the show synopsis
-  --days DAYS      The number of days to show in the calendar
-  --no-color       Don't use color in output. Useful if output is to be
-                   used in email or text file.
-  -w FIELDS, --what-to-show FIELDS
-                   An optional list of information to show seperated by commas.
-                   It can be any of these: date, title, season, episode, magnet,
-                   oneoff, complete, filename, destination
-                   eg. --what-to-show 'title,filename,magnet'
-
-TVOverlord source code is available at https://github.com/8cylinder/tv-overlord
-Any feature requests, or bug reports should go there.
-#+END_EXAMPLE
-
 ** Usefull shell commands
 
 =tvol calendar --days -$(date '+%u'),7 -x= \\
@@ -317,6 +262,7 @@ Todays downloads formated into columns
 =tvol history list 365 > shows.tab= \\
 All episodes downloaded in the last year in a file that can be
 imported into any spreadsheet program
+
 
 ** A note on pirating
 
