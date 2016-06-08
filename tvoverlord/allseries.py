@@ -25,7 +25,7 @@ class AllSeries:
             sqlfilter = self.filter_by_name(name_filter)
 
         if by_date:
-            self.sort_field = self.sort_by_date()
+            self.sort_field = 'next_episode, name'
         else:
             self.sort_field = "replace (name, 'The ', '')"
         self.dbdata = self._query_db(sqlfilter)

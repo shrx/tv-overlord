@@ -86,13 +86,12 @@ class Search(object):
                 executor.submit(self.job, engine, search_string, season, episode): engine for engine in engines
             }
             for future in concurrent.futures.as_completed(res):
-                # print(future)
-                # something = res[future]
                 results = future.result()
                 episodes = episodes + results
 
         episodes.sort(key=lambda x: int(x[3]), reverse=True)  # sort by seeds
 
+        # Remove torrents with 0 seeds
         #for i, episode in enumerate(episodes):
         #    seeds = int(episode[3])
         #    print(episode[0])

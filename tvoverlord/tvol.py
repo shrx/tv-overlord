@@ -351,6 +351,8 @@ def calendar(show_name, show_all, sort_by_next, no_color, days):
     color_row = False
     counter = 1
     season_marker = '-'
+    filter_date = ''
+    filter_name = ''
     if sort_by_next:
         filter_date = True
     if show_name:
@@ -547,7 +549,7 @@ def parse_history(criteria):
 @tvol.command(context_settings=CONTEXT_SETTINGS)
 @click.argument('criteria', required=False)
 @click.option('--what-to-show', '-w', type=str,
-              help="An optional list of information to show seperated by commas. It can be any of these: date, title, season, episode, magnet, oneoff, complete, filename, destination eg. --what-to-show 'title,filename,magnet'")
+              help="An optional list of information to show seperated by commas.")
 def history(criteria, what_to_show):
     """Show a list of downloaded episodes.
 
@@ -555,7 +557,15 @@ def history(criteria, what_to_show):
     will show results from now to X days ago.  If it is a date, it
     will show downloads for that date, and if its a title or partial
     title, it will show all downloads for that show.
+
+    \b
+    what-to-show can be any of these:
+    date, title, season, episode, magnet, oneoff, complete, filename, destination
+
+    eg. --what-to-show 'title,filename,magnet'
     """
+    if not criteria:
+        criteria = 1
     criteria = parse_history(criteria)
     hist = History(criteria)
     hist.show(what_to_show)
@@ -571,6 +581,8 @@ def copy(criteria):
     will show downloads for that date, and if its a title or partial
     title, it will show all downloads for that show.
     """
+    if not criteria:
+        criteria = 1
     criteria = parse_history(criteria)
     hist = History(criteria)
     hist.copy()
@@ -586,6 +598,8 @@ def redownload(criteria):
     will show downloads for that date, and if its a title or partial
     title, it will show all downloads for that show.
     """
+    if not criteria:
+        criteria = 1
     criteria = parse_history(criteria)
     hist = History(criteria)
     hist.download()

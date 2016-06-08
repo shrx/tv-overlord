@@ -113,7 +113,6 @@ class History:
                 ]
             ]
             for i in sqldata:
-                print(i)
                 records.append([
                     self.format_date(i[0]),
                     self.episode(i[1], i[4], i[5]),
