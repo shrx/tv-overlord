@@ -61,8 +61,8 @@ class Config:
         conn.commit()
         conn.close()
         print('The database and config.ini have been created in "{}"'.format(user_dir))
-        print('Run "tv --help", or "tv addnew \'show name\'" to add shows.')
-        exit()  # since there is nothing in the db
+        print('Run "tvol --help", or "tvol addnew \'show name\'" to add shows.')
+        # exit()  # since there is nothing in the db
 
     cfg = configparser.ConfigParser(allow_no_value=True)
     cfg.read(user_config)

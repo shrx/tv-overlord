@@ -50,20 +50,17 @@ If this method is used, all dependencies will be taken care of.
 
 : sudo pip3 install tvoverlord
 
-Otherwise if you want the most recent version you can install it manually:
+If you use Bash as your shell, you can have completions.  Add this
+to your .bashrc file:
 
-: sudo pip3 install tvdb_api beautifulsoup4 feedparser requests docopt python-dateutil appdirs
-: git clone https://github.com/smmcg/tv-overlord.git
-: cd tv-overlord
-: # the following will install bash completions if you are using bash:
-: sudo cp tvoverlord_util/tvoverlord-completion.bash /etc/bash_completion.d/
+: eval "$(_TVOL_COMPLETE=source tvol)"
 
 After its installed, you run it by typing:
 
-: tvol
+: tvol --help
 
 The first time it's run, it will create the apropriate config dir for
-your platform.
+your platform and put the database and config.ini there.
 
 After that you can start to use it, type:
 
@@ -72,6 +69,58 @@ After that you can start to use it, type:
 If this is the wrong show, try again but add the year:
 
 : tvol addnew 'Doctor Who 2005'
+
+Then
+
+: tvol download
+
+**** Setup the post download script
+
+If you use Tranmission or Deluge as your bittorent client there is a
+script for each called transmission_done and deluge_done.  These will
+take the episode that was downloaded and copy it to a folder where it
+will be organized by show titles.
+
+If you set the "clean torrents" setting in config.ini to "yes", the
+largest file (which is the video file) will be extracted and renamed
+to "show title SxxExx resolution.ext".  for example: "Fear the Walking
+Dead S02E06 720p.mkv".  Otherwise whatever was downloaded gets copied.
+
+To set this up in transmission, go to preferences, then downloading
+and select the "call script when torrent is completed" then find the
+"transmission_done" script.  Its location can be found by typing:
+
+: which transmission_done
+
+For Deluge use the execute plugin.  More information is available here:
+http://dev.deluge-torrent.org/wiki/Plugins/Execute
+
+
+** Config file
+
+The config file has several settings.
+
+In "App Settings" there is ip, clean torrents and search type.
+
+The ip setting is there to warn you if you are using it without a vpn
+running.  If you have a vpn account then set the ip setting to what
+your ip address is without the vpn running.  Then if you download,
+tvol will compare this ip address with what your current ip address and
+if different, it will warn you.
+
+The "clean torrents" setting can be "yes" or "no"
+
+The "search type" will set if newsgroup search engines are used or
+bittorent searches are done.
+
+The "File Locations" section has "tv dir" and "staging" settings.
+
+The "tv dir" setting is where the transmission_done and deluge_done
+scripts send the files
+
+The "staging" location is where the NZB files get downloaded to.  This
+is usually a dir that is watched by your nzb client.
+
 
 ** How to use
 
@@ -85,7 +134,7 @@ year to the name: =tvol addnew 'show name year';=.
 
 **** Show missing
 
-: tvol showmissing [--no-cache] [--today]
+: tvol showmissing [--today]
 
 This will list any shows that are available to download.
 
@@ -96,7 +145,7 @@ This will list any shows that are available to download.
 
 **** Download
 
-: tvol download [--no-cache] [--today] [--ignore-warning] [--count NUM]
+: tvol download [--today] [--ignore-warning] [--count NUM]
 :               [--location FILEPATH] [--provider NAME] [SHOWNAME]
 
 For each show thats ready to download, it will ask you which one you
@@ -120,7 +169,7 @@ instead of downloading all.
 
 **** Calendar
 
-: tvol calendar [--no-cache] [--today] [--sort-by-next]
+: tvol calendar [--today] [--sort-by-next]
 :               [--no-color] [--days DAYS[,AFTER]] [SHOWNAME]
 
 Display a calendar of all the current shows in your database.  It
@@ -158,7 +207,7 @@ redownload or recopy a file to the destination set in the ini file.
 
 **** Info
 
-: tvol info [--no-cache] [--today] [--sort-by-next] [--show-links]
+: tvol info [--today] [--sort-by-next] [--show-links]
 :           [--synopsis] [--ask-inactive] [SHOWNAME]
 
 This will show you what shows are next, and how many days till they
@@ -196,9 +245,12 @@ show as 'inactive' here if you wish.
 
 ** Configure
 
-TV Overlord looks for the database and =config.ini= in the
-=~/.tv_overlord/= directory.  If that directory doesn't exist, the app
-will create it.
+TV Overlord looks for the database and =config.ini= in the appropriate
+directory for your platform.  When tvoverlord is first run, it will
+create a tvoverlord directory there.
+
+  + OSX will use ~/Library/Application Support/tvoverlord
+  + Linux will use ~/.config/tvoverlord
 
 *** Configuration file sections
 
@@ -226,7 +278,7 @@ will create it.
 
 =[File Locations]=
  + =tv dir: FILEPATH= \\
-   If you use the transmission_done.py or deluge_done.py scripts, then
+   If you use the transmission_done or deluge_done scripts, then
    this is where the finished video files will be copied to and
    organized into folders under the show's name
 
