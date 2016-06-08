@@ -21,8 +21,8 @@ setup(
     },
     entry_points='''
         [console_scripts]
-        deluge_done=tvoverlord.deluge_done:main
-        transmission_done=tvoverlord.transmission_done:main
+        deluge_done=tvoverlord.client_finished:deluge
+        transmission_done=tvoverlord.client_finished:transmission
         tvol=tvoverlord.tvol:tvol
     ''',
     install_requires=[
