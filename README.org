@@ -96,30 +96,47 @@ For Deluge use the execute plugin.  More information is available here:
 http://dev.deluge-torrent.org/wiki/Plugins/Execute
 
 
-** Config file
+** Configure
 
-The config file has several settings.
+TV Overlord looks for the database and =config.ini= in the appropriate
+directory for your platform.  When tvoverlord is first run, it will
+create a tvoverlord directory there.
 
-In "App Settings" there is ip, clean torrents and search type.
+  + OSX will use ~/Library/Application Support/tvoverlord
+  + Linux will use ~/.config/tvoverlord
 
-The ip setting is there to warn you if you are using it without a vpn
-running.  If you have a vpn account then set the ip setting to what
-your ip address is without the vpn running.  Then if you download,
-tvol will compare this ip address with what your current ip address and
-if different, it will warn you.
+*** Configuration file sections
 
-The "clean torrents" setting can be "yes" or "no"
+=[App Settings]=
+ + =ip: xxx.xxx.xxx.xxx= \\
+   If used, TV Overlord will issue a warning if not connected to a
+   vpn.  This should be you ip address when *not* connected to a vpn, so
+   if your current ip matches this one, the program stops.  It uses
+   http://api.ipify.org to get the current ip address.
 
-The "search type" will set if newsgroup search engines are used or
-bittorent searches are done.
+ + =clean torrents: (yes|no)=\\
+   If yes, the video file is extracted from the downloaded dir and
+   renamed. For example:
+   =Z.Nation.2x09.INTERNAL.720p.HDTV.x264-KILLERS[ettv].mkv= will be
+   renamed to "=Z Nation S02E09 720p.mkv=" and then copied to the "=tv
+   dir=" (description below).  If that directory doesn't have a dir
+   called "Z Nation", it's created.
 
-The "File Locations" section has "tv dir" and "staging" settings.
+   If no, then whatever was downloaded gets copied to the "tv dir" and
+   put into the "Z Nation" directory
 
-The "tv dir" setting is where the transmission_done and deluge_done
-scripts send the files
+ + =search type: (torrent|newsgroup)=\\
+   search type can be torrent or newsgroup.  If it's unspecified, it
+   will use torrent
 
-The "staging" location is where the NZB files get downloaded to.  This
-is usually a dir that is watched by your nzb client.
+=[File Locations]=
+ + =tv dir: FILEPATH= \\
+   If you use the transmission_done or deluge_done scripts, then
+   this is where the finished video files will be copied to and
+   organized into folders under the show's name
+
+ + =staging: FILEPATH= \\
+   If using NZB searches, this is where the NZB files will be put.
 
 
 ** How to use
@@ -243,49 +260,6 @@ Edit the data in the database for show name.  You can manually set a
 show as 'inactive' here if you wish.
 
 
-** Configure
-
-TV Overlord looks for the database and =config.ini= in the appropriate
-directory for your platform.  When tvoverlord is first run, it will
-create a tvoverlord directory there.
-
-  + OSX will use ~/Library/Application Support/tvoverlord
-  + Linux will use ~/.config/tvoverlord
-
-*** Configuration file sections
-
-=[App Settings]=
- + =ip: xxx.xxx.xxx.xxx= \\
-   If used, TV Overlord will issue a warning if not connected to a
-   vpn.  This should be you ip address when *not* connected to a vpn, so
-   if your current ip matches this one, the program stops.  It uses
-   http://api.ipify.org to get the current ip address.
-
- + =clean torrents: (yes|no)=\\
-   If yes, the video file is extracted from the downloaded dir and
-   renamed. For example:
-   =Z.Nation.2x09.INTERNAL.720p.HDTV.x264-KILLERS[ettv].mkv= will be
-   renamed to "=Z Nation S02E09 720p.mkv=" and then copied to the "=tv
-   dir=" (description below).  If that directory doesn't have a dir
-   called "Z Nation", it's created.
-
-   If no, then whatever was downloaded gets copied to the "tv dir" and
-   put into the "Z Nation" directory
-
- + =search type: (torrent|newsgroup)=\\
-   search type can be torrent or newsgroup.  If it's unspecified, it
-   will use torrent
-
-=[File Locations]=
- + =tv dir: FILEPATH= \\
-   If you use the transmission_done or deluge_done scripts, then
-   this is where the finished video files will be copied to and
-   organized into folders under the show's name
-
- + =staging: FILEPATH= \\
-   If using NZB searches, this is where the NZB files will be put.
-
-
 ** Screenshots
 
 [[http://i.imgur.com/jMP4T3h.gif]] \\
@@ -308,12 +282,12 @@ This show the info command.
 This will show all the available shows for the current week from Sun
 to Sat.
 
-=tvol history list 1 | column -ts$'\t';= \\
-Todays downloads formated into columns
+=tvol history 1 | column -ts$'\t';= \\
+Todays downloads formated into columns.
 
 =tvol history list 365 > shows.tab= \\
-All episodes downloaded in the last year in a file that can be
-imported into any spreadsheet program
+All episodes downloaded in the last year put into a file that can be
+imported into any spreadsheet program.
 
 
 ** A note on pirating
