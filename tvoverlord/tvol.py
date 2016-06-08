@@ -121,15 +121,15 @@ def tvol(no_cache):
 @tvol.command(context_settings=CONTEXT_SETTINGS)
 @click.argument('show_name', required=False)
 @click.option('--show-all', '-a', is_flag=True,
-              help='Show all shows including the ones marked inactive')
+              help='Show all shows including the ones marked inactive.')
 @click.option('--sort-by-next', '-x', is_flag=True,
-              help='Sort by release date instead of the default alphabetical')
+              help='Sort by release date instead of the default alphabetical.')
 @click.option('--ask-inactive', is_flag=True,
-              help='Ask to make inactive shows that are cancelled')
+              help='Ask to make inactive shows that are cancelled.')
 @click.option('--show-links', is_flag=True,
-              help='Show links to IMDB.com and TheTVDb.com for each show')
+              help='Show links to IMDB.com and TheTVDb.com for each show.')
 @click.option('--synopsis', is_flag=True,
-              help='Display the show synopsis')
+              help='Display the show synopsis.')
 def info(show_name, show_all, sort_by_next,
          ask_inactive, show_links, synopsis):
     """Show information about your tv shows.
@@ -266,13 +266,13 @@ def info(show_name, show_all, sort_by_next,
 @tvol.command(context_settings=CONTEXT_SETTINGS)
 @click.argument('show_name', required=False)
 @click.option('--show-all', '-a', is_flag=True,
-              help='Show all shows including the ones marked inactive')
+              help='Show all shows including the ones marked inactive.')
 @click.option('--sort-by-next', '-x', is_flag=True,
-              help='Sort by release date instead of the default alphabetical')
+              help='Sort by release date instead of the default alphabetical.')
 @click.option('--no-color', is_flag=True,
               help="Don't use color in output.  Useful if output is to be used in email or text file.")
 @click.option('--days',
-              help='The number of days to show in the calendar')
+              help='The number of days to show in the calendar.')
 def calendar(show_name, show_all, sort_by_next, no_color, days):
     """Display a calendar of upcoming episodes.
 
@@ -435,7 +435,7 @@ def tfunct(series):
 
 @tvol.command(context_settings=CONTEXT_SETTINGS)
 @click.option('--today', '-t', is_flag=True,
-              help="Also show today's episodes")
+              help="Also show today's episodes.")
 def showmissing(today):
     """List episodes that are ready to download.
     """
@@ -455,27 +455,25 @@ def showmissing(today):
 @tvol.command(context_settings=CONTEXT_SETTINGS)
 @click.argument('show_name', required=False)
 @click.option('--today', '-t', is_flag=True,
-              help="Also download today's episodes")
+              help="Also download today's episodes.")
 @click.option('--ignore', '-i', is_flag=True,
-              help="Ignore 'Not connected to vpn' warning")
+              help="Ignore 'Not connected to vpn' warning.")
 @click.option('--count', '-c', type=int, default=10,
               help='Number of search results to list. (default: 5)')
 @click.option('--location', '-l',
               type=click.Path(exists=True, resolve_path=True),
-              help='Directory to download the nzb files to')
+              help='Directory to download the nzb files to.')
 def download(show_name, today, ignore, count, location):
     """Download available episodes.
 
     If SHOW_NAME is used, it will download any shows that match that title
     """
-    all_series = AllSeries()
     if Config.ip and not ignore:
         L = Location()
         if L.ips_match(Config.ip):
             print('%s not connected to VPN' % (U.effects(['redb', 'boldon'], ' Warning: ')))
             exit()
-    if show_name:
-        all_series.name_filter(show_name)
+    all_series = AllSeries(name_filter=show_name)
     for series in all_series:
         series.download_missing(count, today)
 
@@ -502,7 +500,7 @@ def addnew(show_name):
               help='Number of search results to list. (default: 5)')
 @click.option('--location', '-l',
               type=click.Path(exists=True, resolve_path=True),
-              help='Directory to download the nzb files to')
+              help='Directory to download the nzb files to.')
 def nondbshow(search_string, count, location):
     """Download anything, ignoring the database.
 
