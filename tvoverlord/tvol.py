@@ -183,8 +183,6 @@ def info(show_name, show_all, sort_by_next,
         if synopsis and series.overview:
             paragraph = series.overview
             indent = '    '
-            if int(series.console_columns) < fill_width:
-                fill_width = series.console_columns
             paragraph = textwrap.fill(paragraph,
                                       initial_indent=indent,
                                       subsequent_indent=indent)
