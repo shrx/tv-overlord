@@ -152,7 +152,6 @@ class Series:
 
         for episode in missing:
             showid = None
-            print('>>',Config.search_type)
             results = self.search_provider.search(
                 search_title,
                 season=episode['season'],
