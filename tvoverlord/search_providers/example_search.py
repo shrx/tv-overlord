@@ -26,7 +26,8 @@ class Provider():
 
         show_data = []
 
-        show_data.append(['title', 'size', 'date', 'seeds', self.shortname, 'magnet'])
+        show_data.append(['title', 'size', 'date', 'seeds',
+                          self.shortname, 'magnet'])
 
         self.url = [
             'http://www.somesite.com/search/doctorwho'
@@ -39,4 +40,3 @@ if __name__ == '__main__':
     p = Provider()
     results = p.search('game of thrones', season=6, episode=6)
     print(len(results))
-

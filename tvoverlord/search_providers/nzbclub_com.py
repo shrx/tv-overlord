@@ -4,6 +4,7 @@ import urllib.request, urllib.parse, urllib.error
 import os
 from time import mktime
 from datetime import datetime
+from pprint import pprint as pp
 
 import feedparser
 
@@ -13,7 +14,7 @@ from tvoverlord.util import U
 class Provider(object):
     provider_url = 'http://www.nzbclub.com/'
     name = 'NZBClub'
-
+    shortname = 'NZ'
 
     @staticmethod
     def se_ep(season, episode, show_title):
@@ -22,7 +23,6 @@ class Provider(object):
         fixed = '%s S%sE%s or %s %sx%s' % (
             show_title, season_just, episode, show_title, season, episode)
         return fixed
-
 
     def search(self, search_string, season=False, episode=False):
 
@@ -63,19 +63,19 @@ class Provider(object):
                 self.se_ep(
                     season, episode, search_string))
 
-        # print search_string
         url = 'http://www.nzbclub.com/nzbrss.aspx?'
         query = {
-            'q': search_string
-            , 'ig': 2  # hide adult: 1=yes, 2=no
-            , 'szs': 15  # min size: 15=75m, 16=100m,
-            , 'sze': 24  # max size: 24=2gig
-            , 'st': 5  # sort.  5=relevence, 4=size (smallest first)
-            , 'ns': 1  # no spam
-            , 'sp': 1  # don't show passworded files
-            , 'nfo': 0  # has to have nfo  1=yes, 0=no
+            'q': search_string,
+            'ig': 2,    # hide adult: 1=yes, 2=no
+            'szs': 15,  # min size: 15=75m, 16=100m,
+            'sze': 24,  # max size: 24=2gig
+            'st': 5,    # sort.  5=relevence, 4=size (smallest first)
+            'ns': 1,    # no spam
+            'sp': 1,    # don't show passworded files
+            'nfo': 0,   # has to have nfo  1=yes, 0=no
         }
         full_url = url + urllib.parse.urlencode(query)
+
         parsed = feedparser.parse(full_url)
 
         header = [
@@ -92,14 +92,18 @@ class Provider(object):
 
             size = U.pretty_filesize(show['links'][0]['length'])
 
+            nzbfile_url = show['links'][0]['href']
+            nzbfile_url = nzbfile_url.replace(' ', '_')
+
             show_data.append([
                 show['title'],
-                date,
                 size,
-                show['links'][0]['href']  # id
+                date,
+                self.shortname,
+                nzbfile_url,
             ])
 
-        return [header] + [show_data]
+        return show_data
 
 
     def download(self, chosen_show, destination, final_name):

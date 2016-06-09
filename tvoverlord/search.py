@@ -9,6 +9,8 @@ import socket
 import urllib
 
 from tvoverlord.util import U
+
+# torrent search engings
 from tvoverlord.search_providers import extratorrent
 from tvoverlord.search_providers import bitsnoop
 from tvoverlord.search_providers import kickass_to
@@ -17,6 +19,11 @@ from tvoverlord.search_providers import onethreethreesevenx_to
 from tvoverlord.search_providers import torrentdownloads_me
 from tvoverlord.search_providers import rarbg_to
 from tvoverlord.search_providers import eztv_ag
+
+# newsgroup search engines
+from tvoverlord.search_providers import nzbclub_com
+from tvoverlord.search_providers import nzbindex_com
+
 
 
 class SearchError(Exception):
@@ -42,7 +49,8 @@ class Search(object):
 
         return search_results
 
-    def search(self, search_string, season=False, episode=False):
+    def search(self, search_string, season=False,
+               episode=False, search_type='torrent'):
         """
         Return an array of values:
 
@@ -64,6 +72,7 @@ class Search(object):
         self.season = season
         self.episode = episode
         self.show_name = search_string
+        self.search_type = search_type
 
         msg = 'Searching for: {0:s}...'.format(search_string)
         msg = U.hi_color(msg, foreground=16, background=184)
@@ -72,13 +81,28 @@ class Search(object):
         backspace = '\b' * len(msg)
         overwrite = ' ' * len(msg)
 
-        header = [
-            [search_string, ''],
-            ['Name', 'Size', 'Date', 'Seeds', 'SE'],
-            [0, 10, 12, 6, 2],
-            ['<', '>', '<', '>', '<']]
+        if self.search_type == 'torrent':
+            header = [
+                [search_string, ''],
+                ['Name', 'Size', 'Date', 'Seeds', 'SE'],
+                [0, 10, 12, 6, 2],
+                ['<', '>', '<', '>', '<']]
+        else:
+            header = [
+                [search_string, ''],
+                ['Name', 'Size', 'Date', 'SE'],
+                [0, 10, 12, 2],
+                ['<', '>', '<', '<']]
 
-        engines = [bitsnoop, extratorrent, thepiratebay_sx, kickass_to, onethreethreesevenx_to, rarbg_to, eztv_ag]  # , torrentdownloads_me
+        if self.search_type == 'torrent':
+            engines = [bitsnoop, extratorrent, thepiratebay_sx, kickass_to,
+                       onethreethreesevenx_to, rarbg_to, eztv_ag]
+            # , torrentdownloads_me # <-- a suspicious number of seeds
+        else:
+            # for nzb searches, only one search engine is allowed
+            engines = [nzbclub_com]
+            self.engine = engines[0]
+            # , nzbindex_com # <-- rss feed not working
 
         socket.setdefaulttimeout(3.05)
         episodes = []
@@ -90,43 +114,44 @@ class Search(object):
                 results = future.result()
                 episodes = episodes + results
 
-        episodes.sort(key=lambda x: int(x[3]), reverse=True)  # sort by seeds
+        if self.search_type == 'torrent':
 
-        # Remove torrents with 0 seeds
-        #for i, episode in enumerate(episodes):
-        #    seeds = int(episode[3])
-        #    print(episode[0])
-        #    if not seeds:
-        #        print('    ', seeds, episode[0])
-        #        del episodes[i]
+            episodes.sort(key=lambda x: int(x[3]), reverse=True)  # sort by seeds
 
-        # remove duplicates since different sites might have the same torrent
-        titles = []
-        for i, episode in enumerate(episodes):
-            title = episode[0]
-            if title in titles:
-                del episodes[i]
-            else:
-                titles.append(title)
+            # Remove torrents with 0 seeds
+            #for i, episode in enumerate(episodes):
+            #    seeds = int(episode[3])
+            #    print(episode[0])
+            #    if not seeds:
+            #        print('    ', seeds, episode[0])
+            #        del episodes[i]
 
-        # the following will remove duplicates based on the magnet hash
-        hashes = []
-        for i, episode in enumerate(episodes):
-            o = urllib.parse.urlparse(episode[5])
-            torrent_hash = urllib.parse.parse_qs(o.query)['xt']
-            torrent_hash = torrent_hash[0].split(':')[-1]
-            if torrent_hash in hashes:
-                del episodes[i]
-            else:
-                hashes.append(torrent_hash)
+            # remove duplicates since different sites might have the same torrent
+            titles = []
+            for i, episode in enumerate(episodes):
+                title = episode[0]
+                if title in titles:
+                    del episodes[i]
+                else:
+                    titles.append(title)
+
+            # the following will remove duplicates based on the magnet hash
+            hashes = []
+            for i, episode in enumerate(episodes):
+                o = urllib.parse.urlparse(episode[5])
+                torrent_hash = urllib.parse.parse_qs(o.query)['xt']
+                torrent_hash = torrent_hash[0].split(':')[-1]
+                if torrent_hash in hashes:
+                    del episodes[i]
+                else:
+                    hashes.append(torrent_hash)
 
         print('%s%s' % (backspace, overwrite), end=' ')
 
         # return search_results
         return [header] + [episodes]
 
-
-    def download(self, chosen_show, destination):
+    def download(self, chosen_show, destination, search_type='torrent'):
         """
         Pass the chosen show's data and destination to the providers
         download method and return the name of the file downloaded
@@ -163,7 +188,8 @@ class Search(object):
                                 self.episode.rjust(2, '0'))
                 )
                 print(final_name)
-            downloaded_filename = self.engine.download(
+            downloader = self.engine.Provider()
+            downloaded_filename = downloader.download(
                 chosen_show, destination, final_name)
 
         return downloaded_filename

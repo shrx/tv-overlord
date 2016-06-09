@@ -26,6 +26,7 @@ class Provider(object):
 
     provider_url = 'http://nzbindex.com'
     name = 'NZBIndex'
+    shortname = 'NI'
 
 
     @staticmethod
@@ -101,78 +102,7 @@ class Provider(object):
         namespaces  ?
         status      200
         version     u'rss20'
-
-
-        Example of one show entry (results['entries'][0]):
-        --------------------------------------------------
-
-          summary_detail
-          ----------------
-          {'base': u'http://nzbindex.com/rss/?q=American+Horror+Story+S02E09&sort=agedesc&maxsize=5000&minage=0&complete=1&minsize=100&max=100&more=1',
-           'type': u'text/html', 'value': u'<p><font color="gray">alt.binaries.boneless, alt.binaries.cores, alt.binaries.multimedia, alt.binaries.town</font><br />\n<b>1.15 GB</b><br />\n19.6 dagen<br />\n<font color="#3DA233">16 bestanden (3098 delen)</font>\n<font color="gray">door Profess0r &lt;town@town.ag&gt;</font><br />\n<font color="#E2A910">\n5 PAR2 | 11 ARCHIEF</font>\n</p>',
-           'language': None}
-
-          published_parsed
-          ----------------
-          time.struct_time(tm_year=2012, tm_mon=12, tm_mday=13, tm_hour=4, tm_min=58, tm_sec=19, tm_wday=3, tm_yday=348, tm_isdst=0)
-
-          links
-          ----------------
-          [{'href': u'http://nzbindex.com/release/80986743/TOWNwww.town.ag-partner-of-www.ssl-news.info-American.Horror.Story.S02E09.720p.HDTV.X264-DIMENSION-0116-American.Horror.Story.S02E09.720p.HDTV.X2.nzb',
-            'type': u'text/html',
-            'rel': u'alternate'},
-           {'length': u'1233191350',
-            'href': u'http://nzbindex.com/download/80986743/TOWNwww.town.ag-partner-of-www.ssl-news.info-American.Horror.Story.S02E09.720p.HDTV.X264-DIMENSION-0116-American.Horror.Story.S02E09.720p.HDTV.X2.nzb',
-            'type': u'text/xml',
-            'rel': u'enclosure'}]
-
-          title
-          ----------------
-          <TOWN><www.town.ag > <partner of www.ssl-news.info > American.Horror.Story.S02E09.720p.HDTV.X264-DIMENSION [01/16] - "American.Horror.Story.S02E09.720p.HDTV.X264-DIMENSION.par2" - 1,11 GB - yEnc
-
-          tags
-          ----------------
-          [{'term': u'alt.binaries.boneless', 'scheme': None, 'label': None},
-           {'term': u'alt.binaries.cores', 'scheme': None, 'label': None},
-           {'term': u'alt.binaries.multimedia', 'scheme': None, 'label': None},
-           {'term': u'alt.binaries.town', 'scheme': None, 'label': None}]
-
-          summary
-          ----------------
-          <p><font color="gray">alt.binaries.boneless, alt.binaries.cores, alt.binaries.multimedia, alt.binaries.town</font><br />
-          <b>1.15 GB</b><br />
-          19.6 dagen<br />
-          <font color="#3DA233">16 bestanden (3098 delen)</font>
-          <font color="gray">door Profess0r &lt;town@town.ag&gt;</font><br />
-          <font color="#E2A910">
-          5 PAR2 | 11 ARCHIEF</font>
-          </p>
-
-          guidislink
-          ----------------
-          False
-
-          title_detail
-          ----------------
-          {'base': u'http://nzbindex.com/rss/?q=American+Horror+Story+S02E09&sort=agedesc&maxsize=5000&minage=0&complete=1&minsize=100&max=100&more=1',
-           'type': u'text/plain',
-           'value': u'<TOWN><www.town.ag > <partner of www.ssl-news.info > American.Horror.Story.S02E09.720p.HDTV.X264-DIMENSION [01/16] - "American.Horror.Story.S02E09.720p.HDTV.X264-DIMENSION.par2" - 1,11 GB - yEnc',
-           'language': None}
-
-          link
-          ----------------
-          http://nzbindex.com/release/80986743/TOWNwww.town.ag-partner-of-www.ssl-news.info-American.Horror.Story.S02E09.720p.HDTV.X264-DIMENSION-0116-American.Horror.Story.S02E09.720p.HDTV.X2.nzb
-
-          published
-          ----------------
-          Thu, 13 Dec 2012 05:58:19 +0100
-
-          id
-          ----------------
-          http://nzbindex.com/release/80986743/TOWNwww.town.ag-partner-of-www.ssl-news.info-American.Horror.Story.S02E09.720p.HDTV.X264-DIMENSION-0116-American.Horror.Story.S02E09.720p.HDTV.X2.nzb
-
-
-          """
+        """
 
         # search_template = ('nzbindex.com/rss/?q=%s&minage=%s&sort=%s' +
         # '&minsize=%s&maxsize=%s&complete=%s&max=%s&more=1')
@@ -192,14 +122,14 @@ class Provider(object):
 
         url = 'http://nzbindex.com/rss/?'
         query = {
-            'q': search_string
-            , 'minage': '0'
-            , 'sort': 'agedesc'
-            , 'minsize': '100'
-            , 'maxsize': '5000'
-            , 'complete': '1'
-            , 'max': '100'  # results per page
-            , 'more': '1'
+            'q': search_string,
+            'minage': '0',
+            'sort': 'agedesc',
+            'minsize': '100',
+            'maxsize': '5000',
+            'complete': '1',
+            'max': '100',  # results per page
+            'more': '1',
         }
 
         full_url = url + urllib.parse.urlencode(query)
@@ -216,9 +146,10 @@ class Provider(object):
 
             show_data.append([
                 show['title'],
-                date,
                 size,
-                show['links'][1]['href']
+                date,
+                self.shortname,
+                show['links'][1]['href'],
             ])
 
         header = [
@@ -229,7 +160,8 @@ class Provider(object):
             ['<', '<', '>']
         ]
 
-        return [header] + [show_data]
+        pp(show_data)
+        return show_data
 
 
     def download(self, chosen_show, destination, final_name):

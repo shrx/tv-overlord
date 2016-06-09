@@ -152,11 +152,12 @@ class Series:
 
         for episode in missing:
             showid = None
-
+            print('>>',Config.search_type)
             results = self.search_provider.search(
                 search_title,
                 season=episode['season'],
-                episode=episode['episode']
+                episode=episode['episode'],
+                search_type=Config.search_type,
             )
 
             if results:
@@ -167,7 +168,7 @@ class Series:
                     episode=episode['episode']
                 )
             else:
-                print('"%s" is listed in TheTVDB, but not found at the search engine' % (
+                print('"%s" is listed in TheTVDB, but not found in any search engines' % (
                     search_title))
 
             if showid == 'skip_rest':
@@ -246,8 +247,10 @@ class Series:
     def non_db(self, search_str, display_count):
         self.db_name = search_str
         try:
-            show_data = self._ask(self.search_provider.search(search_str),
-                                  None, None, display_count)
+            show_data = self._ask(
+                self.search_provider.search(
+                    search_str, search_type=Config.search_type),
+                None, None, display_count)
             if not show_data:
                 return
         except SearchError:
@@ -378,7 +381,8 @@ class Series:
         sys.stdout.flush()
 
         filename = self.search_provider.download(
-            chosen_show=show_data, destination=Config.staging)
+            chosen_show=show_data, destination=Config.staging,
+            search_type=Config.search_type)
 
         backspace = '\b' * len(msg)
         done = U.hi_color(filename.ljust(len(msg)), foreground=34)
