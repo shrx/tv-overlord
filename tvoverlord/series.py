@@ -46,13 +46,10 @@ class Series:
 
         return fixed
 
-    def __init__(self, dbdata=False, show_type='current'):
+    def __init__(self, dbdata=[], show_type='current'):
         typelist = ('new', 'nondb', 'current')
         if show_type not in typelist:
             raise Exception('incorrect show type')
-
-        if not dbdata:
-            dbdata = []
 
         if show_type == 'current':
             self._set_db_data(dbdata)

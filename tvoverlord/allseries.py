@@ -39,6 +39,8 @@ class AllSeries:
     def __next__(self):
         if self.i == len(self.dbdata):
             raise StopIteration
+        print(self.dbdata[self.i])
+        exit()
         series = Series(dbdata=self.dbdata[self.i])
         self.i += 1
         return series
