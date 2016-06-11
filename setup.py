@@ -6,7 +6,7 @@ if sys.version_info[0] == 2:
     dividers = '!' * 40
     sys.exit("{}\nSorry, TVOverlord does not support python 2.\nUse: 'pip3 install tvoverlord' instead\n{}".format(dividers, dividers))
 
-f = open(os.path.join(os.path.dirname(__file__), 'README.txt'))
+f = open(os.path.join(os.path.dirname(__file__), 'README.org'))
 long_description = f.read()
 f.close()
 
