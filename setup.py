@@ -34,7 +34,7 @@ setup(
         'psutil',
         'click',
     ],
-    version='0.9.18',
+    version='0.9.20',
     description='TV Overlord is a command line tool to download and manage TV shows from newsgroups or bittorent',
     long_description=long_description,
     license='MIT',
