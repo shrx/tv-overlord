@@ -58,7 +58,7 @@ can take a look at making it work or alternatively send me a pull request.
 TV Overlord is a python 3 application and can be installed via pip3.
 If this method is used, all dependencies will be taken care of.
 
-: sudo pip3 install tvoverlord
+: pip3 install tvoverlord
 
 If you use Bash as your shell, you can have completions.  Add this
 to your .bashrc file:
@@ -118,10 +118,11 @@ create a tvoverlord directory there.
 *** Configuration file sections
 
 =[App Settings]=
- + =ip: xxx.xxx.xxx.xxx= \\
+ + =ip whitelist: xxx.xxx.xxx.xxx (, xxx.xxx.xxx.xxx, ...)= \\
    If used, TV Overlord will issue a warning if not connected to a
-   vpn.  This should be you ip address when *not* connected to a vpn, so
-   if your current ip matches this one, the program stops.  It uses
+   vpn.  This should be one or more ip addresses (seperated by a comma)
+   that your vpn provider uses.  If your current ip address doesn't
+   match one of the whitelisted ip's, tvol will stop.  It uses
    http://api.ipify.org to get the current ip address.
 
  + =clean torrents: (yes|no)=\\
@@ -313,4 +314,3 @@ I can, but I don't use it.  As far as I'm concerned, this is the same
 as using TiVo and skipping the commercials.
 
 If you want to download shows, you should do this too.
-

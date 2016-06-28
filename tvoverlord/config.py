@@ -69,7 +69,9 @@ class Config:
 
     # OPTIONAL FIELDS
     # [App Settings]
-    ip = cfg.get('App Settings', 'ip')
+    ip = cfg.get('App Settings', 'ip whitelist')
+    ip = [i.strip() for i in ip.split(',')]
+    ip = [i for i in ip if i]  # remove empty list elements
     clean_torrents = True if cfg.get('App Settings', 'clean torrents') == 'yes' else False
     search_type = 'newsgroup' if cfg.get('App Settings', 'search type') == 'newsgroup' else 'torrent'
 

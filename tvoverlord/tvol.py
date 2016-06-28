@@ -468,8 +468,11 @@ def download(show_name, today, ignore, count, location):
     """
     if Config.ip and not ignore:
         L = Location()
-        if L.ips_match(Config.ip):
+        if not L.ips_match(Config.ip):
             print('%s not connected to VPN' % (U.effects(['redb', 'boldon'], ' Warning: ')))
+            print('The ip addresses in config.ini (%s)' % ', '.join(Config.ip))
+            print('don\'t match your current ip:', L.ip)
+            print('If you know you are connected to a vpn, add your current ip to the config.ini file.')
             exit()
     all_series = AllSeries(name_filter=show_name)
     for series in all_series:
