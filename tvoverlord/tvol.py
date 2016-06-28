@@ -7,7 +7,6 @@ import textwrap
 
 from pprint import pprint as pp
 from dateutil import parser as date_parser
-# from docopt import docopt
 import click
 
 from tvoverlord.allseries import AllSeries
@@ -17,6 +16,9 @@ from tvoverlord.tvutil import FancyPrint, dict_factory
 from tvoverlord.util import U
 from tvoverlord.location import Location
 from tvoverlord.history import History
+from tvoverlord.downloadmanager import DownloadManager
+
+__version__ = '0.9.22'
 
 
 def edit_db(search_str):
@@ -102,6 +104,7 @@ CONTEXT_SETTINGS = {
 @click.group(context_settings=CONTEXT_SETTINGS)
 @click.option('--no-cache', '-n', is_flag=True,
               help='Re-download the show data instead of using the cached data.')
+@click.version_option(version=__version__)
 def tvol(no_cache):
     """Download and manage tv shows.
 

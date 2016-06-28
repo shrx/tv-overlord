@@ -1,14 +1,31 @@
-from distutils.core import setup
-import os
+
+from setuptools import setup
+
 import sys
+import re
+
+version = re.search(
+    '^__version__\s*=\s*"(.*)"',
+    open('tvoverlord/tvol.py').read(),
+    re.M
+    ).group(1)
 
 if sys.version_info[0] == 2:
     dividers = '!' * 40
     sys.exit("{}\nSorry, TVOverlord does not support python 2.\nUse: 'pip3 install tvoverlord' instead\n{}".format(dividers, dividers))
 
-f = open(os.path.join(os.path.dirname(__file__), 'README.org'))
-long_description = f.read()
-f.close()
+long_description = """
+TV Overlord is a command line tool to download and manage TV shows from
+newsgroups or bittorent. It will download nzb files or magnet links.
+
+It searches multiple sites simultaneously and combines the results
+into one list to select from.
+
+TV Overlord keeps track of which shows have been downloaded and what
+shows are available to download.
+
+More information at https://github.com/8cylinder/tv-overlord"""
+
 
 setup(
     name='tvoverlord',
@@ -34,7 +51,7 @@ setup(
         'psutil',
         'click',
     ],
-    version='0.9.20',
+    version=version,
     description='TV Overlord is a command line tool to download and manage TV shows from newsgroups or bittorent',
     long_description=long_description,
     license='MIT',
@@ -58,9 +75,10 @@ setup(
     ],
 )
 
-# python3 setup.py check
 # python3 setup.py sdist
-# python3 setup.py register sdist upload
+# python3 setup.py bdist_wheel
+# pyinstaller tvol.spec
+# twine upload dist/*
 
 # future windows builds:
 # python3 setup.py bdist_wininst
