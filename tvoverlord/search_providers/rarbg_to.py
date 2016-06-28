@@ -55,7 +55,12 @@ class Provider():
             if 'error_code' in results.keys() and results['error_code'] == 20:
                 continue  # no results found
 
-            shows = results['torrent_results']
+            try:
+                shows = results['torrent_results']
+            except KeyError:
+                # no results
+                continue
+
             for show in shows:
                 title = show['title']
                 date = show['pubdate']

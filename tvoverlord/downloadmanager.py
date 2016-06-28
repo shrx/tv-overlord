@@ -44,11 +44,15 @@ class DownloadManager(DB):
     """
     def __init__(self, torrent_hash, path, filename, debug=False):
         # set up logging
-        log_file = '{}tv_download_manager.log'.format(path)
-        logging.basicConfig(format='%(asctime)s: %(levelname)s: %(message)s',
-                            datefmt='%Y-%m-%d %H:%M:%S',
-                            filename=log_file,
-                            level=logging.DEBUG)
+        if os.path.exists(path):
+            log_file = os.path.join(path, 'tv_download_manager.log')
+            logging.basicConfig(
+                format='%(asctime)s: %(levelname)s: %(message)s',
+                datefmt='%Y-%m-%d %H:%M:%S',
+                filename=log_file,
+                level=logging.DEBUG)
+        else:
+            sys.exit('{} does not exist'.format(path))
 
         if debug:
             console = logging.StreamHandler()
