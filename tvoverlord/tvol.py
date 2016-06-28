@@ -18,7 +18,7 @@ from tvoverlord.location import Location
 from tvoverlord.history import History
 from tvoverlord.downloadmanager import DownloadManager
 
-__version__ = '0.9.22'
+__version__ = '0.9.23'
 
 
 def edit_db(search_str):

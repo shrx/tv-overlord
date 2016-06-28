@@ -5,7 +5,7 @@ import sys
 import re
 
 version = re.search(
-    '^__version__\s*=\s*"(.*)"',
+    "^__version__\s*=\s*'(.*)'",
     open('tvoverlord/tvol.py').read(),
     re.M
     ).group(1)
@@ -50,6 +50,7 @@ setup(
         'python-dateutil',
         'psutil',
         'click',
+        'appdirs',
     ],
     version=version,
     description='TV Overlord is a command line tool to download and manage TV shows from newsgroups or bittorent',
@@ -75,10 +76,15 @@ setup(
     ],
 )
 
-# python3 setup.py sdist
-# python3 setup.py bdist_wheel
-# pyinstaller tvol.spec
+
+## build source dist and wheel:
+# python3 setup.py sdist bdist_wheel
+## upload to pypi:
 # twine upload dist/*
+## install for dev:
+# pip install --editable .
+
+# pyinstaller tvol.spec
 
 # future windows builds:
 # python3 setup.py bdist_wininst
