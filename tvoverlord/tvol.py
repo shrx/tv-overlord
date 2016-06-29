@@ -2,6 +2,7 @@
 
 import datetime
 import os
+import sys
 import sqlite3
 import textwrap
 
@@ -472,11 +473,9 @@ def download(show_name, today, ignore, count, location):
     if Config.ip and not ignore:
         L = Location()
         if not L.ips_match(Config.ip):
-            print('%s not connected to VPN' % (U.effects(['redb', 'boldon'], ' Warning: ')))
-            print('The ip addresses in config.ini (%s)' % ', '.join(Config.ip))
-            print('don\'t match your current ip:', L.ip)
-            print('If you know you are connected to a vpn, add your current ip to the config.ini file.')
-            exit()
+            L.message()
+            sys.exit(1)
+
     all_series = AllSeries(name_filter=show_name)
     for series in all_series:
         series.download_missing(count, today)
@@ -502,15 +501,23 @@ def addnew(show_name):
 @click.argument('search_string')
 @click.option('--count', '-c', type=int, default=10,
               help='Number of search results to list. (default: 5)')
+@click.option('--ignore', '-i', is_flag=True,
+              help="Ignore 'Not connected to vpn' warning.")
 @click.option('--location', '-l',
               type=click.Path(exists=True, resolve_path=True),
               help='Directory to download the nzb files to.')
-def nondbshow(search_string, count, location):
+def nondbshow(search_string, count, location, ignore):
     """Download anything, ignoring the database.
 
     This just does a simple search and passes you choise to the bittorrent
     client.  The download is not recorded in the database.
     """
+    if Config.ip and not ignore:
+        L = Location()
+        if not L.ips_match(Config.ip):
+            L.message()
+            sys.exit(1)
+
     nons = Series(show_type='nondb')
     nons.non_db(search_string, count)
 

@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 import os
 import sys
+import textwrap
+import re
 
 
 def dict_factory(cursor, row):
@@ -10,6 +12,16 @@ def dict_factory(cursor, row):
     for idx, col in enumerate(cursor.description):
         d[col[0]] = row[idx]
     return d
+
+
+def format_paragraphs(msg):
+    paragraphs = re.split('\n\n+', msg)
+    for i, paragraph in enumerate(paragraphs):
+        paragraph = textwrap.dedent(paragraph).strip()
+        paragraph = textwrap.fill(paragraph)
+        paragraphs[i] = paragraph
+    document = '\n\n'.join(paragraphs)
+    return document
 
 
 class FancyPrint:
