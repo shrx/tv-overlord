@@ -3,6 +3,8 @@ import os
 import sys
 import textwrap
 import re
+from pprint import pprint as pp
+from collections import namedtuple
 
 
 def dict_factory(cursor, row):
@@ -47,6 +49,23 @@ class FancyPrint:
         sys.stdout.flush()
 
 
-if __name__ == '__main__':
+# http://stackoverflow.com/a/6397492
+def disk_info(path):
+    """Return disk usage associated with path."""
+    st = os.statvfs(path)
+    free = (st.f_bavail * st.f_frsize)
+    total = (st.f_blocks * st.f_frsize)
+    used = (st.f_blocks - st.f_bfree) * st.f_frsize
+    try:
+        percent = ret = (float(used) / total) * 100
+    except ZeroDivisionError:
+        percent = 0
+    # NB: the percentage is -5% than what shown by df due to
+    # reserved blocks that we are currently not considering:
+    # http://goo.gl/sWGbH
+    usage_ntuple = namedtuple('usage',  'total used free percent')
+    return usage_ntuple(total, used, free, round(percent, 1))
 
+
+if __name__ == '__main__':
     pass

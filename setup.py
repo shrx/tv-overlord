@@ -48,7 +48,6 @@ setup(
         'feedparser',
         'requests',
         'python-dateutil',
-        'psutil',
         'click',
         'appdirs',
     ],

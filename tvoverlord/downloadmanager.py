@@ -3,13 +3,13 @@ import os
 import datetime
 import subprocess
 import sys
-import psutil
 from pprint import pprint as pp
 import logging
 
 from tvoverlord.config import Config
 from tvoverlord.db import DB
 from tvoverlord.notify import Tell
+from tvoverlord.tvutil import disk_info
 
 
 class DownloadManager(DB):
@@ -102,7 +102,7 @@ class DownloadManager(DB):
         # check if there is space at the destination
         source_size = self.get_size(source)
         destination_dir = os.path.dirname(destination)
-        destination_free = psutil.disk_usage(destination_dir).free
+        destination_free = disk_info(destination_dir).free
         if source_size > destination_free:
             return False
 
