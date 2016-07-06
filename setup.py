@@ -49,7 +49,6 @@ setup(
         'requests',
         'python-dateutil',
         'click',
-        'appdirs',
     ],
     version=version,
     description='TV Overlord is a command line tool to download and manage TV shows from newsgroups or bittorent',
