@@ -43,9 +43,9 @@ class DownloadManager(DB):
     transfered to the destination.
     """
     def __init__(self, torrent_hash, path, filename, debug=False):
-        # set up logging
+        # set up logging and write to the config dir.
         if os.path.exists(Config.user_dir):
-            log_file = os.path.join(Config.user_dir, 'tv_download_manager.log')
+            log_file = os.path.join(Config.user_dir, 'tvol.log')
             logging.basicConfig(
                 format='%(asctime)s: %(levelname)s: %(message)s',
                 datefmt='%Y-%m-%d %H:%M:%S',
@@ -74,10 +74,17 @@ class DownloadManager(DB):
         if self.is_oneoff(torrent_hash):
             logging.info('Download is a one off, doing nothing.')
         else:
-            # if Config.clean_torrents:
-            source = self.get_show_file(filename)
+            if Config.clean_torrents:
+                source = self.get_show_file(filename)  # extract largest file from dir
+                pretty_filename, destination_dir = self.pretty_names(source, torrent_hash)
+            else:
+                source = filename
+                pretty_filename, destination_dir = self.pretty_names(source, torrent_hash)
+                # if not cleaning filenames, don't use the pretty name
+                # returned from self.pretty_names, instead use the
+                # basename of the downloaded file
+                pretty_filename = os.path.basename(source)
 
-            pretty_filename, destination_dir = self.pretty_names(source, torrent_hash)
             if not os.path.exists(Config.tv_dir):
                 logging.error('{} does not exist'.format(Config.tv_dir))
                 sys.exit()
@@ -99,29 +106,43 @@ class DownloadManager(DB):
                 sys.exit('Destination full')
 
     def copy(self, source, destination):
-        # check if there is space at the destination
+        """Copy files or dirs using the platform's copy tool"""
+
         source_size = self.get_size(source)
         destination_dir = os.path.dirname(destination)
         destination_free = disk_info(destination_dir)
         if source_size > destination_free:
             return False
 
-        """Copy files or dirs using the platform's copy tool"""
+        use_shell = False
+
         cmd = None
-        if Config.is_win:
-            cmd = ['xcopy', source, destination, '/K/O/X']
+        if Config.is_win and os.path.isfile(source):
+            # Windows needs the shell set to True to use the built in
+            # commands like copy.
+            use_shell = True
+            cmd = ['copy', source, destination, '/Y']
+
+        elif Config.is_win and os.path.isdir(source):
+            # /I to prevent xcopy asking if dest is a file or folder
+            destination = os.path.join(destination, '*')
+            cmd = ['xcopy', source, destination, '/E/S/Y']
+
         elif sys.platform.startswith(('darwin', 'linux')):
             cmd = ['cp', '-r', source, destination]
         else:
             click.echo('Unknown platform')
             sys.exit(1)
 
-        subprocess.call(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        subprocess.call(
+            cmd,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            shell=use_shell)
+
         return True
 
     def get_size(self, start_path):
-        # file: xcopy <source> <destination> #<-- no trailing \
-        # dir:  xcopy <source> <destination\source\> /E #<-- add trailing \
         if os.path.isfile(start_path):
             return os.path.getsize(start_path)
         elif os.path.isdir(start_path):

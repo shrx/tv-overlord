@@ -2,6 +2,7 @@
 
 import click
 import os
+import sys
 from pprint import pprint as pp
 from tvoverlord.downloadmanager import DownloadManager
 
@@ -34,20 +35,20 @@ def transmission(debug):
         torrent_hash = os.environ['TR_TORRENT_HASH']
         torrent_name = os.environ['TR_TORRENT_NAME']
     except KeyError:
-        print('Enviroment variables not set')
-        exit(1)
+        click.echo('Enviroment variables not set')
+        sys.exit(1)
 
     if debug:
-        print('torrent_hash:', torrent_hash)
-        print('torrent_dir:', torrent_dir)
-        print('torrent_name:', torrent_name)
+        click.echo('torrent_hash:', torrent_hash)
+        click.echo('torrent_dir:', torrent_dir)
+        click.echo('torrent_name:', torrent_name)
 
     DownloadManager(torrent_hash, torrent_dir,
                     torrent_name, debug=debug)
 
 
 @click.command(context_settings=CONTEXT_SETTINGS)
-@click.argument('torrent_hash', type=int)
+@click.argument('torrent_hash')
 @click.argument('torrent_name')
 @click.argument('torrent_dir')
 @click.option('--debug', is_flag=True, help='Output debug info')
@@ -63,9 +64,9 @@ def deluge(torrent_hash, torrent_name, torrent_dir, debug):
     """
 
     if debug:
-        print('torrent_hash:', torrent_hash)
-        print('torrent_dir:', torrent_dir)
-        print('torrent_name:', torrent_name)
+        click.echo('torrent_hash:', torrent_hash)
+        click.echo('torrent_dir:', torrent_dir)
+        click.echo('torrent_name:', torrent_name)
 
     DownloadManager(torrent_hash, torrent_dir,
                     torrent_name, debug=debug)

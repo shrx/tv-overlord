@@ -67,8 +67,9 @@ def disk_info(path):
     """Return disk usage associated with path."""
     if Config.is_win:
         free_bytes = ctypes.c_ulonglong(0)
-        ctypes.windll.kernel32.GetDiskFreeSpaceExW(ctypes.c_wchar_p(path), None, None, ctypes.pointer(free_bytes))
-        # return free_bytes.value / 1024 / 1024
+        ctypes.windll.kernel32.GetDiskFreeSpaceExW(
+            ctypes.c_wchar_p(path), None, None,
+            ctypes.pointer(free_bytes))
         return free_bytes.value
     else:
         st = os.statvfs(path)
