@@ -2,6 +2,7 @@ import json
 import datetime
 import urllib.parse
 from pprint import pprint as pp
+import click
 
 from tvoverlord.db import DB
 
@@ -57,8 +58,8 @@ class Tracking(DB):
         parsed_url = urllib.parse.urlparse(url)
         magnet_hash = urllib.parse.parse_qs(parsed_url.query)['xt']
         if len(magnet_hash) > 1:
-            print('multple hashes:')
-            print(magnet_hash)
+            click.echo('multple hashes:')
+            click.echo(magnet_hash)
 
         magnet_hash = magnet_hash[0].split(':')[-1]
 

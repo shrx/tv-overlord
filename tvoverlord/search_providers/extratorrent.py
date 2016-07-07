@@ -4,6 +4,7 @@ import urllib.request, urllib.parse, urllib.error
 from time import mktime
 from datetime import datetime
 from pprint import pprint as pp
+import click
 
 import feedparser
 
@@ -53,7 +54,7 @@ class Provider(object):
 
             url = '{}/rss.xml?type=search&cid={}&search=%s'.format(try_url, lookfor)
             full_url = url % encoded_search
-            # print('>', full_url)
+            # click.echo('>', full_url)
 
             parsed = feedparser.parse(full_url)
 

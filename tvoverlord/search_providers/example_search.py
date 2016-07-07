@@ -2,6 +2,7 @@ import urllib.request, urllib.parse, urllib.error
 from time import mktime
 from datetime import datetime
 from pprint import pprint as pp
+import click
 
 import feedparser
 
@@ -39,4 +40,4 @@ if __name__ == '__main__':
     # some simple tests
     p = Provider()
     results = p.search('game of thrones', season=6, episode=6)
-    print(len(results))
+    click.echo(len(results))

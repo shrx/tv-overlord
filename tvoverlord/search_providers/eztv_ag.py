@@ -2,6 +2,7 @@ import urllib.request, urllib.parse, urllib.error
 from bs4 import BeautifulSoup
 import requests
 from pprint import pprint as pp
+import click
 
 import concurrent.futures
 import socket
@@ -124,4 +125,4 @@ if __name__ == '__main__':
     # results = p.search('game of thrones', season=6, episode=6)
     # results = p.search('luther', season=1, episode=5)
     pp(results)
-    print('>>>len', len(results))
+    click.echo('>>>len', len(results))

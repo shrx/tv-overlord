@@ -4,12 +4,15 @@ Build a table to display data in a terminal.
 """
 
 import os
+import sys
 import string
 from collections import namedtuple
 from pprint import pprint as pp
 import click
 
+from tvoverlord.config import Config
 from tvoverlord.util import U
+from tvoverlord.tvutil import style
 
 
 class ConsoleTable:
@@ -37,17 +40,34 @@ class ConsoleTable:
             ]
           ]
         """
-        console_rows, console_columns = os.popen('stty size', 'r').read().split()
-        self.console_columns = int(console_columns)
-        self.colors = {
-            'title_fg': None,
-            'title_bg': 19,
-            'header_fg': None,
-            'header_bg': 17,
-            'body_fg': 'white',
-            'body_bg': None,
-            'bar': 19,
-        }
+
+        if Config.is_win:
+            self.colors = {
+                'title_fg': 'white',
+                'title_bg': 'magenta',
+                'header_fg': 'white',
+                'header_bg': 'blue',
+                'body_fg': 'white',
+                'body_bg': None,
+                'bar': 'magenta',
+                'hidef': 'green',
+                'warnfg': 'yellow',
+                'warnbg': 'black',
+            }
+        else:
+            self.colors = {
+                'title_fg': None,
+                'title_bg': 19,
+                'header_fg': None,
+                'header_bg': 17,
+                'body_fg': 'white',
+                'body_bg': None,
+                'bar': 19,
+                'hidef': 76,
+                'warnfg': 178,
+                'warnbg': 16,
+            }
+            
         self.display_count = 5
         self.is_postdownload = False
 
@@ -81,37 +101,37 @@ class ConsoleTable:
         self.colors = colors
 
     def generate(self):
-        title_bar = U.hi_color(
+        
+        title_bar = style(
             '|',
-            foreground=self.colors['bar'],
-            background=self.colors['header_bg']
-        )
-        bar = U.hi_color(
+            fg=self.colors['bar'],
+            bg=self.colors['header_bg'])
+        bar = style(
             '|',
-            foreground=self.colors['bar']
+            fg=self.colors['bar']
         )
 
         # TITLE --------------------------------------------
-        titletext = ('  ' + self.table.title.text).ljust(self.console_columns)
-        title = U.effects(['boldon'], U.hi_color(
-            titletext,
-            foreground=self.colors['title_fg'],
-            background=self.colors['title_bg'],
-        ))
-        print(title)
-
+        title = '  %s' % self.table.title.text
+        title = title.ljust(Config.console_columns)
+        title = style(title,
+                      bold=True,
+                      fg=self.colors['title_fg'],
+                      bg=self.colors['title_bg'])
+        click.echo(title)
+        
         # HEADER ROW ---------------------------------------
         header = self.table.header
-        header_row = [U.hi_color(' ',     # the number/letter column
-                                 background=self.colors['header_bg'],
-                                 foreground=self.colors['header_fg'])]
+        header_row = [style(' ', bg=self.colors['header_bg'],
+                                 fg=self.colors['header_fg'])]
         NUMBER_SPACE = 1
         BAR_COUNT = len(header.widths)
-        flex_width = self.console_columns - sum(header.widths) - NUMBER_SPACE - BAR_COUNT
+        flex_width = (Config.console_columns - sum(header.widths) -
+                      NUMBER_SPACE - BAR_COUNT)
 
-        for i, title, width, alignment in zip(list(range(len(header.widths))),
-                                              header.titles, header.widths,
-                                              header.alignments):
+        for title, width, alignment in zip(header.titles,
+                                           header.widths,
+                                           header.alignments):
             if width == 0:
                 width = flex_width
             if alignment == '<':
@@ -124,15 +144,15 @@ class ConsoleTable:
                 title = title[:width].ljust(width)
 
             header_row.append(
-                U.hi_color(
-                    title,
-                    background=self.colors['header_bg'],
-                    foreground=self.colors['header_fg']
+                style(title,
+                      bg=self.colors['header_bg'],
+                      fg=self.colors['header_fg']
                 )
             )
+            
         header_row = title_bar.join(header_row)
 
-        print(header_row)
+        click.echo(header_row)
 
         # BODY ROWS -----------------------------------------
 
@@ -145,8 +165,8 @@ class ConsoleTable:
 
         self.table.body = self.table.body[:self.display_count]
         for row, counter in zip(self.table.body, key):
-            # look through the title cell to see if any have 720 or 1080 in the
-            # string and mark this row as high def if so.
+            # look through the title cell to see if any have 720 or
+            # 1080 in the string and mark this row as high def.
             is_hidef = False
             if '720p' in row[0] or '1080p' in row[0]:
                 is_hidef = True
@@ -171,10 +191,10 @@ class ConsoleTable:
 
                 # if hi def, set the foreground to green
                 if is_hidef:
-                    row_item = U.hi_color(row_item, foreground=76)
+                    row_item = style(row_item, fg=self.colors['hidef'])
 
                 row_arr.append(row_item)
-            print(bar.join(row_arr))
+            click.echo(bar.join(row_arr))
 
         # USER INPUT ---------------------------------------
         choice = False
@@ -188,11 +208,28 @@ class ConsoleTable:
     def ask(self, key):
         click.echo('\nLetter, [s]kip, skip [r]est of show, [q]uit, [m]ark as watched, or [enter] for #1: ', nl=False)
         get = click.getchar()
+        # On Windows, getchar returns a byte string which looks like a bug
+        # https://github.com/pallets/click/issues/537
+        if Config.is_win:
+            try:
+                get = get.decode('utf-8')
+            except UnicodeDecodeError:
+                # On windows, if a non character key (like an arrow
+                # key) is pressed, there looks like there are two key
+                # press events which causes a second loop through this
+                # function.  In the case of a right arrow key, the
+                # second key is an 'M' which would cause an
+                # inadvertent selection if there was an 'M' option.
+                # The non char key causes a UnicodeDecodeError so
+                # we'll stop here.
+                click.echo('Invalid key')
+                sys.exit()
+
         click.echo(get)
         choice = False
 
         if get == 'q':  # quit
-            exit()
+            sys.exit()
         elif get == 's':  # skip
             choice = 'skip'
         elif get == 'r':  # skip rest of series
@@ -209,18 +246,35 @@ class ConsoleTable:
         elif get == '[enter]':  # default choice: #1
             choice = self.table.body[0][-1:][0]
         elif get not in key:
-            self.display_error('Invalid choice: %s, try again:' % get)
+            self.display_error('Invalid choice, try again:')
 
         return choice
 
     def ask_postdownload(self, key):
-        click.echo('\nLetter or [q]uit: ')
+        click.echo('\nLetter or [q]uit: ', nl=False)
         get = click.getchar()
+        # On Windows, getchar returns a byte string which looks like a bug
+        # https://github.com/pallets/click/issues/537
+        if Config.is_win:
+            try:
+                get = get.decode('utf-8')
+            except UnicodeDecodeError:
+                # On windows, if a non character key (like an arrow
+                # key) is pressed, there looks like there are two key
+                # press events which causes a second loop through this
+                # function.  In the case of a right arrow key, the
+                # second key is an 'M' which would cause an
+                # inadvertent selection if there was an 'M' option.
+                # The non char key causes a UnicodeDecodeError so
+                # we'll stop here.
+                click.echo('Invalid key')
+                sys.exit()
+
         click.echo(get)
         choice = False
 
         if get == 'q':
-            exit()
+            sys.exit()
         elif get in key:  # number/letter chosen
             choice_num = key.index(get)
             if choice_num not in list(range(len(self.table.body))):
@@ -229,13 +283,17 @@ class ConsoleTable:
             else:
                 choice = self.table.body[choice_num][-1:][0]
         elif get not in key:
-            self.display_error('Invalid choice: %s, try again:' % get)
+            self.display_error('Invalid choice, try again:')
 
         return choice
 
     def display_error(self, message):
-        print()
-        print(U.hi_color('[!]', 16, 178), U.hi_color(message, 178))
+        click.echo()
+        click.echo('%s %s' % (style('[!]',
+                                    fg=self.colors['warnbg'], 
+                                    bg=self.colors['warnfg']),
+                              style(message, 
+                                    fg=self.colors['warnfg'])))
 
 
 if __name__ == '__main__':

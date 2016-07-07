@@ -129,7 +129,7 @@ class U:
         # accept a range from 16 to 231
         if foreground and (foreground < 16 or foreground > 231):
             U.error('number less than 16 or more than 231')
-        if background and (background < 16 or background > 2310):
+        if background and (background < 16 or background > 231):
             U.error('number less than 16 or more than 231')
 
         foreground_pat = background_pat = ''
@@ -190,6 +190,8 @@ class U:
 
 if __name__ == '__main__':
 
+    import click
+
     line = "-" * 50
 
     print("\nTesting U.snip -- U.snip (<text>, <length>)\n", line)
@@ -197,7 +199,7 @@ if __name__ == '__main__':
     seq = "abcdefghijklmnopqrstuvwxyz"
     for j in (13, 14):
         for i in range(10, 20):
-            print("%s<" % (U.snip(seq[0:i], j).ljust(j)))
+            click.echo("%s<" % (U.snip(seq[0:i], j).ljust(j)))
 
     print('\nTesting U.hi_color() -- U.hi_color (<text>, <foreground>, <background>)\n', line)
 

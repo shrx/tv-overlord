@@ -4,6 +4,7 @@ import urllib.request, urllib.parse, urllib.error
 from time import mktime
 from datetime import datetime
 from pprint import pprint as pp
+import click
 
 import feedparser
 
@@ -41,7 +42,7 @@ class Provider(object):
             url = '%s/search/all/{}/c/d/1/?fmt=rss' % (try_url)
             full_url = url.format(encoded_search)
             self.url = full_url
-            #print('>', full_url)
+            #click.echo('>', full_url)
 
             parsed = feedparser.parse(full_url)
             if len(parsed['entries']) == 0:

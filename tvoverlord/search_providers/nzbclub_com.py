@@ -2,9 +2,11 @@
 
 import urllib.request, urllib.parse, urllib.error
 import os
+import sys
 from time import mktime
 from datetime import datetime
 from pprint import pprint as pp
+import click
 
 import feedparser
 
@@ -112,8 +114,8 @@ class Provider(object):
         """
 
         if not os.path.isdir(destination):
-            print('\n%s does not exist' % destination)
-            exit()
+            click.echo('\n%s does not exist' % destination)
+            sys.exit()
 
         href = chosen_show
         filename = href.split('/')[-1]

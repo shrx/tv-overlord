@@ -4,6 +4,7 @@ import re
 
 from bs4 import BeautifulSoup
 import requests
+import click
 
 
 class Provider (object):
@@ -45,13 +46,13 @@ class Provider (object):
         for try_url in self.provider_urls:
             urls = '%s/search/ ' % try_url
             for search in searches:
-                # print('>>>', search)
+                # click.echo('>>>', search)
                 pretty_name = search_string
                 search_string = urllib.parse.quote(search)
                 url = '%s/search/%s/0/7/0' % (try_url, search_string)
                 self.url = self.url + ' ' + url
                 urls += '%s/0/7/0 ' % search_string
-                #print('>', url)
+                #click.echo('>', url)
                 try:
                     r = requests.get(url)
                 except requests.exceptions.ConnectionError:
@@ -104,18 +105,18 @@ if __name__ == '__main__':
 
     p = Provider()
     # x = timeit.timeit("p.search('game of thrones', season=6, episode=6)", globals=globals())
-    # print(x)
+    # click.echo(x)
 
     # results = p.search('game of thrones')
     results = p.search('game of thrones', season=6, episode=6)
     # time: 0:04.74
-    print('>>>len', len(results))
+    click.echo('>>>len', len(results))
 
     results = p.search('luther', season=1, episode=5)
-    print('>>>len', len(results))
+    click.echo('>>>len', len(results))
 
 
     results = p.search('adf asdf asdf asdf asdf asdf asd f', season=1, episode=5)
-    print('>>>len', len(results))
+    click.echo('>>>len', len(results))
 
     pass

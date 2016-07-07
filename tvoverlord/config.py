@@ -1,4 +1,6 @@
 import os
+import sys
+import platform
 import configparser
 import shutil
 import sqlite3
@@ -11,6 +13,10 @@ class Config:
     def __init__(self):
         pass
 
+    is_win = False
+    if platform.system() == 'Windows':
+        is_win = True
+
     thetvdb_apikey = 'DFDB0A667C844513'
     use_cache = True
 
@@ -19,6 +25,13 @@ class Config:
 
     db_file = '%s/%s' % (user_dir, 'shows.sqlite3')
     user_config = '%s/%s' % (user_dir, config_filename)
+
+    console_columns, console_rows = click.get_terminal_size()
+    # On windows, columns are 1 char to wide, so we'll make all
+    # output on all platforms 1 char less.
+    console_columns = int(console_columns)
+    if is_win:
+        console_columns = console_columns - 1
 
     if not os.path.exists(user_dir):
         # create dir and config.ini
@@ -60,9 +73,10 @@ class Config:
         curs.executescript(sql)
         conn.commit()
         conn.close()
-        print('The database and config.ini have been created in "{}"'.format(user_dir))
-        print('Run "tvol --help", or "tvol addnew \'show name\'" to add shows.')
-        # exit()  # since there is nothing in the db
+        click.echo('The database and config.ini have been created in:')
+        click.echo(user_dir)
+        click.echo('Run "tvol --help", or "tvol addnew \'show name\'" to add shows.')
+        click.echo()
 
     cfg = configparser.ConfigParser(allow_no_value=True)
     cfg.read(user_config)
@@ -82,5 +96,5 @@ class Config:
 
 if __name__ == '__main__':
     c = Config()
-    print(c.staging)
+    click.echo(c.staging)
     pass

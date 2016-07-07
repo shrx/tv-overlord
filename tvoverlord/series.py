@@ -1,5 +1,4 @@
 import datetime
-import os
 import sqlite3
 import sys
 import textwrap
@@ -59,7 +58,7 @@ class Series:
         if show_type == 'nondb':
             self.search_provider = Search()
 
-        self.console_rows, self.console_columns = os.popen('stty size', 'r').read().split()
+        self.console_columns = Config.console_columns
 
         self.db = DB()
 
@@ -112,23 +111,22 @@ class Series:
             series = tv[self.db_name]
             self.show_exists = True
         except KeyError:
-            print('TheTVDB is down or very slow, try again.')
-            exit()
+            click.echo('TheTVDB is down or very slow, try again.')
+            sys.exit()
         except tvdb_api.tvdb_shownotfound:
-            print('Show not found: %s' % self.db_name)
+            click.echo('Show not found: %s' % self.db_name)
             self.show_exists = False
-            # exit()
             return
         except tvdb_api.tvdb_error as e_msg:
-            print('\n')
-            print('Error: %s' % self.db_name)
-            print('-----------------------------')
-            print(e_msg)
+            click.echo()
+            click.echo('Error: %s' % self.db_name)
+            click.echo('-----------------------------')
+            click.echo(e_msg)
             return
         except UnboundLocalError as e:
-            print('+++++++++++++++++++++++++')
-            print(e)
-            print('+++++++++++++++++++++++++')
+            click.echo('+++++++++++++++++++++++++')
+            click.echo(e)
+            click.echo('+++++++++++++++++++++++++')
 
         for i in series.data:
             setattr(self, i, series.data[i])
@@ -164,7 +162,7 @@ class Series:
                     episode=episode['episode']
                 )
             else:
-                print('"%s" is listed in TheTVDB, but not found in any search engines' % (
+                click.echo('"%s" is listed in TheTVDB, but not found in any search engines' % (
                     search_title))
 
             if showid == 'skip_rest':
@@ -198,7 +196,7 @@ class Series:
         missing = self.missing
         if len(missing) == 0:
             return False
-        ret = '%s' % (U.effects(['boldon', 'greenf'], self.db_name))
+        ret = U.effects(['boldon', 'greenf'], self.db_name)
         ret += ' - %s, %s' % (self.airs_dayofweek, self.airs_time)
         ret += '\n'
         indent = '    '
@@ -219,26 +217,30 @@ class Series:
         indent = '  '
 
         if not self.show_exists:
-            exit()
+            sys.exit()
 
-        print()
-        print(self.seriesname)
-        print('-' * len(self.seriesname))
+        click.echo()
+        click.echo(self.seriesname)
+        click.echo('-' * len(self.seriesname))
         if self.overview:
-            print(textwrap.fill(self.overview, initial_indent=indent,
+            click.echo(textwrap.fill(self.overview, initial_indent=indent,
                                 subsequent_indent=indent))
         else:
-            print('No description provided.')
-        print()
-        print('%sFirst aired: %s' % (indent, self.firstaired))
-        print('%sStatus: %s' % (indent, self.status))
-        print()
+            click.echo('No description provided.')
+        click.echo()
+        click.echo('%sFirst aired: %s' % (indent, self.firstaired))
+        click.echo('%sStatus: %s' % (indent, self.status))
+        click.echo()
         click.echo('Is this the correct show? [y/n]', nl=False)
         correct = click.getchar(echo=False)
+        correct = correct.decode('utf-8')
         click.echo(' %s' % correct)
 
-        if correct == 'y':
+        if str(correct) == 'y':
             self._add_new_db()
+            click.echo('Show added')
+        else:
+            click.echo('Not added')
 
     def non_db(self, search_str, display_count):
         self.db_name = search_str
@@ -250,7 +252,7 @@ class Series:
             if not show_data:
                 return
         except SearchError:
-            print('No matches')
+            click.echo('No matches')
             return
         self._download(show_data)
 
@@ -313,55 +315,24 @@ class Series:
         return missing
 
     def set_next_episode(self, next_date):
-        # print '>>>', self.series['seriesname'], self.id, next_date, '<<<'
-        # exit()
-
-        # sql = 'UPDATE shows SET next_episode=:next_date WHERE thetvdb_series_id=:tvdb_id'
         sql = 'UPDATE shows SET next_episode=:next_date WHERE name=:show_name'
         conn = sqlite3.connect(Config.db_file)
         curs = conn.cursor()
-        # values = {'next_date': next_date.isoformat(), 'tvdb_id':self.id}
         values = {'next_date': next_date.isoformat(), 'show_name': self.db_name}
-        # print values
-        # return
-        # print '----', values
         curs.execute(sql, values)
         conn.commit()
         conn.close()
 
     def _ask(self, shows, season, episode, display_count):
-        print()
-        color = {
-            'title_fg': None,
-            'title_bg': 19,
-            'header_fg': None,
-            'header_bg': 17,
-            'body_fg': 'white',
-            'body_bg': None,
-            'bar': 19,
-            'hi_def': 70,
-        }
+        click.echo()
         if season and episode:
-            show_title = '%s %s ' % (self.db_name, self.se_ep(season, episode))
-            url = ' %s' % (shows[0][0][1])
+            show_title = '%s %s' % (self.db_name, self.se_ep(season, episode))
         else:
-            show_title = '%s  ' % shows[0][0][0]
-            url = shows[0][0][1]
-
-        show_title_color = U.hi_color(show_title, foreground=color['title_fg'],
-                                      background=color['title_bg'])
-        show_title_color = U.effects(['boldon'], show_title_color)
-
-        space_before_title = 2
-        url = url.ljust(int(self.console_columns) - len(show_title) - space_before_title)
-        url = U.hi_color(url, foreground=27, background=color['title_bg'])
-
-        full_title = '%s%s' % (show_title_color, url)
+            show_title = '%s' % shows[0][0][0]
 
         tbl = ConsoleTable(shows)
-        tbl.set_title(full_title)
+        tbl.set_title(show_title)
         tbl.set_count(display_count)
-        tbl.set_colors(color)
         show_to_dl = tbl.generate()
 
         # save data to Tracking
@@ -372,17 +343,10 @@ class Series:
         return show_to_dl
 
     def _download(self, show_data):
-        msg = U.hi_color('Downloading...', foreground=16, background=184)
-        sys.stdout.write(msg)
-        sys.stdout.flush()
-
-        filename = self.search_provider.download(
-            chosen_show=show_data, destination=Config.staging,
+        self.search_provider.download(
+            chosen_show=show_data,
+            destination=Config.staging,
             search_type=Config.search_type)
-
-        backspace = '\b' * len(msg)
-        done = U.hi_color(filename.ljust(len(msg)), foreground=34)
-        print('%s%s' % (backspace, done))
 
     def set_inactive(self):
         sql = '''UPDATE shows
@@ -414,8 +378,8 @@ class Series:
             sql = '''UPDATE shows SET status="active"
                      WHERE thetvdb_series_id=:thetvdb_id;'''
             values = {'thetvdb_id': self.id}
-            print()
-            print('%s is already in the db. Its status is now set to "active"' % self.seriesname)
+            click.echo()
+            click.echo('%s is already in the db. Its status is now set to "active"' % self.seriesname)
         else:
             sql = '''
                 INSERT INTO shows (

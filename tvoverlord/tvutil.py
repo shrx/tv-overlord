@@ -1,10 +1,25 @@
 #!/usr/bin/env python
 import os
 import sys
+import ctypes
 import textwrap
 import re
+import click
 from pprint import pprint as pp
 from collections import namedtuple
+
+from tvoverlord.config import Config
+from tvoverlord.util import U
+
+
+def style(text, fg=None, bg=None, bold=None):
+    if Config.is_win:
+        fancy = click.style(text, fg=fg, bg=bg, bold=bold)
+    else:
+        fancy = U.hi_color(text, foreground=fg, background=bg)
+        if bold:
+            fancy = U.effects(['boldon'], fancy)
+    return fancy
 
 
 def dict_factory(cursor, row):
@@ -28,17 +43,15 @@ def format_paragraphs(msg):
 
 class FancyPrint:
     def __init__(self):
-        console_rows, console_columns = os.popen('stty size', 'r').read().split()
-        self.bs = '\b' * int(console_columns)
-        self.console_columns = int(console_columns)
+        self.bs = '\b' * Config.console_columns
 
     def standard_print(self, msg):
-        msg = '\n'.join([i.ljust(self.console_columns) for i in msg.split('\n')])
+        msg = '\n'.join([i.ljust(Config.console_columns) for i in msg.split('\n')])
         msg = msg + '\n'
         self._back_print(msg)
 
     def done(self, msg=''):
-        msg = msg.ljust(self.console_columns)
+        msg = msg.ljust(Config.console_columns)
         sys.stdout.write('\033[F')
         self._back_print(msg)
 
@@ -52,19 +65,26 @@ class FancyPrint:
 # http://stackoverflow.com/a/6397492
 def disk_info(path):
     """Return disk usage associated with path."""
-    st = os.statvfs(path)
-    free = (st.f_bavail * st.f_frsize)
-    total = (st.f_blocks * st.f_frsize)
-    used = (st.f_blocks - st.f_bfree) * st.f_frsize
-    try:
-        percent = ret = (float(used) / total) * 100
-    except ZeroDivisionError:
-        percent = 0
-    # NB: the percentage is -5% than what shown by df due to
-    # reserved blocks that we are currently not considering:
-    # http://goo.gl/sWGbH
-    usage_ntuple = namedtuple('usage',  'total used free percent')
-    return usage_ntuple(total, used, free, round(percent, 1))
+    if Config.is_win:
+        free_bytes = ctypes.c_ulonglong(0)
+        ctypes.windll.kernel32.GetDiskFreeSpaceExW(ctypes.c_wchar_p(path), None, None, ctypes.pointer(free_bytes))
+        # return free_bytes.value / 1024 / 1024
+        return free_bytes.value
+    else:
+        st = os.statvfs(path)
+        free = (st.f_bavail * st.f_frsize)
+        total = (st.f_blocks * st.f_frsize)
+        used = (st.f_blocks - st.f_bfree) * st.f_frsize
+        try:
+            percent = ret = (float(used) / total) * 100
+        except ZeroDivisionError:
+            percent = 0
+        # NB: the percentage is -5% than what shown by df due to
+        # reserved blocks that we are currently not considering:
+        # http://goo.gl/sWGbH
+        usage_ntuple = namedtuple('usage',  'total used free percent')
+        # return usage_ntuple(total, used, free, round(percent, 1))
+        return free
 
 
 if __name__ == '__main__':

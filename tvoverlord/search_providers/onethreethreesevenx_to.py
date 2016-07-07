@@ -3,6 +3,7 @@ import urllib.request, urllib.parse, urllib.error
 from bs4 import BeautifulSoup
 import requests
 from pprint import pprint as pp
+import click
 
 import concurrent.futures
 import socket
@@ -43,10 +44,13 @@ class Provider():
 
                 divs = li.find_all('div')
 
-                detail_url = divs[0].strong.a['href']
-                title = divs[0].get_text(strip=True)
-                seeds = divs[1].get_text(strip=True)
-                size = divs[3].get_text(strip=True)
+                try:
+                    detail_url = divs[0].strong.a['href']
+                    title = divs[0].get_text(strip=True)
+                    seeds = divs[1].get_text(strip=True)
+                    size = divs[3].get_text(strip=True)
+                except IndexError:
+                    continue
 
                 search_data.append([detail_url, title, seeds, size])
 
@@ -113,4 +117,4 @@ if __name__ == '__main__':
     # results = p.search('luther', season=1, episode=5)
     # results = p.search('adf asdf asdf asdf asdf asdf asd f', season=1, episode=5)
     # time: 0:04.74
-    print('>>>len', len(results))
+    click.echo('>>>len', len(results))

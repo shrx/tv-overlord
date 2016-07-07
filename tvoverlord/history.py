@@ -4,6 +4,7 @@ import os
 import datetime
 from dateutil import parser
 from pprint import pprint as pp
+import click
 
 from tvoverlord.config import Config
 from tvoverlord.db import DB
@@ -80,7 +81,7 @@ class History:
                       'oneoff': oneoff,
                       'complete': complete}
 
-            print(line.format(**fields))
+            click.echo(line.format(**fields))
 
     def copy(self):
         title = 'Copy files to %s' % Config.tv_dir
@@ -106,7 +107,7 @@ class History:
         if download:
             data = [
                 [
-                    'title',
+                    title,
                     ['Date downloaded', 'Show name, episode', 'Magnet link'],
                     [16, 25, 0],
                     ['<', '<', '<']
@@ -122,7 +123,7 @@ class History:
         else:
             data = [
                 [
-                    'title',
+                    title,
                     ['Date downloaded', 'Show name, episode', 'Local file'],
                     [16, 25, 0],
                     ['<', '<', '<']
@@ -138,7 +139,6 @@ class History:
         data.append(records)
 
         tbl = ConsoleTable(data)
-        tbl.set_title(title)
         tbl.set_count(None)
         tbl.is_postdownload = True
         torrent_hash = tbl.generate()

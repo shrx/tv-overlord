@@ -70,7 +70,7 @@ class Location:
 if __name__ == '__main__':
     from config import Config
     l = Location()
-    print('config ip:', Config.ip)
-    print('my config ip:', Config.ip)
-    print('my real ip:  ', l.ip)
-    print('match?', l.ips_match(Config.ip))
+    click.echo('config ip:', Config.ip)
+    click.echo('my config ip:', Config.ip)
+    click.echo('my real ip:  ', l.ip)
+    click.echo('match?', l.ips_match(Config.ip))

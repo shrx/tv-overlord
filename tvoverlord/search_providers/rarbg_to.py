@@ -2,6 +2,7 @@ import urllib.request, urllib.parse, urllib.error
 import requests
 from pprint import pprint as pp
 import time
+import click
 from tvoverlord.util import U
 
 
@@ -42,7 +43,7 @@ class Provider():
             search_tpl = '{}?mode=search&search_string={}&token={}&format=json_extended&sort=seeders&limit=100&app_id=tvoverlord'
             search_string = urllib.parse.quote(search)
             url = search_tpl.format(self.baseurl, search_string, token)
-            # print(url)
+            # click.echo(url)
             self.url = self.url + ' ' + url
 
             try:
@@ -100,5 +101,5 @@ if __name__ == '__main__':
     # results = p.search('luther', season=1, episode=5)
     results = p.search('shades of blue', season=1, episode=5)
     # results = p.search('adf asdf asdf asdf asdf asd f', season=1, episode=5)
-    # print('>>>len', len(results))
+    # click.echo('>>>len', len(results))
     pp(results)

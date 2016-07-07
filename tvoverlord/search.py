@@ -7,8 +7,10 @@ from pprint import pprint as pp
 import socket
 # from urllib.parse import urlparse
 import urllib
+import click
 
-from tvoverlord.util import U
+from tvoverlord.tvutil import style
+from tvoverlord.config import Config
 
 # torrent search engings
 from tvoverlord.search_providers import extratorrent
@@ -45,7 +47,7 @@ class Search(object):
         search_results = search.search(search_string, season, episode)
 
         ## for info about each search
-        # print(search.name, len(search_results))
+        # click.echo(search.name, len(search_results))
 
         return search_results
 
@@ -75,7 +77,10 @@ class Search(object):
         self.search_type = search_type
 
         msg = 'Searching for: {0:s}...'.format(search_string)
-        msg = U.hi_color(msg, foreground=16, background=184)
+        if Config.is_win:
+            msg = style(msg, fg='black', bg='yellow')
+        else:
+            msg = style(msg, fg=16, bg=184)
         sys.stdout.write(msg)
         sys.stdout.flush()
         backspace = '\b' * len(msg)
@@ -121,9 +126,9 @@ class Search(object):
             # Remove torrents with 0 seeds
             #for i, episode in enumerate(episodes):
             #    seeds = int(episode[3])
-            #    print(episode[0])
+            #    click.echo(episode[0])
             #    if not seeds:
-            #        print('    ', seeds, episode[0])
+            #        click.echo('    ', seeds, episode[0])
             #        del episodes[i]
 
             # remove duplicates since different sites might have the same torrent
@@ -146,7 +151,7 @@ class Search(object):
                 else:
                     hashes.append(torrent_hash)
 
-        print('%s%s' % (backspace, overwrite), end=' ')
+        click.echo('%s%s' % (backspace, overwrite), nl=False)
 
         # return search_results
         return [header] + [episodes]
@@ -174,6 +179,8 @@ class Search(object):
                     sys.exit('\nYou do not have a bittorent client installed')
             elif platform.system() == 'Darwin':
                 subprocess.Popen(["open", "--background", chosen_show])
+            elif platform.system() == 'Windows':
+                os.startfile(chosen_show)
             else:
                 unknown_system = platform.platform()
                 sys.exit('\nUnknown system:', unknown_system)
@@ -187,7 +194,7 @@ class Search(object):
                     "S%sE%s" % (self.season.rjust(2, '0'),
                                 self.episode.rjust(2, '0'))
                 )
-                print(final_name)
+                click.echo(final_name)
             downloader = self.engine.Provider()
             downloaded_filename = downloader.download(
                 chosen_show, destination, final_name)

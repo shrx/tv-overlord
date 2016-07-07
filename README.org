@@ -32,7 +32,7 @@ or a pull request.
 
 **** Requirements
 
-Python3 on Linux or OSX
+Python3 on Linux, OSX, or Windows
 
 
 ** Features
@@ -50,10 +50,6 @@ Python3 on Linux or OSX
 
 
 ** Install
-
-TV Overlord has been tested on Linux and Mac.  It would probably not
-be to hard to make it work on windows, and if anyone is interested, I
-can take a look at making it work or alternatively send me a pull request.
 
 TV Overlord is a python 3 application and can be installed via pip3.
 If this method is used, all dependencies will be taken care of.
@@ -112,8 +108,9 @@ TV Overlord looks for the database and =config.ini= in the appropriate
 directory for your platform.  When tvoverlord is first run, it will
 create a tvoverlord directory there.
 
-  + OSX will use ~/Library/Application Support/tvoverlord
-  + Linux will use ~/.config/tvoverlord
+  + OSX :: ~/Library/Application Support/tvoverlord
+  + Linux :: ~/.config/tvoverlord
+  + Windows :: C:\Users\<USERNAME>\AppData\Roaming\tvoverlord
 
 *** Configuration file sections
 

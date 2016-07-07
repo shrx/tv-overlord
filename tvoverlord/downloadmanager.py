@@ -44,8 +44,8 @@ class DownloadManager(DB):
     """
     def __init__(self, torrent_hash, path, filename, debug=False):
         # set up logging
-        if os.path.exists(path):
-            log_file = os.path.join(path, 'tv_download_manager.log')
+        if os.path.exists(Config.user_dir):
+            log_file = os.path.join(Config.user_dir, 'tv_download_manager.log')
             logging.basicConfig(
                 format='%(asctime)s: %(levelname)s: %(message)s',
                 datefmt='%Y-%m-%d %H:%M:%S',
@@ -74,13 +74,13 @@ class DownloadManager(DB):
         if self.is_oneoff(torrent_hash):
             logging.info('Download is a one off, doing nothing.')
         else:
-            if Config.clean_torrents:
-                source = self.get_show_file(filename)
+            # if Config.clean_torrents:
+            source = self.get_show_file(filename)
 
             pretty_filename, destination_dir = self.pretty_names(source, torrent_hash)
             if not os.path.exists(Config.tv_dir):
                 logging.error('{} does not exist'.format(Config.tv_dir))
-                exit()
+                sys.exit()
             destination_dir = os.path.join(Config.tv_dir, destination_dir)
             if not os.path.exists(destination_dir):
                 os.mkdir(destination_dir)
@@ -102,21 +102,26 @@ class DownloadManager(DB):
         # check if there is space at the destination
         source_size = self.get_size(source)
         destination_dir = os.path.dirname(destination)
-        destination_free = disk_info(destination_dir).free
+        destination_free = disk_info(destination_dir)
         if source_size > destination_free:
             return False
 
         """Copy files or dirs using the platform's copy tool"""
         cmd = None
-        if sys.platform.startswith(('darwin', 'linux')):
-            cmd = ['cp', '-r', source, destination]
-        elif sys.platform.startswith('win'):
+        if Config.is_win:
             cmd = ['xcopy', source, destination, '/K/O/X']
+        elif sys.platform.startswith(('darwin', 'linux')):
+            cmd = ['cp', '-r', source, destination]
+        else:
+            click.echo('Unknown platform')
+            sys.exit(1)
 
         subprocess.call(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         return True
 
     def get_size(self, start_path):
+        # file: xcopy <source> <destination> #<-- no trailing \
+        # dir:  xcopy <source> <destination\source\> /E #<-- add trailing \
         if os.path.isfile(start_path):
             return os.path.getsize(start_path)
         elif os.path.isdir(start_path):

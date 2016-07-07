@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 
 import datetime
-import os
 import sys
 import sqlite3
 import textwrap
@@ -17,9 +16,9 @@ from tvoverlord.tvutil import FancyPrint, dict_factory
 from tvoverlord.util import U
 from tvoverlord.location import Location
 from tvoverlord.history import History
-from tvoverlord.downloadmanager import DownloadManager
+from tvoverlord.tvutil import style
 
-__version__ = '0.9.23'
+__version__ = '0.9.24'
 
 
 def edit_db(search_str):
@@ -32,13 +31,13 @@ def edit_db(search_str):
     row = curs.fetchone()
 
     if not row:
-        print('"%s" not found' % search_str)
-        exit()
+        click.echo('"%s" not found' % search_str)
+        sys.exit()
 
     is_error = False
 
-    print('While editing a field, hit <enter> to leave it unchanged.')
-    print('Type "<ctrl> c" to cancel all edits.\n')
+    click.echo('While editing a field, hit <enter> to leave it unchanged.')
+    click.echo('Type "<ctrl> c" to cancel all edits.\n')
     try:
         new_name = input('Name: (%s) ' % (row['name']))
         if not new_name:
@@ -60,26 +59,26 @@ def edit_db(search_str):
         if not new_status:
             new_status = row['status']
 
-        print()
+        click.echo()
 
     except KeyboardInterrupt:
-        print('\nDatabase edit canceled.')
-        exit()
+        click.echo('\nDatabase edit canceled.')
+        sys.exit()
 
     if not new_season.isdigit():
-        print('Error: Season must be a number')
+        click.echo('Error: Season must be a number')
         is_error = True
 
     if not new_episode.isdigit():
-        print('Error: Episode must be a number')
+        click.echo('Error: Episode must be a number')
         is_error = True
 
     if new_status not in ['active', 'inactive']:
-        print('Error: Status must be either "active" or "inactive"')
+        click.echo('Error: Status must be either "active" or "inactive"')
         is_error = True
 
     if is_error:
-        exit()
+        sys.exit()
 
     sql = '''UPDATE shows SET name=:name, season=:season,
         episode=:episode, status=:status, search_engine_name=:search_engine_name
@@ -91,7 +90,7 @@ def edit_db(search_str):
 
     curs.execute(sql, row_values)
 
-    print('Database updated')
+    click.echo('Database updated')
 
     conn.commit()
     conn.close()
@@ -156,6 +155,12 @@ def info(show_name, show_all, sort_by_next,
         show_links = True
         filter_name = show_name
 
+    if Config.is_win:
+        colors = {'links': 'blue', 'ended': 'red',
+                  'last': 'cyan', 'future': 'green'}
+    else:
+        colors = {'links': 20, 'ended': 195, 'last': 48, 'future': 22}
+
     all_shows = AllSeries(name_filter=filter_name)
     for series in all_shows:
         title = series.db_name
@@ -167,7 +172,7 @@ def info(show_name, show_all, sort_by_next,
             continue
 
         if series.status == 'Ended':
-            status = U.hi_color(series.status, foreground=196)
+            status = style(series.status, fg=colors['ended'])
         else:
             status = ''
 
@@ -176,13 +181,13 @@ def info(show_name, show_all, sort_by_next,
             str(series.db_current_season).rjust(2, '0'),
             str(series.db_last_episode).rjust(2, '0'),
         )
-        se = U.hi_color(se, foreground=48)
+        se = style(se, fg=colors['last'])
 
         imdb_url = thetvdb_url = ''
         if show_links:
-            imdb_url = U.hi_color('\n    IMDB.com:    http://imdb.com/title/%s' % series.imdb_id, foreground=20)
-            thetvdb_url = U.hi_color('\n    TheTVDB.com: http://thetvdb.com/?tab=series&id=%s' % series.id,
-                                     foreground=20)
+            imdb_url = style('\n    IMDB.com:    http://imdb.com/title/%s' % series.imdb_id, fg=colors['links'])
+            thetvdb_url = style('\n    TheTVDB.com: http://thetvdb.com/?tab=series&id=%s' % series.id,
+                                     fg=colors['links'])
 
         if synopsis and series.overview:
             paragraph = series.overview
@@ -218,7 +223,7 @@ def info(show_name, show_all, sort_by_next,
 
                 future_date = date_parser.parse(b_date)
                 diff = future_date - today
-                fancy_date = future_date.strftime('%b %-d')
+                fancy_date = future_date.strftime('%b %d')
                 if broadcast_date >= today:
                     episodes_list.append('S%sE%s, %s (%s)' % (
                         series.series[i][j]['seasonnumber'].rjust(2, '0'),
@@ -239,7 +244,7 @@ def info(show_name, show_all, sort_by_next,
                 indent = '    '
                 episode_list = 'Future episodes: ' + ' - '.join(episodes_list)
                 episodes = textwrap.fill(
-                    U.hi_color(episode_list, foreground=22),
+                    style(episode_list, fg=colors['future']),
                     initial_indent=indent,
                     subsequent_indent=indent
                 )
@@ -262,7 +267,13 @@ def info(show_name, show_all, sort_by_next,
     full_output = ''
     for i in keys:
         full_output = full_output + show_info[i] + '\n\n'
-    click.echo_via_pager(full_output)
+
+    if len(keys) < 4:
+        click.echo(full_output)
+    elif Config.is_win:
+        click.echo(full_output)
+    else:
+        click.echo_via_pager(full_output)
 
 
 @tvol.command(context_settings=CONTEXT_SETTINGS)
@@ -297,14 +308,22 @@ def calendar(show_name, show_all, sort_by_next, no_color, days):
         use_color = True
 
     # set colors for ui elements
-    header_color = 17
-    date_color_1 = 17
-    date_color_2 = 0
-    title_color_1 = 18
-    title_color_2 = 0
+    if Config.is_win:
+        foreground = 'white'
+        header_color = 'blue'
+        date_color_1 = 'blue'
+        date_color_2 = 0
+        title_color_1 = 'blue'
+        title_color_2 = 0
+    else:
+        foreground = 225
+        header_color = 17
+        date_color_1 = 17
+        date_color_2 = 0
+        title_color_1 = 18
+        title_color_2 = 0
 
     title_width = 20  # width of show titles column
-    console_columns = int(os.popen('stty size', 'r').read().split()[1])
     spacer = ' '  # can be any string, any length
     today = datetime.datetime.today()
 
@@ -317,7 +336,7 @@ def calendar(show_name, show_all, sort_by_next, no_color, days):
         if len(days) == 1:
             calendar_columns = days[0]
     else:
-        calendar_columns = console_columns - (title_width + len(spacer))
+        calendar_columns = Config.console_columns - (title_width + len(spacer))
 
     # Days_chars can be any string of seven chars. eg: 'mtwtfSS'
     days_chars = '.....::'  # first char is monday
@@ -342,12 +361,12 @@ def calendar(show_name, show_all, sort_by_next, no_color, days):
 
     months_row = months_row[:calendar_columns]  # chop off any extra spaces created by adding the months
     if use_color:
-        months_row = U.hi_color(months_row, 225, header_color)
-        days_row = U.hi_color(days_row, 225, header_color)
+        months_row = style(months_row, fg=foreground, bg=header_color)
+        days_row = style(days_row, fg=foreground, bg=header_color)
     months_row = (' ' * title_width) + (' ' * len(spacer)) + months_row
     days_row = (' ' * title_width) + (' ' * len(spacer)) + days_row
-    print(months_row)
-    print(days_row)
+    click.echo(months_row)
+    click.echo(days_row)
 
     # build shows rows
     step = 3
@@ -411,13 +430,13 @@ def calendar(show_name, show_all, sort_by_next, no_color, days):
 
         if has_episode or show_all:
             if use_color and color_row:
-                title = U.hi_color(title, 225, title_color_1)
-                broadcast_row = U.hi_color(broadcast_row, 225, date_color_1)
+                title = style(title, fg=foreground, bg=title_color_1)
+                broadcast_row = style(broadcast_row, fg=foreground, bg=date_color_1)
             elif use_color and not color_row:
-                title = U.hi_color(title, 225, title_color_2)
-                broadcast_row = U.hi_color(broadcast_row, 225, date_color_2)
+                title = style(title, fg=foreground, bg=title_color_2)
+                broadcast_row = style(broadcast_row, fg=foreground, bg=date_color_2)
             row = title + spacer + broadcast_row
-            print(row)
+            click.echo(row)
 
             if counter >= step:
                 counter = 0
@@ -428,6 +447,7 @@ def calendar(show_name, show_all, sort_by_next, no_color, days):
 
 
 def tfunct(series):
+    """Display the series title on the right side of the progressbar"""
     try:
         title = series.db_name
     except AttributeError:
@@ -453,6 +473,7 @@ def showmissing(today):
             if series.is_missing(today):
                 fp.standard_print(series.show_missing())
     fp.done()
+
 
 @tvol.command(context_settings=CONTEXT_SETTINGS)
 @click.argument('show_name', required=False)
