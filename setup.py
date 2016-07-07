@@ -2,6 +2,7 @@
 from setuptools import setup
 
 import sys
+import platform
 import re
 
 version = re.search(
@@ -49,7 +50,9 @@ setup(
         'requests',
         'python-dateutil',
         'click',
-    ],
+    ] + ([
+        'colorama',
+    ] if 'Windows' == platform.system() else []),
     version=version,
     description='TV Overlord is a command line tool to download and manage TV shows from newsgroups or bittorent',
     long_description=long_description,
