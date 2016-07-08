@@ -8,6 +8,7 @@ import click
 
 from tvoverlord.search import Search, SearchError
 from tvoverlord.util import U
+from tvoverlord.tvutil import style
 from tvoverlord.config import Config
 from tvoverlord.consoletable import ConsoleTable
 from tvoverlord.tracking import Tracking
@@ -196,7 +197,7 @@ class Series:
         missing = self.missing
         if len(missing) == 0:
             return False
-        ret = U.effects(['boldon', 'greenf'], self.db_name)
+        ret = style(self.db_name, fg='green', bold=True)
         ret += ' - %s, %s' % (self.airs_dayofweek, self.airs_time)
         ret += '\n'
         indent = '    '

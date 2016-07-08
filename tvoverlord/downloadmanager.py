@@ -124,9 +124,9 @@ class DownloadManager(DB):
             cmd = ['copy', source, destination, '/Y']
 
         elif Config.is_win and os.path.isdir(source):
+            # destination = os.path.join(destination, '*')
             # /I to prevent xcopy asking if dest is a file or folder
-            destination = os.path.join(destination, '*')
-            cmd = ['xcopy', source, destination, '/E/S/Y']
+            cmd = ['xcopy', source, destination, '/E/S/Y/I']
 
         elif sys.platform.startswith(('darwin', 'linux')):
             cmd = ['cp', '-r', source, destination]

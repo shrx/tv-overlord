@@ -70,6 +70,7 @@ setup(
         'Operating System :: MacOS',
         'Operating System :: POSIX :: Linux',
         'Operating System :: Unix',
+        'Operating System :: Microsoft :: Windows'
         'Topic :: Internet',
         'Topic :: Multimedia :: Video',
         'Natural Language :: English',

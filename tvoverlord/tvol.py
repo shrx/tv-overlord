@@ -12,7 +12,7 @@ import click
 from tvoverlord.allseries import AllSeries
 from tvoverlord.series import Series
 from tvoverlord.config import Config
-from tvoverlord.tvutil import FancyPrint, dict_factory
+from tvoverlord.tvutil import FancyPrint, dict_factory, style
 from tvoverlord.util import U
 from tvoverlord.location import Location
 from tvoverlord.history import History
@@ -198,7 +198,7 @@ def info(show_name, show_all, sort_by_next,
             synopsis = '\n%s' % paragraph
 
         first_row_a = []
-        fancy_title = U.effects(['boldon'], title)
+        fancy_title = style(title, bold=True)
         for i in [fancy_title + ',', se, status, imdb_url, thetvdb_url, synopsis]:
             if i: first_row_a.append(i)
         first_row = ' '.join(first_row_a)

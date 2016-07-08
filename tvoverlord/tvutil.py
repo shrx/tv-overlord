@@ -12,13 +12,11 @@ from tvoverlord.config import Config
 from tvoverlord.util import U
 
 
-def style(text, fg=None, bg=None, bold=None):
+def style(text, fg=None, bg=None, bold=None, strike=None):
     if Config.is_win:
         fancy = click.style(text, fg=fg, bg=bg, bold=bold)
     else:
-        fancy = U.hi_color(text, foreground=fg, background=bg)
-        if bold:
-            fancy = U.effects(['boldon'], fancy)
+        fancy = U.style(text, fg=fg, bg=bg, bold=bold, strike=strike)
     return fancy
 
 

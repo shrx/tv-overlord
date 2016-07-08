@@ -12,6 +12,7 @@ from tvoverlord.consoletable import ConsoleTable
 from tvoverlord.downloadmanager import DownloadManager
 from tvoverlord.search import Search
 from tvoverlord.util import U
+from tvoverlord.tvutil import style
 
 
 class History:
@@ -42,7 +43,7 @@ class History:
         elif os.path.exists(filename):
             filename = filename
         else:
-            filename = U.effects(['blackf', 'strikeon'], filename)
+            filename = style(filename, fg='black', strike=True)
         return filename
 
     def format_date(self, date):

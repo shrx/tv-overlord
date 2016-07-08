@@ -44,12 +44,12 @@ class ConsoleTable:
         if Config.is_win:
             self.colors = {
                 'title_fg': 'white',
-                'title_bg': 'magenta',
+                'title_bg': 'green',
                 'header_fg': 'white',
                 'header_bg': 'blue',
                 'body_fg': 'white',
                 'body_bg': None,
-                'bar': 'magenta',
+                'bar': 'green',
                 'hidef': 'green',
                 'warnfg': 'yellow',
                 'warnbg': 'black',
