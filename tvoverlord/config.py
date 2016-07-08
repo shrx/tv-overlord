@@ -27,10 +27,9 @@ class Config:
     user_config = '%s/%s' % (user_dir, config_filename)
 
     console_columns, console_rows = click.get_terminal_size()
-    # On windows, columns are 1 char to wide, so we'll make all
-    # output on all platforms 1 char less.
     console_columns = int(console_columns)
     if is_win:
+        # On windows, columns are 1 char too wide
         console_columns = console_columns - 1
 
     if not os.path.exists(user_dir):
