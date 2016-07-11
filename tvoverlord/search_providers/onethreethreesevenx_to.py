@@ -13,8 +13,8 @@ class Provider():
 
     name = '1337X'
     shortname = '13'  # can only be 2 characters long
-    url = ''
-    base_url = 'http://1337x.to'
+    provider_urls = ['http://1337x.to']
+    base_url = provider_urls[0]
 
     def search(self, search_string, season=False, episode=False):
 

@@ -14,6 +14,7 @@ from tvoverlord.util import U
 class Provider(object):
 
     name = 'ExtraTorrent'
+    shortname = 'ET'
     url = ''
     provider_urls = [
         'http://extratorrent.cc',
@@ -94,8 +95,8 @@ class Provider(object):
                     size,
                     date,
                     seeds,
-                    'ET', # extratorrent identifier
-                    magnet
+                    self.shortname,
+                    magnet,
                 ])
 
             return show_data

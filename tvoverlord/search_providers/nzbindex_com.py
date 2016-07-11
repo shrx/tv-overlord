@@ -26,7 +26,7 @@ class Provider(object):
     # def __init__ (self):
     # pass
 
-    provider_url = 'http://nzbindex.com'
+    provider_urls = ['http://nzbindex.com']
     name = 'NZBIndex'
     shortname = 'NI'
 
@@ -114,22 +114,14 @@ class Provider(object):
                 self.se_ep(
                     season, episode, search_string))
 
-        search_term = ''
-        min_age = '0'
-        sort = 'agedesc'  # age, agedesc, size, sizedesc
-        min_size = '100'  # mb
-        max_size = '1000'  # mb
-        complete_only = '1'  # return only complete posts
-        max_results = '100'
-
         url = 'http://nzbindex.com/rss/?'
         query = {
             'q': search_string,
             'minage': '0',
-            'sort': 'agedesc',
-            'minsize': '100',
-            'maxsize': '5000',
-            'complete': '1',
+            'sort': 'agedesc',  # age, agedesc, size, sizedesc
+            'minsize': '100',   # mb
+            'maxsize': '5000',  # mb
+            'complete': '1',  # return only complete posts
             'max': '100',  # results per page
             'more': '1',
         }

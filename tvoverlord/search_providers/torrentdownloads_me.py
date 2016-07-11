@@ -14,6 +14,7 @@ from tvoverlord.util import U
 
 class Provider():
     name = 'Torrent Downloads'
+    provider_urls = ['http://www.torrentdownloads.me']
     url = ''
     short_name = 'TD'
 
@@ -22,10 +23,10 @@ class Provider():
         if season and episode:
             searches = self.se_ep(search_string, season, episode)
         else:
-            searches = [search_string]        
+            searches = [search_string]
 
         # http://www.torrentdownloads.me/rss.xml?type=search&search=doctor+who+s05e01
-        base_url = 'http://www.torrentdownloads.me/rss.xml?type=search&search={}'
+        base_url = '%s/rss.xml?type=search&search={}' % self.provider_urls[0]
         show_data = []
         for search in searches:
             encoded_search = urllib.parse.quote(search)

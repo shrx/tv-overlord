@@ -12,7 +12,8 @@ class Provider():
 
     name = 'rarbg'
     shortname = 'RB'
-    baseurl = 'https://torrentapi.org/pubapi_v2.php'
+    provider_urls = ['https://torrentapi.org/pubapi_v2.php']
+    baseurl = provider_urls[0]
     url = ''
 
     def search(self, search_string, season=False, episode=False):

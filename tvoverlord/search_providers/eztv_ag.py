@@ -12,8 +12,9 @@ class Provider():
 
     name = 'eztv'
     shortname = 'EZ'
-    url = ''
-    base_url = 'https://eztv.ag/'
+    provider_urls = ['https://eztv.ag']
+
+    base_url = provider_urls[0]
 
     def search(self, search_string, season=False, episode=False):
 

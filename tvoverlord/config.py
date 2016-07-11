@@ -23,8 +23,8 @@ class Config:
     config_filename = 'config.ini'
     user_dir = click.get_app_dir('tvoverlord')
 
-    db_file = '%s/%s' % (user_dir, 'shows.sqlite3')
-    user_config = '%s/%s' % (user_dir, config_filename)
+    db_file = os.path.join(user_dir, 'shows.sqlite3')
+    user_config = os.path.join(user_dir, config_filename)
 
     console_columns, console_rows = click.get_terminal_size()
     console_columns = int(console_columns)
@@ -36,7 +36,7 @@ class Config:
         # create dir and config.ini
         os.makedirs(user_dir)
         app_home = os.path.join(os.path.dirname(os.path.realpath(__file__)))
-        app_config = '%s/%s' % (app_home, config_filename)
+        app_config = os.path.join(app_home, config_filename)
         shutil.copy(app_config, user_dir)
         # make db
         sql = '''
@@ -72,9 +72,11 @@ class Config:
         curs.executescript(sql)
         conn.commit()
         conn.close()
+        click.secho('-' * console_columns, fg='yellow')
         click.echo('The database and config.ini have been created in:')
         click.echo(user_dir)
         click.echo('Run "tvol --help", or "tvol addnew \'show name\'" to add shows.')
+        click.secho('-' * console_columns, fg='yellow')
         click.echo()
 
     cfg = configparser.ConfigParser(allow_no_value=True)
