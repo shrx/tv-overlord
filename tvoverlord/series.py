@@ -234,7 +234,11 @@ class Series:
         click.echo()
         click.echo('Is this the correct show? [y/n]', nl=False)
         correct = click.getchar(echo=False)
-        correct = correct.decode('utf-8')
+        try:
+            # this is nessesary for windows
+            correct = correct.decode('utf-8')
+        except AttributeError:
+            pass
         click.echo(' %s' % correct)
 
         if str(correct) == 'y':
