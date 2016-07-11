@@ -54,9 +54,11 @@ Python3 on Linux, OSX, or Windows
 TV Overlord is a python 3 application and can be installed via pip3.
 If this method is used, all dependencies will be taken care of.
 
-: pip3 install tvoverlord
+There are two different methods to use when using pip.
 
-If you use Bash as your shell, you can have completions.  Add this
+: sudo pip3 install tvoverlord
+
+If you use Bash as your shell, you can have tab completions.  Add this
 to your .bashrc file:
 
 : eval "$(_TVOL_COMPLETE=source tvol)"
@@ -79,6 +81,12 @@ If this is the wrong show, try again but add the year:
 Then
 
 : tvol download
+
+To get help for each command, you can use:
+
+: tvol download --help
+: tvol addnew --help
+: # etc...
 
 **** Setup the post download script
 
@@ -170,8 +178,8 @@ This will list any shows that are available to download.
 
 **** Download
 
-: tvol download [--today] [--ignore-warning] [--count NUM]
-:               [--location FILEPATH] [--provider NAME] [SHOWNAME]
+: tvol download [--today] [--ignore] [--count NUM]
+:               [--location FILEPATH] [SHOWNAME]
 
 For each show thats ready to download, it will ask you which one you
 want to download.
@@ -179,13 +187,9 @@ want to download.
  + =--count=  sets the number of results to display, the default is 5.
  + =--location=  sets the dir to download the nzb files to if you are using
    an nzb search engine.  This can be set in the ini file
- + =--provider=  will set the provider to use.  Look in the ini file to see
-   how that can be specified there.  NAME can be a partial name
- + =--no-cache= will use fresh info from thetvdb.com instead of using the
-   cached data (which is valid for 4 hours)
  + =--today= will show info for today instead of the usuall which is to
    only show yesterday's and older
- + =--ignore-warning= does not check if you are connected to a vpn.
+ + =--ignore= does not check if you are connected to a vpn.
    This is documented in the tv_config.ini section
 
 
@@ -194,7 +198,7 @@ instead of downloading all.
 
 **** Calendar
 
-: tvol calendar [--today] [--sort-by-next]
+: tvol calendar [--today] [--sort-by-next] [--show-all]
 :               [--no-color] [--days DAYS[,AFTER]] [SHOWNAME]
 
 Display a calendar of all the current shows in your database.  It
@@ -205,41 +209,65 @@ defaults to the width of the console.
    =--days 10= will show the next 10 days only.
  + =--days DAYS,AFTER= will display from DAYS to AFTER days.  For
    example, =--days 10,5= will display from the 10th day to the 15th day.
- + =--no-cache= will use fresh info from thetvdb.com instead of using the
-   cached data (which is valid for 4 hours)
- + =--today= will show info for today instead of the usuall which is to
-   only show yesterday's and older
+ + =--show-all= will also show inactive shows.
 
 **** History
 
-: tvol history (list [-w FIELDS]|copy|redownload) [CRITERIA]
+: tvol history [-w FIELDS] [CRITERIA]
 
-- =CRITERIA= can be days, a date or a title or partial title
-- =FIELDS= is a comma seperated list if fields to show that only works
-  with the list command.  It may be any combination of these: date,
-  title, season, episode, magnet, oneoff, complete, filename,
-  destination.  If not specified it defaults to
-  ='date,title,complete,destination'=.
+ + =CRITERIA= can be days, a date or a show title.  If its days, it will
+   show results from now to X days ago.  If it is a date, it will show
+   downloads for that date, and if its a title or partial title, it
+   will show all downloads for that show.
+ + =FIELDS= is a comma seperated list of fields to show.  It may be any
+   combination of these: date, title, season, episode, magnet, oneoff,
+   complete, filename, destination.  If not specified it defaults to
+   =date,title,complete,destination=.
 
-The =list= command generates a tab seperated list.  This is usefull for
+This command generates a tab seperated list.  This is usefull for
 piping to various unix commands or for import into a spreadsheet.  For
 example this command will format the output into columns.
 
-: tvol history list -w 'title,date,complete' | column -ts$'\t'
+: tvol history -w 'title,date,complete' | column -ts$'\t'
 
-=copy= and =redownload= show a list where the user can choose an episode to
-redownload or recopy a file to the destination set in the ini file.
+**** Copy
+
+: tvol copy [CRITERIA]
+
+Copy the file from the directory where the bittorrent client put the
+downloads to the 'tv dir' specified in the config.ini.  This is only
+relevent if you are using the post download scripts.  Also this will
+only be nessesary if the copy fails when the post download script is
+called by the bittorent client.
+
+ + =CRITERIA= can be days, a date or a show title.  If its days, it will
+   show results from now to X days ago.  If it is a date, it will show
+   downloads for that date, and if its a title or partial title, it
+   will show all downloads for that show.
+
+**** Redownload
+
+: tvol redownload [CRITERIA]
+
+Re download a show.  This may be nessesary if a downloaded show is
+accidentally deleted.
+
+ + =CRITERIA= can be days, a date or a show title.  If its days, it will
+   show results from now to X days ago.  If it is a date, it will show
+   downloads for that date, and if its a title or partial title, it
+   will show all downloads for that show.
 
 **** Info
 
 : tvol info [--today] [--sort-by-next] [--show-links]
-:           [--synopsis] [--ask-inactive] [SHOWNAME]
+:           [--synopsis] [--ask-inactive] [--show-all] [SHOWNAME]
 
 This will show you what shows are next, and how many days till they
 are broadcast.  Called without arguments, it lists all show except
 shows marked inactive, in alphabetical order.  A single show can be
 specified also.
 
+ + =--show-all= will also show inactive shows.
  + =--sort-by-next= this will sort the shows by order of which episodes are next
  + =--show-links= will display links to imdb.com and thetvdb.com for
    each show
@@ -248,24 +276,47 @@ specified also.
    has been cancelled or ended, it will ask you if you want to mark it
    inactive.
 
-**** Search and download non tracked
+**** Search and download non tracked files
 
 : tvol nondbshow [--count NUM] [--location FILEPATH]
-:                [--provider NAME] SEARCHTERM
+:                [--ignore] SEARCHTERM
 
 This will show you matches to your search.  Anything downloaded this
 way will not be recorded in your database.
 
  + =--count= is the number of search results to display
  + =--location= is where to download nzb files to
- + =--provider= will set the provider to use.  NAME can be a partial name
+ + =--ignore= does not check if you are connected to a vpn.
+   This is documented in the tv_config.ini section
 
 **** Edit db info
 
 : tvol editdbinfo SHOWNAME
 
-Edit the data in the database for show name.  You can manually set a
-show as 'inactive' here if you wish.
+Edit the data in the database for show name.  The show name must be
+exacty as what shows in =tvol info showname= including the year if it
+shows in the title.
+
+- Name :: This is what is used for searching and folder names.
+
+- Search engine title :: Sometimes a different name searches better.
+     If this is set, it will be used when searching.
+
+- Current season :: Setting this can be usefull if you add a new show
+     to the db, but want to download starting at a later season.
+
+- Last episode :: Set this to change the last episode downloaded.
+
+- Status :: This can be 'active' or 'inactive'.  This can be used to
+     turn off a show.
+
+
+**** Get config information
+
+: tvol config
+
+Show information of where various files are installed, (config.ini,
+database) and show list of the search engines and the url's they use.
 
 
 ** Screenshots
