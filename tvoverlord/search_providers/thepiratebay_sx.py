@@ -13,8 +13,9 @@ class Provider (object):
         'http://thepiratebay.se',
         'http://thepiratebay.org',
     ]
-
     name = 'The Pirate Bay'
+    shortname = 'PB'
+    
     url = ''
 
     @staticmethod
@@ -92,7 +93,7 @@ class Provider (object):
 
                     magnet = tds[0].find('a', href=re.compile('magnet:.*')).attrs['href']
 
-                    show_data.append([name, size, date, seeds, 'PB', magnet])
+                    show_data.append([name, size, date, seeds, self.shortname, magnet])
 
             return show_data
 

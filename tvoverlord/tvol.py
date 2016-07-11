@@ -2,6 +2,7 @@
 
 import datetime
 import sys
+import os
 import sqlite3
 import textwrap
 
@@ -17,8 +18,9 @@ from tvoverlord.util import U
 from tvoverlord.location import Location
 from tvoverlord.history import History
 from tvoverlord.tvutil import style
+from tvoverlord.search import Search
 
-__version__ = '0.9.24'
+__version__ = '1.0'
 
 
 def edit_db(search_str):
@@ -464,9 +466,14 @@ def showmissing(today):
     fp = FancyPrint()
 
     all_series = AllSeries()
+    bar_width = 50
+    if Config.console_columns < 90:
+        bar_width = 30
+    if Config.console_columns < 80:
+        bar_width = 20
     with click.progressbar(
             all_series, item_show_func=tfunct, show_percent=False,
-            show_eta=False, width=50, empty_char='\u00B7',
+            show_eta=False, width=bar_width, empty_char='\u00B7',
             fill_char=click.style('\u2588', fg='blue'),
     ) as bar:
         for series in bar:
@@ -634,3 +641,49 @@ def redownload(criteria):
     criteria = parse_history(criteria)
     hist = History(criteria)
     hist.download()
+
+
+@tvol.command(context_settings=CONTEXT_SETTINGS)
+def config():
+    """tvol's config information.
+
+    Show information of where various files are, (config.ini,
+    database) and a list of the search engines and the url's they use.
+    """
+
+    import shutil
+
+    title = 'green'
+    bold = True
+    ul = True
+
+    # file locations
+    click.echo()
+    click.secho('File locations:', fg=title, bold=bold, underline=ul)
+    click.echo()
+
+    click.echo('Config file:     %s' % os.path.join(
+        Config.user_dir, Config.config_filename))
+    click.echo('Database file:   %s' % os.path.join(
+        Config.user_dir, Config.db_file))
+    click.echo('NZB staging dir: %s' % Config.staging)
+    click.echo('TV dir:          %s' % Config.tv_dir)
+
+    click.echo()
+    for script in ['tvol', 'transmission_done', 'deluge_done']:
+        loc = shutil.which(script)
+        script = script + ':'
+        click.echo('%s %s' % (script.ljust(18), loc))
+
+    # search engines
+    click.echo()
+    click.secho('Search engines:', fg=title, bold=bold, underline=ul)
+    search = Search()
+    engines_types = [search.torrent_engines, search.newsgroup_engines]
+    for engines in engines_types:
+        for engine in engines:
+            click.echo()
+            click.secho(engine.Provider.name, bold=True, nl=False)
+            click.echo(' (%s)' % engine.Provider.shortname)
+            for url in engine.Provider.provider_urls:
+                click.echo('  %s' % url)

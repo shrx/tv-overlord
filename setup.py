@@ -66,11 +66,11 @@ setup(
         'Programming Language :: Python :: 3',
         'Programming Language :: Python :: 3 :: Only',
         'Environment :: Console',
-        'License :: OSI Approved :: GNU General Public License v3 (GPLv3)'
+        'License :: OSI Approved :: GNU General Public License v3 (GPLv3)',
         'Operating System :: MacOS',
         'Operating System :: POSIX :: Linux',
         'Operating System :: Unix',
-        'Operating System :: Microsoft :: Windows'
+        'Operating System :: Microsoft :: Windows',
         'Topic :: Internet',
         'Topic :: Multimedia :: Video',
         'Natural Language :: English',

@@ -17,6 +17,7 @@ class Provider(object):
         'http://bitsnoop.com',            # do not add a trailing slash for bitsnoop
     ]                                     # it causes the search to fail
     name = 'BitSnoop'
+    shortname = 'BS'
 
     @staticmethod
     def se_ep (season, episode, show_title):
@@ -64,7 +65,7 @@ class Provider(object):
                     size,
                     date,
                     seeds,
-                    'BS', # bitsnoop identifier
+                    self.shortname,
                     magnet
                 ])
 

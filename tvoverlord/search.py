@@ -27,7 +27,6 @@ from tvoverlord.search_providers import nzbclub_com
 from tvoverlord.search_providers import nzbindex_com
 
 
-
 class SearchError(Exception):
     def __init__(self, value):
         self.value = value
@@ -37,6 +36,14 @@ class SearchError(Exception):
 
 
 class Search(object):
+    torrent_engines = [bitsnoop, extratorrent, thepiratebay_sx, kickass_to,
+                       onethreethreesevenx_to, rarbg_to, eztv_ag]
+    # , torrentdownloads_me # <-- a suspicious number of seeds
+
+    # for nzb searches, only the first one listed will be used
+    newsgroup_engines = [nzbclub_com]
+    # , nzbindex_com # <-- rss feed not working
+
     def __init__(self):
         self.season = ''
         self.episode = ''
@@ -100,14 +107,10 @@ class Search(object):
                 ['<', '>', '<', '<']]
 
         if self.search_type == 'torrent':
-            engines = [bitsnoop, extratorrent, thepiratebay_sx, kickass_to,
-                       onethreethreesevenx_to, rarbg_to, eztv_ag]
-            # , torrentdownloads_me # <-- a suspicious number of seeds
+            engines = self.torrent_engines
         else:
-            # for nzb searches, only one search engine is allowed
-            engines = [nzbclub_com]
+            engines = self.newsgroup_engines
             self.engine = engines[0]
-            # , nzbindex_com # <-- rss feed not working
 
         socket.setdefaulttimeout(3.05)
         episodes = []

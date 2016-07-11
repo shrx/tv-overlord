@@ -18,7 +18,7 @@ class Provider (object):
         'http://kat.cr'
     ]
     name = 'Kickass Torrents'
-
+    shortname = 'KT'
 
     @staticmethod
     def se_ep (season, episode, show_title):
@@ -61,7 +61,7 @@ class Provider (object):
                     size,                     # show size
                     date,                     # date
                     show['torrent_seeds'],    # seeds
-                    'KA',                     # kickass identifier
+                    self.shortname,
                     show['torrent_magneturi'] # id (download magnet url)
                 ])
 

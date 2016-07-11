@@ -14,7 +14,7 @@ from tvoverlord.util import U
 
 
 class Provider(object):
-    provider_url = 'http://www.nzbclub.com/'
+    provider_urls = ['http://www.nzbclub.com']
     name = 'NZBClub'
     shortname = 'NZ'
 
@@ -65,7 +65,7 @@ class Provider(object):
                 self.se_ep(
                     season, episode, search_string))
 
-        url = 'http://www.nzbclub.com/nzbrss.aspx?'
+        url = '%s/nzbrss.aspx?' % self.provider_urls[0]
         query = {
             'q': search_string,
             'ig': 2,    # hide adult: 1=yes, 2=no

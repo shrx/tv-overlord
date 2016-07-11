@@ -12,7 +12,7 @@ class Provider():
     name = 'Search engine name'
 
     # this is used for debugging.  It should be the full search url's used
-    url = []
+    provider_urls = []
 
     # two letters, used for showing what search engine each episode is from
     shortname = 'SE'
