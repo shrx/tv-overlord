@@ -35,7 +35,8 @@ class Location:
             if not ip:
                 raise Exception('IP address cannot be empty')
             part_ip = ip.split('.')
-            part_ip = '.'.join(part_ip[:2])
+            # part_ip = '.'.join(part_ip[:2])
+            part_ip = '.'.join(part_ip[:4])
             if self.ip.startswith(part_ip):
                 return True
 
@@ -70,7 +71,6 @@ class Location:
 if __name__ == '__main__':
     from config import Config
     l = Location()
-    click.echo('config ip:', Config.ip)
-    click.echo('my config ip:', Config.ip)
-    click.echo('my real ip:  ', l.ip)
-    click.echo('match?', l.ips_match(Config.ip))
+    print('config ip:', Config.ip)
+    print('my real ip:  ', l.ip)
+    print('match?', l.ips_match(Config.ip))
