@@ -7,10 +7,12 @@ from pprint import pprint as pp
 import socket
 # from urllib.parse import urlparse
 import urllib
+import time
 import click
 
-from tvoverlord.tvutil import style
 from tvoverlord.config import Config
+from tvoverlord.util import U
+from tvoverlord.tvutil import style
 
 # torrent search engings
 from tvoverlord.search_providers import extratorrent
@@ -53,10 +55,10 @@ class Search(object):
         search = engine.Provider()
         search_results = search.search(search_string, season, episode)
 
-        ## for info about each search
-        # click.echo(search.name, len(search_results))
+        # for info about each search
+        # click.echo('%s -- %s' % (search.name, len(search_results)))
 
-        return search_results
+        return search_results + [search.name]
 
     def search(self, search_string, season=False,
                episode=False, search_type='torrent'):
@@ -83,15 +85,7 @@ class Search(object):
         self.show_name = search_string
         self.search_type = search_type
 
-        msg = 'Searching for: {0:s}...'.format(search_string)
-        if Config.is_win:
-            msg = style(msg, fg='black', bg='yellow')
-        else:
-            msg = style(msg, fg=16, bg=184)
-        sys.stdout.write(msg)
-        sys.stdout.flush()
-        backspace = '\b' * len(msg)
-        overwrite = ' ' * len(msg)
+        click.echo()
 
         if self.search_type == 'torrent':
             header = [
@@ -114,27 +108,57 @@ class Search(object):
 
         socket.setdefaulttimeout(3.05)
         episodes = []
+        if Config.is_win:
+            light = 'green'
+            dark = 'blue'
+        else:
+            light = 35
+            dark = 23
         with concurrent.futures.ThreadPoolExecutor(max_workers=8) as executor:
             res = {
-                executor.submit(self.job, engine, search_string, season, episode): engine for engine in engines
+                executor.submit(
+                    self.job, engine, search_string, season, episode
+                ): engine for engine in engines
             }
-            for future in concurrent.futures.as_completed(res):
-                results = future.result()
-                episodes = episodes + results
+            with click.progressbar(
+                    concurrent.futures.as_completed(res),
+                    label=U.style(search_string, bold=True),
+                    empty_char=style(' ', fg=dark, bg=dark),
+                    fill_char=style('*', fg=light, bg=light),
+                    length=len(engines),
+                    show_percent=False,
+                    show_eta=False,
+                    item_show_func=self.progress_title,
+                    width=Config.progressbar_width,
+                    bar_template='%(label)s %(bar)s %(info)s',
+                    show_pos=True,
+            ) as bar:
+                for future in bar:
+                    results = future.result()
+                    # remove the search engine name from the end of
+                    # the results array that was added in self.job()
+                    # so progress_title() could make use of it.
+                    results = results[:-1]
+                    episodes = episodes + results
+
+        # go up 3 lines to remove the progress bar
+        click.echo('[%sA' % 3)
 
         if self.search_type == 'torrent':
 
-            episodes.sort(key=lambda x: int(x[3]), reverse=True)  # sort by seeds
+            # sort by seeds
+            episodes.sort(key=lambda x: int(x[3]), reverse=True)
 
             # Remove torrents with 0 seeds
-            #for i, episode in enumerate(episodes):
-            #    seeds = int(episode[3])
-            #    click.echo(episode[0])
-            #    if not seeds:
-            #        click.echo('    ', seeds, episode[0])
-            #        del episodes[i]
+            for i, episode in enumerate(episodes):
+                seeds = int(episode[3])
+                # click.echo(episode[0])
+                if not seeds:
+                    # click.echo('    %s %s' % (seeds, episode[0]))
+                    del episodes[i]
 
-            # remove duplicates since different sites might have the same torrent
+            # remove duplicates since different sites might
+            # have the same torrent
             titles = []
             for i, episode in enumerate(episodes):
                 title = episode[0]
@@ -143,7 +167,7 @@ class Search(object):
                 else:
                     titles.append(title)
 
-            # the following will remove duplicates based on the magnet hash
+            # remove duplicates based on the magnet hash
             hashes = []
             for i, episode in enumerate(episodes):
                 o = urllib.parse.urlparse(episode[5])
@@ -153,8 +177,6 @@ class Search(object):
                     del episodes[i]
                 else:
                     hashes.append(torrent_hash)
-
-        click.echo('%s%s' % (backspace, overwrite), nl=False)
 
         # return search_results
         return [header] + [episodes]
@@ -203,6 +225,18 @@ class Search(object):
                 chosen_show, destination, final_name)
 
         return downloaded_filename
+
+    def progress_title(self, future):
+        """Display the search engine name on the right side of the progressbar"""
+        try:
+            engine_name = future.result()[-1]
+            # print('\n%s' % engine_name)
+            engine_name += ' done'
+            self.last_engine = engine_name
+            return engine_name
+        except AttributeError:
+            engine_name = ''
+            return
 
 
 if __name__ == '__main__':

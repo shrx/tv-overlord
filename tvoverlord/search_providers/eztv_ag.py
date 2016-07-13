@@ -10,7 +10,7 @@ import socket
 
 class Provider():
 
-    name = 'eztv'
+    name = 'EZTV'
     shortname = 'EZ'
     provider_urls = ['https://eztv.ag']
 

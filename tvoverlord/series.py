@@ -256,6 +256,7 @@ class Series:
                 None, None, display_count)
             if not show_data:
                 return
+
         except SearchError:
             click.echo('No matches')
             return
@@ -330,6 +331,10 @@ class Series:
 
     def _ask(self, shows, season, episode, display_count):
         click.echo()
+        if not shows[1]:
+            # use ljust to cover over the progressbar
+            click.secho('No results found.'.ljust(Config.console_columns))
+            sys.exit()
         if season and episode:
             show_title = '%s %s' % (self.db_name, self.se_ep(season, episode))
         else:

@@ -67,7 +67,7 @@ class ConsoleTable:
                 'warnfg': 178,
                 'warnbg': 16,
             }
-            
+
         self.display_count = 5
         self.is_postdownload = False
 
@@ -101,7 +101,7 @@ class ConsoleTable:
         self.colors = colors
 
     def generate(self):
-        
+
         title_bar = style(
             '|',
             fg=self.colors['bar'],
@@ -119,7 +119,7 @@ class ConsoleTable:
                       fg=self.colors['title_fg'],
                       bg=self.colors['title_bg'])
         click.echo(title)
-        
+
         # HEADER ROW ---------------------------------------
         header = self.table.header
         header_row = [style(' ', bg=self.colors['header_bg'],
@@ -149,7 +149,7 @@ class ConsoleTable:
                       fg=self.colors['header_fg']
                 )
             )
-            
+
         header_row = title_bar.join(header_row)
 
         click.echo(header_row)
@@ -290,9 +290,9 @@ class ConsoleTable:
     def display_error(self, message):
         click.echo()
         click.echo('%s %s' % (style('[!]',
-                                    fg=self.colors['warnbg'], 
+                                    fg=self.colors['warnbg'],
                                     bg=self.colors['warnfg']),
-                              style(message, 
+                              style(message,
                                     fg=self.colors['warnfg'])))
 
 

@@ -28,6 +28,12 @@ class Config:
 
     console_columns, console_rows = click.get_terminal_size()
     console_columns = int(console_columns)
+    progressbar_width = 50
+    if console_columns < 90:
+        progressbar_width = 30
+    if console_columns < 80:
+        progressbar_width = 20
+
     if is_win:
         # On windows, columns are 1 char too wide
         console_columns = console_columns - 1

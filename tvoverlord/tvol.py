@@ -466,15 +466,22 @@ def showmissing(today):
     fp = FancyPrint()
 
     all_series = AllSeries()
-    bar_width = 50
-    if Config.console_columns < 90:
-        bar_width = 30
-    if Config.console_columns < 80:
-        bar_width = 20
+    if Config.is_win:
+        light = 'green'
+        dark = 'blue'
+    else:
+        light = 35
+        dark = 23
+
     with click.progressbar(
-            all_series, item_show_func=tfunct, show_percent=False,
-            show_eta=False, width=bar_width, empty_char='\u00B7',
-            fill_char=click.style('\u2588', fg='blue'),
+            all_series,
+            item_show_func=tfunct,
+            show_percent=False,
+            show_eta=False,
+            width=Config.progressbar_width,
+            empty_char=style(' ', fg=dark, bg=dark),
+            fill_char=style('*', fg=light, bg=light),
+            bar_template='%(label)s %(bar)s %(info)s',
     ) as bar:
         for series in bar:
             if series.is_missing(today):
@@ -687,3 +694,21 @@ def config():
             click.echo(' (%s)' % engine.Provider.shortname)
             for url in engine.Provider.provider_urls:
                 click.echo('  %s' % url)
+
+    # ip addresses
+    click.echo()
+    click.secho('Ip addresse information:', fg=title, bold=bold, underline=ul)
+    click.echo()
+
+    l = Location()
+    click.echo('Your current ip address:')
+    click.secho('  %s' % l.ip, bold=True)
+    if Config.ip:
+        click.echo()
+        click.echo('Your whitelisted ip addresses:')
+        # short = '.'.join(l.ip.split('.')[:-1])
+        for ip in Config.ip:
+            color = None
+            # if ip.startswith(short):
+                # color = 'green'
+            click.secho('  %s' % ip, fg=color)

@@ -10,7 +10,7 @@ from tvoverlord.util import U
 
 class Provider():
 
-    name = 'rarbg'
+    name = 'RARBG'
     shortname = 'RB'
     provider_urls = ['https://torrentapi.org/pubapi_v2.php']
     baseurl = provider_urls[0]
