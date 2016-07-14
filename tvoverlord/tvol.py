@@ -473,20 +473,26 @@ def showmissing(today):
         light = 35
         dark = 23
 
-    with click.progressbar(
-            all_series,
-            item_show_func=tfunct,
-            show_percent=False,
-            show_eta=False,
-            width=Config.progressbar_width,
-            empty_char=style(' ', fg=dark, bg=dark),
-            fill_char=style('*', fg=light, bg=light),
-            bar_template='%(label)s %(bar)s %(info)s',
-    ) as bar:
-        for series in bar:
+    if len(all_series) > 20:
+        with click.progressbar(
+                all_series,
+                item_show_func=tfunct,
+                show_percent=False,
+                show_eta=False,
+                width=Config.progressbar_width,
+                empty_char=style(' ', fg=dark, bg=dark),
+                fill_char=style('*', fg=light, bg=light),
+                bar_template='%(label)s %(bar)s %(info)s',
+        ) as bar:
+            for series in bar:
+                if series.is_missing(today):
+                    fp.standard_print(series.show_missing())
+        fp.done()
+    else:
+        for series in all_series:
             if series.is_missing(today):
                 fp.standard_print(series.show_missing())
-    fp.done()
+        fp.done()
 
 
 @tvol.command(context_settings=CONTEXT_SETTINGS)

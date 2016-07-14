@@ -122,7 +122,7 @@ class Search(object):
             }
             with click.progressbar(
                     concurrent.futures.as_completed(res),
-                    label=U.style(search_string, bold=True),
+                    label=U.style('  %s' % search_string, bold=True),
                     empty_char=style(' ', fg=dark, bg=dark),
                     fill_char=style('*', fg=light, bg=light),
                     length=len(engines),

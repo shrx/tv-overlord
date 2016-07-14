@@ -334,7 +334,7 @@ class Series:
         if not shows[1]:
             # use ljust to cover over the progressbar
             click.secho('No results found.'.ljust(Config.console_columns))
-            sys.exit()
+            return 'skip'
         if season and episode:
             show_title = '%s %s' % (self.db_name, self.se_ep(season, episode))
         else:
