@@ -690,6 +690,8 @@ def config():
         Config.user_dir, Config.db_file))
     click.echo('NZB staging dir: %s' % Config.staging)
     click.echo('TV dir:          %s' % Config.tv_dir)
+    click.echo('Alt client:      %s' % Config.client)
+    click.echo('Magnet dir:      %s' % Config.magnet_dir)
 
     click.echo()
     for script in ['tvol', 'transmission_done', 'deluge_done']:
@@ -721,9 +723,9 @@ def config():
     if Config.ip:
         click.echo()
         click.echo('Your whitelisted ip addresses:')
-        # short = '.'.join(l.ip.split('.')[:-1])
+        short = l.ip # '.'.join(l.ip.split('.')[:-1])
         for ip in Config.ip:
             color = None
-            # if ip.startswith(short):
-                # color = 'green'
+            if ip.startswith(short):
+                color = 'green'
             click.secho('  %s' % ip, fg=color)
