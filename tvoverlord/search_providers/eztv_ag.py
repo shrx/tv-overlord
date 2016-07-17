@@ -42,22 +42,19 @@ class Provider():
                 continue
 
             for tr in search_results:
-
-                tds = tr.find_all('td')
-
-                title = tds[1].get_text(strip=True)
-                if search_string.lower() not in title.lower():
+                try:
+                    tds = tr.find_all('td')
+                    title = tds[1].get_text(strip=True)
+                    if search_string.lower() not in title.lower():
+                        continue
+                    detail_url = tds[1].a['href']
+                    magnet = tds[2].a['href']
+                    if not magnet.startswith('magnet'):
+                        continue
+                    size = tds[3].get_text(strip=True)
+                    date = tds[4].get_text(strip=True)
+                except TypeError:
                     continue
-
-                detail_url = tds[1].a['href']
-
-                magnet = tds[2].a['href']
-                if not magnet.startswith('magnet'):
-                    continue
-
-                size = tds[3].get_text(strip=True)
-
-                date = tds[4].get_text(strip=True)
 
                 search_data.append([detail_url, title, date, magnet, size])
 
