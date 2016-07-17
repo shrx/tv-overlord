@@ -16,8 +16,9 @@ def sxxexx(season='', episode=''):
     """Return a season and episode formated as S01E01"""
     se = ''
     if season and episode:
-        se = 'S%2sE%2s' % (season, episode)
-
+        season = int(season)
+        episode = int(episode)
+        se = 'S%02dE%02d' % (season, episode)
     return se
 
 
@@ -25,8 +26,9 @@ def sxee(season='', episode=''):
     """Return a season and episode formated as 1X01"""
     se = ''
     if season and episode:
-        se = '%sX%2s' % (season, episode)
-
+        season = int(season)
+        episode = int(episode)
+        se = '%dX%02d' % (season, episode)
     return se
 
 
