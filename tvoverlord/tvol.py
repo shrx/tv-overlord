@@ -82,12 +82,19 @@ def edit_db(search_str):
     if is_error:
         sys.exit()
 
-    sql = '''UPDATE shows SET name=:name, season=:season,
-        episode=:episode, status=:status, search_engine_name=:search_engine_name
-        WHERE thetvdb_series_id=:tvdb_id'''
+    sql = '''UPDATE shows SET
+                name=:name,
+                season=:season,
+                episode=:episode,
+                status=:status,
+                search_engine_name=:search_engine_name
+             WHERE thetvdb_series_id=:tvdb_id'''
 
-    row_values = {'name': new_name, 'season': new_season, 'episode': new_episode,
-                  'status': new_status, 'search_engine_name': new_search_engine_name,
+    row_values = {'name': new_name,
+                  'season': new_season,
+                  'episode': new_episode,
+                  'status': new_status,
+                  'search_engine_name': new_search_engine_name,
                   'tvdb_id': row['thetvdb_series_id']}
 
     curs.execute(sql, row_values)
@@ -98,7 +105,9 @@ def edit_db(search_str):
     conn.close()
 
 CONTEXT_SETTINGS = {
+    # add -h in addition to --help
     'help_option_names': ['-h', '--help'],
+    # allow case insensitive commands
     'token_normalize_func': lambda x: x.lower(),
 }
 
