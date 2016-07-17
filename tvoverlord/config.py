@@ -5,6 +5,7 @@ import configparser
 import shutil
 import sqlite3
 import click
+import shlex
 
 from pprint import pprint as pp
 
@@ -20,11 +21,10 @@ class Config:
     thetvdb_apikey = 'DFDB0A667C844513'
     use_cache = True
 
-    config_filename = 'config.ini'
     user_dir = click.get_app_dir('tvoverlord')
-
     db_file = os.path.join(user_dir, 'shows.sqlite3')
-    user_config = os.path.join(user_dir, config_filename)
+    config_filename = 'config.ini'
+    user_config = os.path.join(user_dir, 'config.ini')
 
     console_columns, console_rows = click.get_terminal_size()
     console_columns = int(console_columns)
@@ -38,13 +38,23 @@ class Config:
         # On windows, columns are 1 char too wide
         console_columns = console_columns - 1
 
+    _msg = ''
+    # create app config dir
     if not os.path.exists(user_dir):
-        # create dir and config.ini
         os.makedirs(user_dir)
+        _msg += 'App config dir created'
+        _msg += '  %s' % user_dir
+
+    # create config.ini
+    if not os.path.exists(user_config):
         app_home = os.path.join(os.path.dirname(os.path.realpath(__file__)))
         app_config = os.path.join(app_home, config_filename)
         shutil.copy(app_config, user_dir)
-        # make db
+        _msg += 'config.ini created'
+        _msg += '  %' % app_config
+
+    # create db
+    if not os.path.exists(db_file):
         sql = '''
             CREATE TABLE shows (
                 search_engine_name TEXT,
@@ -78,28 +88,57 @@ class Config:
         curs.executescript(sql)
         conn.commit()
         conn.close()
+        _msg += 'Database has been created'
+        _msg += '  %s' % db_file
+
+    if _msg:
         click.secho('-' * console_columns, fg='yellow')
-        click.echo('The database and config.ini have been created in:')
-        click.echo(user_dir)
-        click.echo('Run "tvol --help", or "tvol addnew \'show name\'" to add shows.')
+        click.echo(_msg)
         click.secho('-' * console_columns, fg='yellow')
         click.echo()
 
-    cfg = configparser.ConfigParser(allow_no_value=True)
+    cfg = configparser.ConfigParser(allow_no_value=True, interpolation=None)
     cfg.read(user_config)
 
     # OPTIONAL FIELDS
     # [App Settings]
-    ip = cfg.get('App Settings', 'ip whitelist')
-    # split, strip, and remove empty values from whitelist
-    ip = [i.strip() for i in ip.split(',') if i.strip()]
-    clean_torrents = True if cfg.get('App Settings', 'clean torrents') == 'yes' else False
-    search_type = 'newsgroup' if cfg.get('App Settings', 'search type') == 'newsgroup' else 'torrent'
+    try:
+        ip = cfg.get('App Settings', 'ip whitelist')
+        # split, strip, and remove empty values from whitelist
+        ip = [i.strip() for i in ip.split(',') if i.strip()]
+    except configparser.NoOptionError:
+        ip = None
+
+    try:
+        clean_torrents = True if cfg.get('App Settings', 'clean torrents') == 'yes' else False
+    except configparser.NoOptionError:
+        clean_torrents = False
+
+    try:
+        search_type = 'newsgroup' if cfg.get('App Settings', 'search type') == 'newsgroup' else 'torrent'
+    except configparser.NoOptionError:
+        search_type = 'torrent'
+
+    try:
+        client = cfg.get('App Settings', 'client')
+        client = shlex.split(client)
+    except configparser.NoOptionError:
+        client = None
+
+    try:
+        magnet_dir = cfg.get('App Settings', 'magnet folder')
+    except configparser.NoOptionError:
+        magnet_dir = None
 
     # [File Locations]
-    tv_dir = os.path.expanduser(cfg.get('File Locations', 'tv dir'))
-    staging = os.path.expanduser(cfg.get('File Locations', 'staging'))
-
+    try:
+        tv_dir = os.path.expanduser(cfg.get('File Locations', 'tv dir'))
+    except configparser.NoOptionError:
+        tv_dir = None
+    try:
+        staging = os.path.expanduser(cfg.get('File Locations', 'staging'))
+    except configparser.NoOptionError:
+        staging = None
 
 if __name__ == '__main__':
     c = Config()

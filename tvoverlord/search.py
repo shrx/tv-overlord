@@ -12,7 +12,7 @@ import click
 
 from tvoverlord.config import Config
 from tvoverlord.util import U
-from tvoverlord.tvutil import style
+from tvoverlord.tvutil import style, sxxexx
 
 # torrent search engings
 from tvoverlord.search_providers import extratorrent
@@ -181,6 +181,22 @@ class Search(object):
         # return search_results
         return [header] + [episodes]
 
+    def magnet_filename(self):
+        se_ep = sxxexx(self.season, self.episode)
+        if se_ep:
+            fullname = '%s %s.magnet' % (self.show_name, se_ep)
+        else:
+            fullname = '%s.magnet' % (self.show_name)
+        fullname = fullname.replace(' ', '_')
+        return fullname
+
+    def config_command(self, chosen_show):
+        args = [i.replace('%magnet%', chosen_show) for i in Config.client]
+        if args == Config.client:
+            sys.exit('\nNo %magnet% replacement flag was found in config.ini, client section.')
+
+        return args
+
     def download(self, chosen_show, destination, search_type='torrent'):
         """
         Pass the chosen show's data and destination to the providers
@@ -191,7 +207,26 @@ class Search(object):
         downloaded_filename = ''
         if chosen_show.startswith("magnet:"):
 
-            if platform.system() == 'Linux':
+            # write magnet links to a file
+            if Config.magnet_dir:
+                Config.magnet_dir = os.path.expanduser(Config.magnet_dir)
+                fn = self.magnet_filename()
+                if os.path.isdir(Config.magnet_dir):
+                    full = os.path.join(Config.magnet_dir, fn)
+                    with open(full, 'w') as f:
+                        f.write(chosen_show)
+                else:
+                    sys.exit('\n"%s" does not exist' % Config.magnet_dir)
+
+            # use a command specified in config.ini
+            elif Config.client:
+                args = self.config_command(chosen_show)
+                try:
+                    subprocess.Popen(args)
+                except FileNotFoundError:
+                    sys.exit('\n"%s" not found.' % args[0])
+
+            elif platform.system() == 'Linux':
                 isX = True if os.environ.get('DISPLAY') else False
                 if isX:
                     app = 'xdg-open'
@@ -202,10 +237,13 @@ class Search(object):
                     subprocess.Popen([app, chosen_show])
                 except OSError:
                     sys.exit('\nYou do not have a bittorent client installed')
+
             elif platform.system() == 'Darwin':
                 subprocess.Popen(["open", "--background", chosen_show])
+
             elif platform.system() == 'Windows':
                 os.startfile(chosen_show)
+
             else:
                 unknown_system = platform.platform()
                 sys.exit('\nUnknown system:', unknown_system)

@@ -12,6 +12,24 @@ from tvoverlord.config import Config
 from tvoverlord.util import U
 
 
+def sxxexx(season='', episode=''):
+    """Return a season and episode formated as S01E01"""
+    se = ''
+    if season and episode:
+        se = 'S%2sE%2s' % (season, episode)
+
+    return se
+
+
+def sxee(season='', episode=''):
+    """Return a season and episode formated as 1X01"""
+    se = ''
+    if season and episode:
+        se = '%sX%2s' % (season, episode)
+
+    return se
+
+
 def style(text, fg=None, bg=None, bold=None, strike=None):
     if Config.is_win:
         fancy = click.style(text, fg=fg, bg=bg, bold=bold)
