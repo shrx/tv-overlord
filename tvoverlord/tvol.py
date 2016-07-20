@@ -114,7 +114,7 @@ CONTEXT_SETTINGS = {
 
 @click.group(context_settings=CONTEXT_SETTINGS)
 @click.option('--no-cache', '-n', is_flag=True,
-              help='Re-download the show data instead of using the cached data.')
+              help='Re-download the show data instead of using\nthe cached data.')
 @click.version_option(version=__version__)
 def tvol(no_cache):
     """Download and manage tv shows.
@@ -122,9 +122,12 @@ def tvol(no_cache):
     Use `tvol COMMAND -h` to get help for each command.
 
     \b
-    TVOverlord source code is available at
-    https://github.com/8cylinder/tv-overlord
-    Any feature requests or bug reports should go there.
+       \/    TVOverlord source code is available at:
+     <(. )>  https://github.com/8cylinder/tv-overlord
+       ^
+      /^\\    Any feature requests or bug reports should go there.
+     //^\\\\
+    ^-._.--.-^^-.____._^-.^._
     """
     if no_cache:
         Config.use_cache = False

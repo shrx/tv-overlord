@@ -155,7 +155,7 @@ create a tvoverlord directory there.
    If using NZB searches, this is where the NZB files will be put.
 
 
-** How to use
+** Command line reference
 
 **** Add new
 
