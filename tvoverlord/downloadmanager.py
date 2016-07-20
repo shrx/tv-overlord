@@ -1,15 +1,18 @@
 
 import os
+import re
 import datetime
 import subprocess
 import sys
 from pprint import pprint as pp
 import logging
+import itertools
+import click
 
 from tvoverlord.config import Config
 from tvoverlord.db import DB
 from tvoverlord.notify import Tell
-from tvoverlord.tvutil import disk_info
+from tvoverlord.tvutil import disk_info, sxxexx, sxee
 
 
 class DownloadManager(DB):
@@ -33,12 +36,12 @@ class DownloadManager(DB):
 
     Two settings in config.ini control behaviour:
     torrent done: copy|move
-    clean torrents: yes|no
+    single file: yes|no
 
     If 'torrent done' is not defined, then nothing happens, else the
     content is copied or moved.
 
-    if 'clean torrents' is 'yes', then only the media file is
+    if 'single file' is 'yes', then only the media file is
     transfered.  If it's 'no', then whatever was downloaded is
     transfered to the destination.
     """
@@ -73,37 +76,39 @@ class DownloadManager(DB):
 
         if self.is_oneoff(torrent_hash):
             logging.info('Download is a one off, doing nothing.')
+            return
+
+        if not os.path.exists(Config.tv_dir):
+            logging.error('{} does not exist'.format(Config.tv_dir))
+            sys.exit()
+
+        source = filename
+        if Config.single_file:
+            # extract largest file from dir
+            source = self.get_show_file(filename)
+
+        if Config.template:
+            dest_filename = self.pretty_names(source, torrent_hash)
         else:
-            if Config.clean_torrents:
-                source = self.get_show_file(filename)  # extract largest file from dir
-                pretty_filename, destination_dir = self.pretty_names(source, torrent_hash)
-            else:
-                source = filename
-                pretty_filename, destination_dir = self.pretty_names(source, torrent_hash)
-                # if not cleaning filenames, don't use the pretty name
-                # returned from self.pretty_names, instead use the
-                # basename of the downloaded file
-                pretty_filename = os.path.basename(source)
+            dest_filename = os.path.basename(source)
 
-            if not os.path.exists(Config.tv_dir):
-                logging.error('{} does not exist'.format(Config.tv_dir))
-                sys.exit()
-            destination_dir = os.path.join(Config.tv_dir, destination_dir)
-            if not os.path.exists(destination_dir):
-                os.mkdir(destination_dir)
-                logging.info('creating dir: %s' % destination_dir)
+        dest = os.path.join(Config.tv_dir, dest_filename)
+        dest_path = os.path.dirname(dest)
 
-            destination_file = os.path.join(destination_dir, pretty_filename)
-            self.save_dest(torrent_hash, destination_file)
+        if not os.path.exists(dest):
+            os.makedirs(dest_path, exist_ok=True)
+            logging.info('creating dir: %s' % dest)
 
-            logging.info('copying %s to %s' % (source, destination_file))
-            if self.copy(source, destination_file):
-                Tell('%s done' % pretty_filename)
-                self.set_torrent_complete(torrent_hash)
-            else:
-                logging.info('Destination full')
-                Tell('Destination full')
-                sys.exit('Destination full')
+        self.save_dest(torrent_hash, dest)
+
+        logging.info('copying %s to %s' % (source, dest))
+        if self.copy(source, dest):
+            Tell('%s done' % os.path.basename(dest))
+            self.set_torrent_complete(torrent_hash)
+        else:
+            logging.info('Destination full')
+            Tell('Destination full')
+            sys.exit('Destination full')
 
     def copy(self, source, destination):
         """Copy files or dirs using the platform's copy tool"""
@@ -156,55 +161,83 @@ class DownloadManager(DB):
             sys.exit('{} does not exist'.format(start_path))
 
     def pretty_names(self, filename, torrent_hash):
-        """Generate a file name and dir name based on data from the database
+        fields = {}
+        fields['show'], fields['searchname'], fields['season'], fields['episode'] = self.get_show_info(torrent_hash)
+        fields['original'] = os.path.basename(filename)
+        fields['s00e00'] = sxxexx(fields['season'], fields['episode'])
+        fields['0x00'] = sxee(fields['season'], fields['episode'])
+        fields['season'] = fields['season'].rjust(2, '0')
+        fields['episode'] = fields['episode'].rjust(2, '0')
 
-        Args:
-            filename - the dir or file that the new name will be based on
-                It is used to get the file extention and and determine if
-                it's a dir or not.
-            torrent_hash - the hash is used to look up the data in the db
+        if fields['searchname'] is None:
+            fields['searchname'] = ''
 
-        Returns:
-            Returns two values, a generated filename and a generated dir name
-        """
-        show_name, season, episode = self.get_show_info(torrent_hash)
+        template = Config.template
+        if not template:
+            template = '{show}/{original}'
 
-        seperator = ' '
-        # new file name
-        file_show_name = show_name.replace(' ', seperator)
+        # search original filename for info
+        fields['resolution'] = ''
+        for res in Config.categories.resolution:
+            if res.lower() in filename.lower():
+                fields['resolution'] = res
+        fields['source'] = ''
+        for srs in Config.categories.sources:
+            if srs.lower() in filename.lower():
+                fields['source'] = srs
+        fields['codec'] = ''
+        for cod in Config.categories.codecs:
+            if cod.lower() in filename.lower():
+                fields['codec'] = cod
+        fields['audio'] = ''
+        for aud in Config.categories.audio:
+            if aud.lower() in filename.lower():
+                fields['audio'] = aud
 
-        seep = ''
-        if season and episode:
-            season = season.rjust(2, '0')
-            episode = episode.rjust(2, '0')
-            seep = 'S{}E{}'.format(season, episode)
-        else:
-            seep = datetime.date.today().isoformat()
-
-        basename = os.path.basename(filename)
-        res = ''
-        res_options = ['720p', '1080p']
-        for i in res_options:
-            if i in basename:
-                res = i
-
-        file_type = ''
+        ext = ''
         if os.path.isfile(filename):
-            file_type = os.path.splitext(filename)[1]
+            ext = os.path.splitext(filename)[-1]
 
-        newname = seperator.join([file_show_name, seep, res])
-        # remove any extraneous space or duplicate seperator charaters
-        newname = newname.strip(' ' + seperator)
-        newname = newname.replace(seperator + seperator, '')
+        broke = re.split('({.*?})', template)
+        if not broke[-1]:
+            broke = broke[:-1]
 
-        pretty_filename = newname + file_type
+        new = []
+        is_section = False
 
-        # new dir name
-        pretty_dirname = show_name  # .replace(' ', '_')
+        for section in broke:
+            if section.startswith('{'):
+                chunks = section.strip('{}').split('|')
+                field = chunks[0].lower()
+                filters = [i.lower() for i in chunks[1:]]
+                if not fields[field]:
+                    continue
+                complete = self.format(fields[field], filters)
+                new.append(complete)
+                is_section = True
+            else:
+                new.append(section)
+                is_section = False
+        # remove adjacent duplicates
+        new = [i[0] for i in itertools.groupby(new)]
+        if not is_section:
+            new = new[:-1]
+        new.append(ext)
+        full = ''.join(new)
 
-        # print '>>>', pretty_filename, pretty_dirname
-        logging.info('Pretty names: %s, %s' % (pretty_filename, pretty_dirname))
-        return pretty_filename, pretty_dirname
+        return full
+
+    def format(self, str, filters):
+        for filter in filters:
+            if filter == 'lower':
+                str = str.lower()
+            if filter == 'capitalize':
+                str = ' '.join([i.capitalize() for i in str.split()])
+            if filter == 'underscore':
+                str = str.replace(' ', '_')
+            if filter == 'dash':
+                str = str.replace(' ', '-')
+        return str
 
     def get_show_file(self, name):
         """Find the largest file in a dir

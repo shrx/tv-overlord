@@ -191,9 +191,9 @@ class Search(object):
         return fullname
 
     def config_command(self, chosen_show):
-        args = [i.replace('%magnet%', chosen_show) for i in Config.client]
+        args = [i.replace('{magnet}', chosen_show) for i in Config.client]
         if args == Config.client:
-            sys.exit('\nNo %magnet% replacement flag was found in config.ini, client section.')
+            sys.exit('\nNo {magnet} replacement flag was found in config.ini, client section.')
 
         return args
 
@@ -234,7 +234,9 @@ class Search(object):
                     sys.exit('\nNon X usage is not supported')
 
                 try:
-                    subprocess.Popen([app, chosen_show])
+                    subprocess.Popen([app, chosen_show],
+                                     stderr=subprocess.DEVNULL,
+                                     stdout=subprocess.DEVNULL)
                 except OSError:
                     sys.exit('\nYou do not have a bittorent client installed')
 

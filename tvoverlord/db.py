@@ -36,13 +36,16 @@ class DB(object):
         return rowsdata
 
     def get_show_info(self, hash):
-        sql = '''SELECT show_title, season, episode
+        sql = '''SELECT  show_title, tracking.season,
+                         tracking.episode,  search_engine_name
                  FROM tracking
-                 WHERE lower(chosen_hash) = lower(:hash)'''
+                 INNER JOIN shows
+                   ON tracking.show_title = shows.name
+                 WHERE  lower(chosen_hash) = lower(:hash)'''
         values = {'hash': hash}
 
         data = self.run_sql(sql, values, named_fields=True)[0]
-        return data['show_title'], data['season'], data['episode']
+        return data['show_title'], data['search_engine_name'], data['season'], data['episode']
 
     def is_oneoff(self, hash):
         sql = '''SELECT one_off FROM tracking

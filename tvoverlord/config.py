@@ -6,6 +6,7 @@ import shutil
 import sqlite3
 import click
 import shlex
+import types
 
 from pprint import pprint as pp
 
@@ -97,10 +98,23 @@ class Config:
         click.secho('-' * console_columns, fg='yellow')
         click.echo()
 
+    categories = types.SimpleNamespace()
+    categories.resolution = [
+            '1080p', '1080i', '720p', '720i', 'hr', '576p',
+            '480p', '368p', '360p']
+    categories.sources = [
+            'bluray', 'remux', 'dvdrip', 'webdl', 'hdtv', 'bdscr',
+            'dvdscr', 'sdtv', 'webrip', 'dsr', 'tvrip', 'preair',
+            'ppvrip', 'hdrip', 'r5', 'tc', 'ts', 'cam', 'workprint']
+    categories.codecs = [
+            '10bit', 'h265', 'h264', 'x264', 'xvid', 'divx']
+    categories.audio = [
+            'truehd', 'dts', 'dtshd', 'flac', 'ac3', 'dd5.1', 'aac', 'mp3']
+
     cfg = configparser.ConfigParser(allow_no_value=True, interpolation=None)
     cfg.read(user_config)
 
-    # OPTIONAL FIELDS
+    # Settings from config.ini ---------------------------------
     # [App Settings]
     try:
         ip = cfg.get('App Settings', 'ip whitelist')
@@ -110,9 +124,14 @@ class Config:
         ip = None
 
     try:
-        clean_torrents = True if cfg.get('App Settings', 'clean torrents') == 'yes' else False
+        single_file = True if cfg.get('App Settings', 'single file') == 'yes' else False
     except configparser.NoOptionError:
-        clean_torrents = False
+        single_file = False
+
+    try:
+        template = cfg.get('App Settings', 'template')
+    except configparser.NoOptionError:
+        template = False
 
     try:
         search_type = 'newsgroup' if cfg.get('App Settings', 'search type') == 'newsgroup' else 'torrent'
