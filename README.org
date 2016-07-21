@@ -93,12 +93,12 @@ To get help for each command, you can use:
 If you use Tranmission or Deluge as your bittorent client there is a
 script for each called transmission_done and deluge_done.  These will
 take the episode that was downloaded and copy it to a folder where it
-will be organized by show titles.
+will be organized by how the template string in config.ini is
+configured.
 
-If you set the "clean torrents" setting in config.ini to "yes", the
+If you set the "single file" setting in config.ini to "yes", the
 largest file (which is the video file) will be extracted and renamed
-to "show title SxxExx resolution.ext".  for example: "Fear the Walking
-Dead S02E06 720p.mkv".  Otherwise whatever was downloaded gets copied.
+otherwise whatever was downloaded gets copied.
 
 To set this up in transmission, go to preferences, then downloading
 and select the "call script when torrent is completed" then find the
