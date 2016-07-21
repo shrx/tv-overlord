@@ -29,15 +29,30 @@ class Config:
 
     console_columns, console_rows = click.get_terminal_size()
     console_columns = int(console_columns)
-    progressbar_width = 50
-    if console_columns < 90:
-        progressbar_width = 30
-    if console_columns < 80:
-        progressbar_width = 20
-
     if is_win:
         # On windows, columns are 1 char too wide
         console_columns = console_columns - 1
+
+    # progressbar settings
+    pb = types.SimpleNamespace()
+    pb.width = 50
+    if console_columns < 90:
+        pb.width = 30
+    if console_columns < 80:
+        pb.width = 20
+    if is_win:
+        pb.light = 'green'
+        pb.dark = 'blue'
+    else:
+        pb.light = 35
+        pb.dark = 23
+    pb.empty_char = ' '
+    pb.fill_char = '*'
+    pb.template = '%(label)s %(bar)s %(info)s'
+
+    # number of ip address octets to match to be considered ok.  Must
+    # be between 1 and 4
+    parts_to_match = 3
 
     _msg = ''
     # create app config dir
@@ -58,17 +73,23 @@ class Config:
     if not os.path.exists(db_file):
         sql = '''
             CREATE TABLE shows (
+                name TEXT,
                 search_engine_name TEXT,
+                display_name TEXT,
+                date_added TEXT,
                 network_status TEXT,
                 status TEXT,
                 thetvdb_series_id TEXT,
-                name TEXT,
+                ragetv_series_id TEXT,
+                imdb_series_id TEXT,
+                alt_series_id TEXT,
                 season NUMERIC,
                 episode NUMERIC,
                 next_episode TEXT,
                 airs_time TEXT,
                 airs_dayofweek TEXT,
-                ragetv_series_id TEXT
+                rating TEXT,
+                notes TEXT,
             );
             CREATE TABLE tracking (
                 download_date TEXT,

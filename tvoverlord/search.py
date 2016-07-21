@@ -17,12 +17,13 @@ from tvoverlord.tvutil import style, sxxexx
 # torrent search engings
 from tvoverlord.search_providers import extratorrent
 from tvoverlord.search_providers import bitsnoop
-from tvoverlord.search_providers import kickass_to
+# from tvoverlord.search_providers import kickass_to
 from tvoverlord.search_providers import thepiratebay_sx
 from tvoverlord.search_providers import onethreethreesevenx_to
-from tvoverlord.search_providers import torrentdownloads_me
+# from tvoverlord.search_providers import torrentdownloads_me
 from tvoverlord.search_providers import rarbg_to
 from tvoverlord.search_providers import eztv_ag
+from tvoverlord.search_providers import btstorr_cc
 
 # newsgroup search engines
 from tvoverlord.search_providers import nzbclub_com
@@ -38,7 +39,7 @@ class SearchError(Exception):
 
 
 class Search(object):
-    torrent_engines = [bitsnoop, extratorrent, thepiratebay_sx, kickass_to,
+    torrent_engines = [bitsnoop, extratorrent, thepiratebay_sx, btstorr_cc,
                        onethreethreesevenx_to, rarbg_to, eztv_ag]
     # , torrentdownloads_me # <-- a suspicious number of seeds
 
@@ -108,12 +109,6 @@ class Search(object):
 
         socket.setdefaulttimeout(3.05)
         episodes = []
-        if Config.is_win:
-            light = 'green'
-            dark = 'blue'
-        else:
-            light = 35
-            dark = 23
         with concurrent.futures.ThreadPoolExecutor(max_workers=8) as executor:
             res = {
                 executor.submit(
@@ -123,14 +118,18 @@ class Search(object):
             with click.progressbar(
                     concurrent.futures.as_completed(res),
                     label=U.style('  %s' % search_string, bold=True),
-                    empty_char=style(' ', fg=dark, bg=dark),
-                    fill_char=style('*', fg=light, bg=light),
+                    empty_char=style(Config.pb.empty_char,
+                                     fg=Config.pb.dark,
+                                     bg=Config.pb.dark),
+                    fill_char=style(Config.pb.fill_char,
+                                    fg=Config.pb.light,
+                                    bg=Config.pb.light),
                     length=len(engines),
                     show_percent=False,
                     show_eta=False,
                     item_show_func=self.progress_title,
-                    width=Config.progressbar_width,
-                    bar_template='%(label)s %(bar)s %(info)s',
+                    width=Config.pb.width,
+                    bar_template=Config.pb.template,
                     show_pos=True,
             ) as bar:
                 for future in bar:

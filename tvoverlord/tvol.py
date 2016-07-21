@@ -478,12 +478,6 @@ def showmissing(today):
     fp = FancyPrint()
 
     all_series = AllSeries()
-    if Config.is_win:
-        light = 'green'
-        dark = 'blue'
-    else:
-        light = 35
-        dark = 23
 
     if len(all_series) > 20:
         with click.progressbar(
@@ -491,10 +485,14 @@ def showmissing(today):
                 item_show_func=tfunct,
                 show_percent=False,
                 show_eta=False,
-                width=Config.progressbar_width,
-                empty_char=style(' ', fg=dark, bg=dark),
-                fill_char=style('*', fg=light, bg=light),
-                bar_template='%(label)s %(bar)s %(info)s',
+                width=Config.pb.width,
+                empty_char=style(Config.pb.empty_char,
+                                 fg=Config.pb.dark,
+                                 bg=Config.pb.dark),
+                fill_char=style(Config.pb.fill_char,
+                                fg=Config.pb.light,
+                                bg=Config.pb.light),
+                bar_template=Config.pb.template,
         ) as bar:
             for series in bar:
                 if series.is_missing(today):
