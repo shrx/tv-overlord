@@ -39,9 +39,9 @@ def transmission(debug):
         sys.exit(1)
 
     if debug:
-        click.echo('torrent_hash:', torrent_hash)
-        click.echo('torrent_dir:', torrent_dir)
-        click.echo('torrent_name:', torrent_name)
+        click.echo('torrent_hash: %s' % torrent_hash)
+        click.echo('torrent_dir: %s' % torrent_dir)
+        click.echo('torrent_name: %s' % torrent_name)
 
     DownloadManager(torrent_hash, torrent_dir,
                     torrent_name, debug=debug)
@@ -64,9 +64,9 @@ def deluge(torrent_hash, torrent_name, torrent_dir, debug):
     """
 
     if debug:
-        click.echo('torrent_hash:', torrent_hash)
-        click.echo('torrent_dir:', torrent_dir)
-        click.echo('torrent_name:', torrent_name)
+        click.echo('torrent_hash: %s' % torrent_hash)
+        click.echo('torrent_dir: %s' % torrent_dir)
+        click.echo('torrent_name: %s' % torrent_name)
 
     DownloadManager(torrent_hash, torrent_dir,
                     torrent_name, debug=debug)

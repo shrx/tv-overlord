@@ -51,7 +51,8 @@ class Provider():
                     magnet
                 ])
 
-        return show_data
+            # return without trying any more urls, this one has data.
+            return show_data
 
 
 if __name__ == '__main__':

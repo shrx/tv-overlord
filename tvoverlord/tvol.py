@@ -667,12 +667,18 @@ def redownload(criteria):
 
 
 @tvol.command(context_settings=CONTEXT_SETTINGS)
-def config():
+@click.option('--edit', '-e', is_flag=True,
+              help="Edit config.ini with default editor")
+def config(edit):
     """tvol's config information.
 
     Show information of where various files are, (config.ini,
     database) and a list of the search engines and the url's they use.
     """
+
+    if edit:
+        click.edit(filename=Config.user_config)
+        return
 
     import shutil
 

@@ -91,6 +91,7 @@ class DownloadManager(DB):
             dest_filename = self.pretty_names(source, torrent_hash)
         else:
             dest_filename = os.path.basename(source)
+        logging.info('Destination filename: %s' % dest_filename)
 
         dest = os.path.join(Config.tv_dir, dest_filename)
         dest_path = os.path.dirname(dest)
@@ -230,14 +231,15 @@ class DownloadManager(DB):
             new = new[:-1]
         new.append(ext)
         full = ''.join(new)
-        print(full)
-        exit()
+        full = os.path.normpath(full)
         return full
 
     def format(self, str, filters):
         for filter in filters:
             if filter == 'lower':
                 str = str.lower()
+            if filter == 'upper':
+                str = str.upper()
             if filter == 'capitalize':
                 str = ' '.join([i.capitalize() for i in str.split()])
             if filter == 'underscore':
