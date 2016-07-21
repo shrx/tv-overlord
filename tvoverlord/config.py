@@ -67,7 +67,7 @@ class Config:
         app_config = os.path.join(app_home, config_filename)
         shutil.copy(app_config, user_dir)
         _msg += 'config.ini created'
-        _msg += '  %' % app_config
+        _msg += '  %s' % os.path.join(user_dir, config_filename)
 
     # create db
     if not os.path.exists(db_file):
@@ -117,7 +117,6 @@ class Config:
         click.secho('-' * console_columns, fg='yellow')
         click.echo(_msg)
         click.secho('-' * console_columns, fg='yellow')
-        click.echo()
 
     categories = types.SimpleNamespace()
     categories.resolution = [
