@@ -201,7 +201,7 @@ class DownloadManager(DB):
         fields['all-space'] = ' '.join(all)
         fields['all-dash'] = '-'.join([i.replace(' ', '-') for i in all])
         fields['all-under'] = '_'.join([i.replace(' ', '_') for i in all])
-        
+
         ext = ''
         if os.path.isfile(filename):
             ext = os.path.splitext(filename)[-1]
