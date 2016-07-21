@@ -198,9 +198,7 @@ class DownloadManager(DB):
         all = [fields['show'], fields['s00e00'], fields['resolution'],
                fields['source'], fields['codec'], fields['audio']]
         all = [i for i in all if i]  # remove empty
-        fields['all-space'] = ' '.join(all)
-        fields['all-dash'] = '-'.join([i.replace(' ', '-') for i in all])
-        fields['all-under'] = '_'.join([i.replace(' ', '_') for i in all])
+        fields['all'] = ' '.join(all)
 
         ext = ''
         if os.path.isfile(filename):
@@ -232,7 +230,8 @@ class DownloadManager(DB):
             new = new[:-1]
         new.append(ext)
         full = ''.join(new)
-
+        print(full)
+        exit()
         return full
 
     def format(self, str, filters):
