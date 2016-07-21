@@ -20,7 +20,7 @@ from tvoverlord.history import History
 from tvoverlord.tvutil import style
 from tvoverlord.search import Search
 
-__version__ = '1.0'
+__version__ = '1.1'
 
 
 def edit_db(search_str):
@@ -522,7 +522,7 @@ def download(show_name, today, ignore, count, location):
     If SHOW_NAME is used, it will download any shows that match that title
     """
     if Config.ip and not ignore:
-        L = Location()
+        L = Location(parts_to_match=Config.parts_to_match)
         if not L.ips_match(Config.ip):
             L.message()
             sys.exit(1)
@@ -564,7 +564,7 @@ def nondbshow(search_string, count, location, ignore):
     client.  The download is not recorded in the database.
     """
     if Config.ip and not ignore:
-        L = Location()
+        L = Location(parts_to_match=Config.parts_to_match)
         if not L.ips_match(Config.ip):
             L.message()
             sys.exit(1)
@@ -693,6 +693,7 @@ def config():
     click.echo('TV dir:          %s' % Config.tv_dir)
     click.echo('Alt client:      %s' % Config.client)
     click.echo('Magnet dir:      %s' % Config.magnet_dir)
+    click.echo('Template:        %s' % Config.template)
 
     click.echo()
     for script in ['tvol', 'transmission_done', 'deluge_done']:
@@ -718,13 +719,13 @@ def config():
     click.secho('Ip addresse information:', fg=title, bold=bold, underline=ul)
     click.echo()
 
-    l = Location()
+    l = Location(parts_to_match=Config.parts_to_match)
     click.echo('Your current ip address:')
     click.secho('  %s' % l.ip, bold=True)
     if Config.ip:
         click.echo()
         click.echo('Your whitelisted ip addresses:')
-        short = l.ip # '.'.join(l.ip.split('.')[:-1])
+        short = '.'.join(l.ip.split('.')[:Config.parts_to_match])
         for ip in Config.ip:
             color = None
             if ip.startswith(short):

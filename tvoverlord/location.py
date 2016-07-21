@@ -16,7 +16,11 @@ class Location:
     are compared since the last octet is regularly changed by the ISP.
     """
 
-    def __init__(self):
+    def __init__(self, parts_to_match=4):
+        if parts_to_match not in [1, 2, 3, 4]:
+            sys.exit('parts_to_match not between 1 and 4')
+        self.parts = parts_to_match
+
         url = 'http://api.ipify.org'
         try:
             r = requests.get(url)
@@ -35,8 +39,7 @@ class Location:
             if not ip:
                 raise Exception('IP address cannot be empty')
             part_ip = ip.split('.')
-            # part_ip = '.'.join(part_ip[:2])
-            part_ip = '.'.join(part_ip[:4])
+            part_ip = '.'.join(part_ip[:self.parts])
             if self.ip.startswith(part_ip):
                 return True
 
@@ -70,7 +73,7 @@ class Location:
 
 if __name__ == '__main__':
     from config import Config
-    l = Location()
+    l = Location(parts_to_match=3)
     print('config ip:', Config.ip)
     print('my real ip:  ', l.ip)
     print('match?', l.ips_match(Config.ip))
