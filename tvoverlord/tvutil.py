@@ -4,12 +4,19 @@ import sys
 import ctypes
 import textwrap
 import re
+import urllib
 import click
 from pprint import pprint as pp
 from collections import namedtuple
 
 from tvoverlord.config import Config
 from tvoverlord.util import U
+
+
+def hash2magnet(magnet_hash, title):
+    magnet_url = 'magnet:?xt=urn:btih:{}&dn={}'
+    magnet = magnet_url.format(magnet_hash, urllib.parse.quote(title))
+    return magnet
 
 
 def sxxexx(season='', episode=''):
