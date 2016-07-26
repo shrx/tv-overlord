@@ -7,7 +7,6 @@ from pprint import pprint as pp
 import click
 
 from tvoverlord.search import Search, SearchError
-from tvoverlord.util import U
 from tvoverlord.tvutil import style
 from tvoverlord.config import Config
 from tvoverlord.consoletable import ConsoleTable
@@ -15,7 +14,7 @@ from tvoverlord.tracking import Tracking
 from tvoverlord.db import DB
 
 
-class Series:
+class Show:
     """
     Local db fields added:
     ----------------------

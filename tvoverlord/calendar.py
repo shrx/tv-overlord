@@ -3,7 +3,7 @@ from pprint import pprint as pp
 import click
 
 from tvoverlord.tvutil import style
-from tvoverlord.allseries import AllSeries
+from tvoverlord.shows import Shows
 from tvoverlord.config import Config
 
 
@@ -101,18 +101,18 @@ def calendar(show_name, show_all, sort_by_next, no_color, days):
     if show_name:
         filter_name = show_name
 
-    all_series = AllSeries(name_filter=filter_name, by_date=filter_date)
-    for series in all_series:
+    show = Shows(name_filter=filter_name, by_date=filter_date)
+    for show in show:
         broadcast_row = ''
-        title = series.db_name[:title_width].ljust(title_width)
+        title = show.db_name[:title_width].ljust(title_width)
         has_episode = False
         first_display_date = True
         last_days_away = 0
         last_date = 0
-        for i in series.series:  # season
-            for j in series.series[i]:  # episode
-                episode_number = series.series[i][j]['episodenumber']
-                b_date = series.series[i][j]['firstaired']
+        for i in show.series:  # season
+            for j in show.series[i]:  # episode
+                episode_number = show.series[i][j]['episodenumber']
+                b_date = show.series[i][j]['firstaired']
                 if not b_date:
                     continue  # some episode have no broadcast date?
                 split_date = b_date.split('-')
@@ -126,7 +126,7 @@ def calendar(show_name, show_all, sort_by_next, no_color, days):
                 days_away = (broadcast_date - today).days + 1
                 if days_away >= calendar_columns:
                     continue  # don't include days after the width of the screen
-                if series.series[i][j]['seasonnumber'] == '0':
+                if show.series[i][j]['seasonnumber'] == '0':
                     continue  # not interested in season 0 episodes.
 
                 if first_display_date:
@@ -137,7 +137,7 @@ def calendar(show_name, show_all, sort_by_next, no_color, days):
                     broadcast_row = before_first + episode_number
                     first_display_date = False
                     # set the next episode date in the db while we're here:
-                    series.set_next_episode(broadcast_date.date())
+                    show.set_next_episode(broadcast_date.date())
                 else:
                     episode_char_len = len(str(int(episode_number) - 1))
                     broadcast_row = broadcast_row + (

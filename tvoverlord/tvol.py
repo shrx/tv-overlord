@@ -1,23 +1,19 @@
 #!/usr/bin/env python3
 
-import datetime
 import sys
 import os
 import sqlite3
-import textwrap
 
 from pprint import pprint as pp
 from dateutil import parser as date_parser
 import click
 
-from tvoverlord.allseries import AllSeries
-from tvoverlord.series import Series
+from tvoverlord.shows import Shows
+from tvoverlord.show import Show
 from tvoverlord.config import Config
 from tvoverlord.tvutil import FancyPrint, dict_factory, style
-from tvoverlord.util import U
 from tvoverlord.location import Location
 from tvoverlord.history import History
-from tvoverlord.tvutil import style
 from tvoverlord.search import Search
 from tvoverlord.calendar import calendar as Calendar
 from tvoverlord.info import info as Info
@@ -235,11 +231,11 @@ def showmissing(today):
     """
     fp = FancyPrint()
 
-    all_series = AllSeries()
+    shows = Shows()
 
-    if len(all_series) > 20:
+    if len(shows) > 20:
         with click.progressbar(
-                all_series,
+                shows,
                 item_show_func=tfunct,
                 show_percent=False,
                 show_eta=False,
@@ -257,9 +253,9 @@ def showmissing(today):
                     fp.standard_print(series.show_missing())
         fp.done()
     else:
-        for series in all_series:
-            if series.is_missing(today):
-                fp.standard_print(series.show_missing())
+        for show in shows:
+            if show.is_missing(today):
+                fp.standard_print(show.show_missing())
         fp.done()
 
 
@@ -285,9 +281,9 @@ def download(show_name, today, ignore, count, location):
             L.message()
             sys.exit(1)
 
-    all_series = AllSeries(name_filter=show_name)
-    for series in all_series:
-        series.download_missing(count, today)
+    shows = Shows(name_filter=show_name)
+    for show in shows:
+        show.download_missing(count, today)
 
 
 @tvol.command(context_settings=CONTEXT_SETTINGS)
@@ -302,7 +298,7 @@ def addnew(show_name):
     If you search for 'Doctor Who', the result will be the original series,
     but if you want the modern one, search for 'Doctor Who 2005'
     """
-    new_show = Series(show_type='new')
+    new_show = Show(show_type='new')
     new_show.add_new(name=show_name)
 
 
@@ -327,7 +323,7 @@ def nondbshow(search_string, count, location, ignore):
             L.message()
             sys.exit(1)
 
-    nons = Series(show_type='nondb')
+    nons = Show(show_type='nondb')
     nons.non_db(search_string, count)
 
 

@@ -4,7 +4,7 @@ from pprint import pprint as pp
 from dateutil import parser as date_parser
 import click
 
-from tvoverlord.allseries import AllSeries
+from tvoverlord.shows import Shows
 from tvoverlord.config import Config
 from tvoverlord.tvutil import style
 
@@ -38,36 +38,36 @@ def info(show_name, show_all, sort_by_next,
         colors = {'links': 20, 'ended': 'red',
                   'last': 48, 'future': 22}
 
-    all_shows = AllSeries(name_filter=filter_name)
-    for series in all_shows:
-        title = series.db_name
+    shows = Shows(name_filter=filter_name)
+    for show in shows:
+        title = show.db_name
 
         # check if the series object has a status attribute. if it
         # doesn't then its probably a show that nothing is known
         # about it yet.
-        if 'status' not in dir(series):
+        if 'status' not in dir(show):
             continue
 
-        if series.status == 'Ended':
-            status = style(series.status, fg=colors['ended'])
+        if show.status == 'Ended':
+            status = style(show.status, fg=colors['ended'])
         else:
             status = ''
 
         # build first row of info for each show
         se = 'Last downloaded: S%sE%s' % (
-            str(series.db_current_season).rjust(2, '0'),
-            str(series.db_last_episode).rjust(2, '0'),
+            str(show.db_current_season).rjust(2, '0'),
+            str(show.db_last_episode).rjust(2, '0'),
         )
         se = style(se, fg=colors['last'])
 
         imdb_url = thetvdb_url = ''
         if show_links:
-            imdb_url = style('\n    IMDB.com:    http://imdb.com/title/%s' % series.imdb_id, fg=colors['links'])
-            thetvdb_url = style('\n    TheTVDB.com: http://thetvdb.com/?tab=series&id=%s' % series.id,
+            imdb_url = style('\n    IMDB.com:    http://imdb.com/title/%s' % show.imdb_id, fg=colors['links'])
+            thetvdb_url = style('\n    TheTVDB.com: http://thetvdb.com/?tab=series&id=%s' % show.id,
                                      fg=colors['links'])
 
-        if synopsis and series.overview:
-            paragraph = series.overview
+        if synopsis and show.overview:
+            paragraph = show.overview
             indent = '    '
             paragraph = textwrap.fill(paragraph,
                                       initial_indent=indent,
@@ -85,9 +85,9 @@ def info(show_name, show_all, sort_by_next,
         first_time = True
         episodes_list = []
         counter += 1
-        for i in series.series:  # season
-            for j in series.series[i]:  # episode
-                b_date = series.series[i][j]['firstaired']
+        for i in show.series:  # season
+            for j in show.series[i]:  # episode
+                b_date = show.series[i][j]['firstaired']
                 if not b_date: continue  # some episode have no broadcast date?
 
                 split_date = b_date.split('-')
@@ -103,8 +103,8 @@ def info(show_name, show_all, sort_by_next,
                 fancy_date = future_date.strftime('%b %d')
                 if broadcast_date >= today:
                     episodes_list.append('S%sE%s, %s (%s)' % (
-                        series.series[i][j]['seasonnumber'].rjust(2, '0'),
-                        series.series[i][j]['episodenumber'].rjust(2, '0'),
+                        show.series[i][j]['seasonnumber'].rjust(2, '0'),
+                        show.series[i][j]['episodenumber'].rjust(2, '0'),
                         fancy_date,
                         diff.days + 1,
                     ))
@@ -114,7 +114,7 @@ def info(show_name, show_all, sort_by_next,
                     if sort_by_next:
                         sort_key = str(diff.days).rjust(5, '0') + str(counter)
                     else:
-                        sort_key = series.db_name.replace('The ', '')
+                        sort_key = show.db_name.replace('The ', '')
 
         if not first_time:
             if episodes_list:
@@ -130,14 +130,14 @@ def info(show_name, show_all, sort_by_next,
                 show_info[sort_key] = first_row
 
         if ask_inactive:
-            if series.status == 'Ended' and first_time:
+            if show.status == 'Ended' and first_time:
                 click.echo(
                     '%s has ended, and all have been downloaded. Set as inactive? [y/n]: ' %
                     title)
                 set_status = click.getchar()
                 click.echo(set_status)
                 if set_status == 'y':
-                    series.set_inactive()
+                    show.set_inactive()
 
     keys = list(show_info.keys())
     keys.sort()
