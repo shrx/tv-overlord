@@ -55,7 +55,7 @@ class DownloadManager(DB):
                 filename=log_file,
                 level=logging.DEBUG)
         else:
-            sys.exit('{} does not exist'.format(path))
+            sys.exit('User dir: "{}" does not exist'.format(Config.user_dir))
 
         if debug:
             console = logging.StreamHandler()
@@ -79,7 +79,7 @@ class DownloadManager(DB):
             return
 
         if not os.path.exists(Config.tv_dir):
-            logging.error('{} does not exist'.format(Config.tv_dir))
+            logging.error('Destination: "{}" does not exist'.format(Config.tv_dir))
             sys.exit()
 
         source = filename
@@ -159,7 +159,7 @@ class DownloadManager(DB):
                     total_size += os.path.getsize(fp)
             return total_size
         else:
-            sys.exit('{} does not exist'.format(start_path))
+            sys.exit('Get size dir: "{}" does not exist'.format(start_path))
 
     def pretty_names(self, filename, torrent_hash):
         fields = {}
