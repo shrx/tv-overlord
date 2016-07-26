@@ -19,18 +19,27 @@ from tvoverlord.location import Location
 from tvoverlord.history import History
 from tvoverlord.tvutil import style
 from tvoverlord.search import Search
+from tvoverlord.calendar import calendar as Calendar
+from tvoverlord.info import info as Info
 
 __version__ = '1.1'
 
 
 def edit_db(search_str):
-    sql = 'SELECT * FROM shows WHERE name=:search'
+    try:
+        import readline
+    except ImportError:
+        pass
+
+    sql = 'SELECT * FROM shows WHERE name like :search'
     conn = sqlite3.connect(Config.db_file)
     conn.row_factory = dict_factory
     curs = conn.cursor()
-    values = {'search': search_str}
+    values = {'search': '%{}%'.format(search_str)}
     curs.execute(sql, values)
     row = curs.fetchone()
+    editcolor = 'green' if Config.is_win else 31
+    dirty = False
 
     if not row:
         click.echo('"%s" not found' % search_str)
@@ -38,34 +47,51 @@ def edit_db(search_str):
 
     is_error = False
 
-    click.echo('While editing a field, hit <enter> to leave it unchanged.')
-    click.echo('Type "<ctrl> c" to cancel all edits.\n')
-    try:
-        new_name = input('Name: (%s) ' % (row['name']))
-        if not new_name:
-            new_name = row['name']
+    click.echo()
+    click.echo('While editing a field, hit <enter> in an empty field to leave it')
+    click.echo('unchanged and skip to the next one.  Type "<ctrl> c" to cancel all')
+    click.echo('edits.  The current value is shown in ()\'s beside the field name.')
+    click.echo()
 
-        new_search_engine_name = input('Search engine title: (%s) ' % (row['search_engine_name']))
+    title = '%s' % row['name']
+    click.echo(style(title, bold=True))
+    click.echo()
+    try:
+        msg = style('Search engine name (%s): ', fg=editcolor)
+        new_search_engine_name = input(msg % (row['search_engine_name']))
         if not new_search_engine_name:
             new_search_engine_name = row['search_engine_name']
+        else:
+            dirty = True
 
-        new_season = input('Current season: (%s) ' % (row['season']))
+        msg = style('Current season (%s): ', fg=editcolor)
+        new_season = input(msg % (row['season']))
         if not new_season:
             new_season = str(row['season'])
+        else:
+            dirty = True
 
-        new_episode = input('Last episode: (%s) ' % (row['episode']))
+        msg = style('Last episode (%s): ', fg=editcolor)
+        new_episode = input(msg % (row['episode']))
         if not new_episode:
             new_episode = str(row['episode'])
+        else:
+            dirty = True
 
-        new_status = input('Status: (%s) ' % (row['status']))
+        msg = style('Status (%s): ', fg=editcolor)
+        new_status = input(msg % (row['status']))
         if not new_status:
             new_status = row['status']
-
-        click.echo()
+        else:
+            dirty = True
 
     except KeyboardInterrupt:
         click.echo('\nDatabase edit canceled.')
-        sys.exit()
+        sys.exit(0)
+
+    if dirty is False:
+        click.echo('No changes made.')
+        sys.exit(0)
 
     if not new_season.isdigit():
         click.echo('Error: Season must be a number')
@@ -80,18 +106,22 @@ def edit_db(search_str):
         is_error = True
 
     if is_error:
+        sys.exit(1)
+
+    click.echo()
+
+    if not click.confirm('Commit db edits?', default='Y'):
+        click.echo('Database edit cancelled.')
         sys.exit()
 
     sql = '''UPDATE shows SET
-                name=:name,
                 season=:season,
                 episode=:episode,
                 status=:status,
                 search_engine_name=:search_engine_name
              WHERE thetvdb_series_id=:tvdb_id'''
 
-    row_values = {'name': new_name,
-                  'season': new_season,
+    row_values = {'season': new_season,
                   'episode': new_episode,
                   'status': new_status,
                   'search_engine_name': new_search_engine_name,
@@ -155,139 +185,8 @@ def info(show_name, show_all, sort_by_next,
     will show information about any shows that match that string, else
     it will show informaton about all your shows.
     """
-    show_info = {}
-    counter = 0
-
-    # When the user specifies a single show, turn on --show-all
-    # because the show they are asking for might an inactive show
-    # and turn on --synopsis and --show-links since its only one
-    # show we may as well show everything
-    filter_name = ''
-    if show_name:
-        show_all = True
-        synopsis = True
-        show_links = True
-        filter_name = show_name
-
-    if Config.is_win:
-        colors = {'links': 'blue', 'ended': 'red',
-                  'last': 'cyan', 'future': 'green'}
-    else:
-        colors = {'links': 20, 'ended': 195, 'last': 48, 'future': 22}
-
-    all_shows = AllSeries(name_filter=filter_name)
-    for series in all_shows:
-        title = series.db_name
-
-        # check if the series object has a status attribute. if it
-        # doesn't then its probably a show that nothing is known
-        # about it yet.
-        if 'status' not in dir(series):
-            continue
-
-        if series.status == 'Ended':
-            status = style(series.status, fg=colors['ended'])
-        else:
-            status = ''
-
-        # build first row of info for each show
-        se = 'Last downloaded: S%sE%s' % (
-            str(series.db_current_season).rjust(2, '0'),
-            str(series.db_last_episode).rjust(2, '0'),
-        )
-        se = style(se, fg=colors['last'])
-
-        imdb_url = thetvdb_url = ''
-        if show_links:
-            imdb_url = style('\n    IMDB.com:    http://imdb.com/title/%s' % series.imdb_id, fg=colors['links'])
-            thetvdb_url = style('\n    TheTVDB.com: http://thetvdb.com/?tab=series&id=%s' % series.id,
-                                     fg=colors['links'])
-
-        if synopsis and series.overview:
-            paragraph = series.overview
-            indent = '    '
-            paragraph = textwrap.fill(paragraph,
-                                      initial_indent=indent,
-                                      subsequent_indent=indent)
-            synopsis = '\n%s' % paragraph
-
-        first_row_a = []
-        fancy_title = style(title, bold=True)
-        for i in [fancy_title + ',', se, status, imdb_url, thetvdb_url, synopsis]:
-            if i: first_row_a.append(i)
-        first_row = ' '.join(first_row_a)
-
-        # build 'upcoming episodes' list
-        today = datetime.datetime.today()
-        first_time = True
-        episodes_list = []
-        counter += 1
-        for i in series.series:  # season
-            for j in series.series[i]:  # episode
-                b_date = series.series[i][j]['firstaired']
-                if not b_date: continue  # some episode have no broadcast date?
-
-                split_date = b_date.split('-')
-                broadcast_date = datetime.datetime(
-                    int(split_date[0]), int(split_date[1]), int(split_date[2]))
-
-                if not show_all:
-                    if broadcast_date < today:
-                        continue
-
-                future_date = date_parser.parse(b_date)
-                diff = future_date - today
-                fancy_date = future_date.strftime('%b %d')
-                if broadcast_date >= today:
-                    episodes_list.append('S%sE%s, %s (%s)' % (
-                        series.series[i][j]['seasonnumber'].rjust(2, '0'),
-                        series.series[i][j]['episodenumber'].rjust(2, '0'),
-                        fancy_date,
-                        diff.days + 1,
-                    ))
-
-                if first_time:
-                    first_time = False
-                    if sort_by_next:
-                        sort_key = str(diff.days).rjust(5, '0') + str(counter)
-                    else:
-                        sort_key = series.db_name.replace('The ', '')
-
-        if not first_time:
-            if episodes_list:
-                indent = '    '
-                episode_list = 'Future episodes: ' + ' - '.join(episodes_list)
-                episodes = textwrap.fill(
-                    style(episode_list, fg=colors['future']),
-                    initial_indent=indent,
-                    subsequent_indent=indent
-                )
-                show_info[sort_key] = first_row + '\n' + episodes
-            else:
-                show_info[sort_key] = first_row
-
-        if ask_inactive:
-            if series.status == 'Ended' and first_time:
-                click.echo(
-                    '%s has ended, and all have been downloaded. Set as inactive? [y/n]: ' %
-                    title)
-                set_status = click.getchar()
-                click.echo(set_status)
-                if set_status == 'y':
-                    series.set_inactive()
-
-    keys = list(show_info.keys())
-    keys.sort()
-    full_output = ''
-    for i in keys:
-        full_output = full_output + show_info[i] + '\n\n'
-
-    if len(keys) < 4:
-        click.echo(full_output)
-    elif Config.is_win:
-        click.echo(full_output)
-    else:
-        click.echo_via_pager(full_output)
+    Info(show_name, show_all, sort_by_next,
+         ask_inactive, show_links, synopsis)
 
 
 @tvol.command(context_settings=CONTEXT_SETTINGS)
@@ -316,148 +215,7 @@ def calendar(show_name, show_all, sort_by_next, no_color, days):
     --days 10,20   will start ten days from now and then show 20 days ahead.
     --days -20,10  will go back 20 days from today and then show ahead from there.
     """
-    if no_color:
-        use_color = False
-    else:
-        use_color = True
-
-    # set colors for ui elements
-    if Config.is_win:
-        foreground = 'white'
-        header_color = 'blue'
-        date_color_1 = 'blue'
-        date_color_2 = 0
-        title_color_1 = 'blue'
-        title_color_2 = 0
-    else:
-        foreground = 225
-        header_color = 17
-        date_color_1 = 17
-        date_color_2 = 0
-        title_color_1 = 18
-        title_color_2 = 0
-
-    title_width = 20  # width of show titles column
-    spacer = ' '  # can be any string, any length
-    today = datetime.datetime.today()
-
-    if days:
-        days = days.split(',')
-        days = [int(x) for x in days]
-        if len(days) == 2:
-            today = today + datetime.timedelta(days=days[0])
-            calendar_columns = days[1]
-        if len(days) == 1:
-            calendar_columns = days[0]
-    else:
-        calendar_columns = Config.console_columns - (title_width + len(spacer))
-
-    # Days_chars can be any string of seven chars. eg: 'mtwtfSS'
-    days_chars = '.....::'  # first char is monday
-    monthstart = '|'  # marker used to indicate the begining of month
-
-    # build date title row
-    months_row = today.strftime('%b') + (' ' * calendar_columns)
-    days_row = ''
-    daybefore = today - datetime.timedelta(days=1)
-    for days in range(calendar_columns):
-        cur_date = today + datetime.timedelta(days=days)
-
-        if cur_date.month != daybefore.month:
-            days_row += monthstart
-            month = cur_date.strftime('%b')
-            month_len = len(month)
-            months_row = months_row[:days] + month + months_row[(days + month_len):]
-        else:
-            days_row += days_chars[cur_date.weekday()]
-
-        daybefore = cur_date
-
-    months_row = months_row[:calendar_columns]  # chop off any extra spaces created by adding the months
-    if use_color:
-        months_row = style(months_row, fg=foreground, bg=header_color)
-        days_row = style(days_row, fg=foreground, bg=header_color)
-    months_row = (' ' * title_width) + (' ' * len(spacer)) + months_row
-    days_row = (' ' * title_width) + (' ' * len(spacer)) + days_row
-    click.echo(months_row)
-    click.echo(days_row)
-
-    # build shows rows
-    step = 3
-    color_row = False
-    counter = 1
-    season_marker = '-'
-    filter_date = ''
-    filter_name = ''
-    if sort_by_next:
-        filter_date = True
-    if show_name:
-        filter_name = show_name
-
-    all_series = AllSeries(name_filter=filter_name, by_date=filter_date)
-    for series in all_series:
-        broadcast_row = ''
-        title = series.db_name[:title_width].ljust(title_width)
-        has_episode = False
-        first_display_date = True
-        last_days_away = 0
-        last_date = 0
-        for i in series.series:  # season
-            for j in series.series[i]:  # episode
-                episode_number = series.series[i][j]['episodenumber']
-                b_date = series.series[i][j]['firstaired']
-                if not b_date:
-                    continue  # some episode have no broadcast date?
-                split_date = b_date.split('-')
-                broadcast_date = datetime.datetime(
-                    int(split_date[0]), int(split_date[1]), int(split_date[2]))
-                if broadcast_date == last_date:
-                    continue  # sometimes multiple episodes have the same date, don't repeat them.
-                last_date = broadcast_date
-                if broadcast_date.date() < today.date():
-                    continue  # don't include episodes before today
-                days_away = (broadcast_date - today).days + 1
-                if days_away >= calendar_columns:
-                    continue  # don't include days after the width of the screen
-                if series.series[i][j]['seasonnumber'] == '0':
-                    continue  # not interested in season 0 episodes.
-
-                if first_display_date:
-                    if int(episode_number) > 1:
-                        before_first = season_marker * days_away
-                    else:
-                        before_first = ' ' * days_away
-                    broadcast_row = before_first + episode_number
-                    first_display_date = False
-                    # set the next episode date in the db while we're here:
-                    series.set_next_episode(broadcast_date.date())
-                else:
-                    episode_char_len = len(str(int(episode_number) - 1))
-                    broadcast_row = broadcast_row + (
-                        season_marker * (days_away - last_days_away - episode_char_len)) + episode_number
-
-                last_days_away = days_away
-
-                has_episode = True
-
-        broadcast_row = broadcast_row[:calendar_columns].ljust(calendar_columns)
-
-        if has_episode or show_all:
-            if use_color and color_row:
-                title = style(title, fg=foreground, bg=title_color_1)
-                broadcast_row = style(broadcast_row, fg=foreground, bg=date_color_1)
-            elif use_color and not color_row:
-                title = style(title, fg=foreground, bg=title_color_2)
-                broadcast_row = style(broadcast_row, fg=foreground, bg=date_color_2)
-            row = title + spacer + broadcast_row
-            click.echo(row)
-
-            if counter >= step:
-                counter = 0
-                color_row = True
-            else:
-                color_row = False
-                counter += 1
+    Calendar(show_name, show_all, sort_by_next, no_color, days)
 
 
 def tfunct(series):
@@ -575,21 +333,27 @@ def nondbshow(search_string, count, location, ignore):
 
 @tvol.command(context_settings=CONTEXT_SETTINGS)
 @click.argument('show_name')
-def editdbinfo(show_name):
+def editshow(show_name):
     """Edit the contents of the database.
 
     This allows you to change the fields in the database for a show.
     The fields affected are:
 
     \b
-    Name:                This is what is used for searching and folder names.
-    Search engine title: Sometimes a different name searches better.  If this
-                         is set, it will be used when searching.
-    Current season:      Setting this can be usefull if you add a new show to
-                         the db, but want to download starting at a later season.
-    Last episode:        Set this to change the last episode downloaded.
-    Status:              This can be 'active' or 'inactive'.  This can be used
-                         to turn off a show.
+    Search engine title:
+        Sometimes a different name searches better.  If this
+        is set, it will be used when searching.
+    \b
+    Current season:
+        Setting this can be usefull if you add a new show to
+        the db, but want to download starting at a later season.
+    \b
+    Last episode:
+        Set this to change the last episode downloaded.
+    \b
+    Status:
+        This can be 'active' or 'inactive'.  This can be used
+        to turn off a show.
     """
     edit_db(show_name)
 
