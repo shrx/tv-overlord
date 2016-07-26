@@ -30,6 +30,7 @@ class Provider():
                 continue
 
             for show in parsed['entries']:
+
                 if show['published_parsed']:
                     dt = datetime.fromtimestamp(
                         mktime(show['published_parsed']))
@@ -54,6 +55,8 @@ class Provider():
             # return without trying any more urls, this one has data.
             return show_data
 
+        # return the empty show_data empty array
+        return show_data
 
 if __name__ == '__main__':
     from tvoverlord.consoletable import ConsoleTable

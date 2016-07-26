@@ -89,6 +89,7 @@ class Config:
                 airs_time TEXT,
                 airs_dayofweek TEXT,
                 rating TEXT,
+                auto_download TEXT,
                 notes TEXT,
             );
             CREATE TABLE tracking (
