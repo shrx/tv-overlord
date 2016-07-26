@@ -41,33 +41,6 @@ class ConsoleTable:
           ]
         """
 
-        if Config.is_win:
-            self.colors = {
-                'title_fg': 'white',
-                'title_bg': 'green',
-                'header_fg': 'white',
-                'header_bg': 'blue',
-                'body_fg': 'white',
-                'body_bg': None,
-                'bar': 'green',
-                'hidef': 'green',
-                'warnfg': 'yellow',
-                'warnbg': 'black',
-            }
-        else:
-            self.colors = {
-                'title_fg': None,
-                'title_bg': 19,
-                'header_fg': None,
-                'header_bg': 17,
-                'body_fg': 'white',
-                'body_bg': None,
-                'bar': 19,
-                'hidef': 76,
-                'warnfg': 178,
-                'warnbg': 16,
-            }
-
         self.display_count = 5
         self.is_postdownload = False
 
@@ -97,18 +70,15 @@ class ConsoleTable:
     def set_header(self, header_items):
         self.table.header.titles = header_items
 
-    def set_colors(self, colors):
-        self.colors = colors
-
     def generate(self):
-
+        colors = Config.color.table
         title_bar = style(
             '|',
-            fg=self.colors['bar'],
-            bg=self.colors['header_bg'])
+            fg=colors.bar.fg,
+            bg=colors.header.bg,)
         bar = style(
             '|',
-            fg=self.colors['bar']
+            fg=colors.bar.fg,
         )
 
         # TITLE --------------------------------------------
@@ -116,14 +86,14 @@ class ConsoleTable:
         title = title.ljust(Config.console_columns)
         title = style(title,
                       bold=True,
-                      fg=self.colors['title_fg'],
-                      bg=self.colors['title_bg'])
+                      fg=colors.title.fg,
+                      bg=colors.title.bg)
         click.echo(title)
 
         # HEADER ROW ---------------------------------------
         header = self.table.header
-        header_row = [style(' ', bg=self.colors['header_bg'],
-                                 fg=self.colors['header_fg'])]
+        header_row = [style(' ', bg=colors.header.bg,
+                                 fg=colors.header.fg)]
         NUMBER_SPACE = 1
         BAR_COUNT = len(header.widths)
         flex_width = (Config.console_columns - sum(header.widths) -
@@ -145,8 +115,8 @@ class ConsoleTable:
 
             header_row.append(
                 style(title,
-                      bg=self.colors['header_bg'],
-                      fg=self.colors['header_fg']
+                      bg=colors.header.bg,
+                      fg=colors.header.fg,
                 )
             )
 
@@ -191,7 +161,7 @@ class ConsoleTable:
 
                 # if hi def, set the foreground to green
                 if is_hidef:
-                    row_item = style(row_item, fg=self.colors['hidef'])
+                    row_item = style(row_item, fg=colors.hidef.fg)
 
                 row_arr.append(row_item)
             click.echo(bar.join(row_arr))
@@ -288,12 +258,13 @@ class ConsoleTable:
         return choice
 
     def display_error(self, message):
+        colors = Config.color
         click.echo()
         click.echo('%s %s' % (style('[!]',
-                                    fg=self.colors['warnbg'],
-                                    bg=self.colors['warnfg']),
+                                    fg=colors.warn.fg,
+                                    bg=colors.warn.bg),
                               style(message,
-                                    fg=self.colors['warnfg'])))
+                                    fg=colors.warn.fg)))
 
 
 if __name__ == '__main__':

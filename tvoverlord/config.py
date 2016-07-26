@@ -6,7 +6,7 @@ import shutil
 import sqlite3
 import click
 import shlex
-import types
+from types import SimpleNamespace as SN
 
 from pprint import pprint as pp
 
@@ -34,7 +34,7 @@ class Config:
         console_columns = console_columns - 1
 
     # progressbar settings
-    pb = types.SimpleNamespace()
+    pb = SN()
     pb.width = 50
     if console_columns < 90:
         pb.width = 30
@@ -49,6 +49,57 @@ class Config:
     pb.empty_char = ' '
     pb.fill_char = '*'
     pb.template = '%(label)s %(bar)s %(info)s'
+
+    if is_win:
+        color = SN()
+        color.table = SN(
+            title=SN(fg='white', bg='green'),
+            header=SN(fg='white', bg='blue'),
+            body=SN(fg='white', bg=None),
+            bar=SN(fg='green', bg=None),
+            hidef=SN(fg='green', bg=None),
+        )
+        color.info = SN(
+            links=SN(fg='blue', bg=None),
+            ended=SN(fg='red', bg=None),
+            last=SN(fg='cyan', bg=None),
+            future=SN(fg='green', bg=None),
+        )
+        color.calendar = SN(
+            header=SN(fg='white', bg='blue'),
+            dates=SN(fg='white', bg=None),
+            titles=SN(fg='white', bg=None),
+            altdates=SN(fg='white', bg='blue'),
+            alttitles=SN(fg='white', bg='blue'),
+        )
+        color.missing = SN(fg='green', bg=None)
+        color.edit = SN(fg='yellow', bg='black')
+        color.warn = SN(fg='yellow', bg='black')
+    else:
+        color = SN()
+        color.table = SN(
+            title=SN(fg=None, bg=19),
+            header=SN(fg=None, bg=17),
+            body=SN(fg='white', bg=None),
+            bar=SN(fg=19, bg=None),
+            hidef=SN(fg=76, bg=None),
+        )
+        color.info = SN(
+            links=SN(fg=20, bg=None),
+            ended=SN(fg='red', bg=None),
+            last=SN(fg=48, bg=None),
+            future=SN(fg=22, bg=None),
+        )
+        color.calendar = SN(
+            header=SN(fg='white', bg=17),
+            dates=SN(fg='white', bg=None),
+            titles=SN(fg='white', bg=None),
+            altdates=SN(fg='white', bg=17),
+            alttitles=SN(fg='white', bg=18),
+        )
+        color.missing = SN(fg='green', bg=None)
+        color.edit = SN(fg='yellow', bg='black')
+        color.warn = SN(fg='yellow', bg='black')
 
     # number of ip address octets to match to be considered ok.  Must
     # be between 1 and 4
@@ -119,7 +170,7 @@ class Config:
         click.echo(_msg)
         click.secho('-' * console_columns, fg='yellow')
 
-    categories = types.SimpleNamespace()
+    categories = SN()
     categories.resolution = [
             '1080p', '1080i', '720p', '720i', 'hr', '576p',
             '480p', '368p', '360p']
