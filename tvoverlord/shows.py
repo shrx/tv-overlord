@@ -1,14 +1,14 @@
 import sqlite3
 import click
 
-from tvoverlord.series import Series
+from tvoverlord.show import Show
 from tvoverlord.config import Config
 from tvoverlord.tvutil import dict_factory
 
 
-class AllSeries:
+class Shows:
     """
-    Return an iterable class of Series
+    Return an iterable class of Shows
 
     Methods
     -------
@@ -40,9 +40,9 @@ class AllSeries:
     def __next__(self):
         if self.i == len(self.dbdata):
             raise StopIteration
-        series = Series(dbdata=self.dbdata[self.i])
+        show = Show(dbdata=self.dbdata[self.i])
         self.i += 1
-        return series
+        return show
 
     def __len__(self):
         return self.show_count

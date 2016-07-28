@@ -58,7 +58,6 @@ class Search(object):
 
         # for info about each search
         # click.echo('%s -- %s' % (search.name, len(search_results)))
-
         return search_results + [search.name]
 
     def search(self, search_string, season=False,

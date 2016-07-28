@@ -298,15 +298,12 @@ way will not be recorded in your database.
  + =--ignore= does not check if you are connected to a vpn.
    This is documented in the tv_config.ini section
 
-**** Edit db info
+**** Edit show
 
-: tvol editdbinfo SHOWNAME
+: tvol editshow SHOWNAME
 
-Edit the data in the database for show name.  The show name must be
-exacty as what shows in =tvol info showname= including the year if it
-shows in the title.
-
-- Name :: This is what is used for searching and folder names.
+Edit the data in the database for show name.  If =SHOWNAME= is a partial
+name that matches more than one show, the first match will be used.
 
 - Search engine title :: Sometimes a different name searches better.
      If this is set, it will be used when searching.
@@ -318,6 +315,14 @@ shows in the title.
 
 - Status :: This can be 'active' or 'inactive'.  This can be used to
      turn off a show.
+
+**** Config info
+
+: tvol config [--edit]
+
+This will output information about various paths and search engines.
+If you add the =--edit= option, the config.ini file will be opened with
+the default command line editor.
 
 
 **** Get config information
