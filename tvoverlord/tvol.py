@@ -20,7 +20,7 @@ from tvoverlord.history import History
 from tvoverlord.tvutil import style
 from tvoverlord.search import Search
 
-__version__ = '1.1'
+__version__ = '1.3'
 
 
 def edit_db(search_str):

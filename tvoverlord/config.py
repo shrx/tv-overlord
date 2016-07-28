@@ -58,16 +58,16 @@ class Config:
     # create app config dir
     if not os.path.exists(user_dir):
         os.makedirs(user_dir)
-        _msg += 'App config dir created'
-        _msg += '  %s' % user_dir
+        _msg += 'App config dir created\n'
+        _msg += '  %s\n' % user_dir
 
     # create config.ini
     if not os.path.exists(user_config):
         app_home = os.path.join(os.path.dirname(os.path.realpath(__file__)))
         app_config = os.path.join(app_home, config_filename)
         shutil.copy(app_config, user_dir)
-        _msg += 'config.ini created'
-        _msg += '  %s' % os.path.join(user_dir, config_filename)
+        _msg += 'config.ini created\n'
+        _msg += '  %s\n' % os.path.join(user_dir, config_filename)
 
     # create db
     if not os.path.exists(db_file):
@@ -110,8 +110,8 @@ class Config:
         curs.executescript(sql)
         conn.commit()
         conn.close()
-        _msg += 'Database has been created'
-        _msg += '  %s' % db_file
+        _msg += 'Database has been created\n'
+        _msg += '  %s\n' % db_file
 
     if _msg:
         click.secho('-' * console_columns, fg='yellow')

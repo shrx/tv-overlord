@@ -1,9 +1,9 @@
 
 [[http://i.imgur.com/S9hlqg0.png]]
 
-TV Overlord is a command line tool to download and manage TV shows
-from newsgroups or bittorent.  It will download nzb files or magnet
-links.
+TV Overlord is a *semi automatic* command line tool to download and
+manage TV shows from newsgroups or bittorent.  It will download nzb
+files or magnet links.
 
 It searches multiple sites simultaneously and combines the results into
 one list to select from.
@@ -21,7 +21,7 @@ For torrent files, you can also have your shows organized after
 downloading.  If you use transmission or deluge, those clients can be
 configured to call a script when each torrent is complete.  This
 script will extract the video file from the downloaded folder, rename
-it, and put it in a seperate folder organized into sub folders named
+it, and put it in a separate folder organized into sub folders named
 for each tv show.
 
 There are several bittorent search providers and two NZB search
@@ -29,6 +29,15 @@ providers and new ones can be added fairly easily.  See the
 search providers [[https://github.com/8cylinder/tv-overlord/tree/master/tv/search_providers][README.org]], or by making a feature request in issues
 or a pull request.
 
+**** Why semi automatic
+
+Semi automatic means that you manually run it and select from a list
+each episode you want.  The reason for this is that not all torrents
+follow a naming convention that is parsable, especially for more obscure
+shows.  So instead of writing a ton of code to try and figure out
+information about an episode, I'll use the parser built into my brain.
+Also I like that it runs when I like, its light weight and there are
+no background processes.
 
 **** Requirements
 
@@ -67,7 +76,7 @@ After its installed, you run it by typing:
 
 : tvol --help
 
-The first time it's run, it will create the apropriate config dir for
+The first time it's run, it will create the appropriate config dir for
 your platform and put the database and config.ini there.
 
 After that you can start to use it, type:
@@ -90,7 +99,7 @@ To get help for each command, you can use:
 
 **** Setup the post download script
 
-If you use Tranmission or Deluge as your bittorent client there is a
+If you use Transmission or Deluge as your bittorent client there is a
 script for each called transmission_done and deluge_done.  These will
 take the episode that was downloaded and copy it to a folder where it
 will be organized by how the template string in config.ini is
@@ -127,7 +136,7 @@ create a tvoverlord directory there.
    If used, TV Overlord will issue a warning if not connected to a
    vpn.  This should be one or more ip addresses (seperated by a comma)
    that your vpn provider uses.  If your current ip address doesn't
-   match one of the whitelisted ip's, tvol will stop.  It uses
+   match one of the white-listed ip's, tvol will stop.  It uses
    http://api.ipify.org to get the current ip address.
 
  + =clean torrents: (yes|no)=\\
@@ -181,7 +190,7 @@ This will list any shows that are available to download.
 : tvol download [--today] [--ignore] [--count NUM]
 :               [--location FILEPATH] [SHOWNAME]
 
-For each show thats ready to download, it will ask you which one you
+For each show that's ready to download, it will ask you which one you
 want to download.
 
  + =--count=  sets the number of results to display, the default is 5.
@@ -224,7 +233,7 @@ defaults to the width of the console.
    complete, filename, destination.  If not specified it defaults to
    =date,title,complete,destination=.
 
-This command generates a tab seperated list.  This is usefull for
+This command generates a tab separated list.  This is useful for
 piping to various unix commands or for import into a spreadsheet.  For
 example this command will format the output into columns.
 
@@ -236,7 +245,7 @@ example this command will format the output into columns.
 
 Copy the file from the directory where the bittorrent client put the
 downloads to the 'tv dir' specified in the config.ini.  This is only
-relevent if you are using the post download scripts.  Also this will
+relevant if you are using the post download scripts.  Also this will
 only be nessesary if the copy fails when the post download script is
 called by the bittorent client.
 
@@ -249,7 +258,7 @@ called by the bittorent client.
 
 : tvol redownload [CRITERIA]
 
-Re download a show.  This may be nessesary if a downloaded show is
+Re download a show.  This may be necessary if a downloaded show is
 accidentally deleted.
 
  + =CRITERIA= can be days, a date or a show title.  If its days, it will
@@ -302,7 +311,7 @@ shows in the title.
 - Search engine title :: Sometimes a different name searches better.
      If this is set, it will be used when searching.
 
-- Current season :: Setting this can be usefull if you add a new show
+- Current season :: Setting this can be useful if you add a new show
      to the db, but want to download starting at a later season.
 
 - Last episode :: Set this to change the last episode downloaded.
@@ -342,7 +351,7 @@ This will show all the available shows for the current week from Sun
 to Sat.
 
 =tvol history 1 | column -ts$'\t';= \\
-Todays downloads formated into columns.
+Today's downloads formatted into columns.
 
 =tvol history list 365 > shows.tab= \\
 All episodes downloaded in the last year put into a file that can be
