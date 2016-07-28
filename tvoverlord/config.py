@@ -141,7 +141,7 @@ class Config:
                 airs_dayofweek TEXT,
                 rating TEXT,
                 auto_download TEXT,
-                notes TEXT,
+                notes TEXT
             );
             CREATE TABLE tracking (
                 download_date TEXT,
