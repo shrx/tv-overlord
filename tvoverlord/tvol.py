@@ -359,10 +359,10 @@ def parse_history(criteria):
     # work, pass it on as a string which should be a show title
     try:
         criteria = int(criteria)
-    except:
+    except ValueError:
         try:
             criteria = date_parser.parse(criteria)
-        except:
+        except ValueError:
             criteria = criteria
     return criteria
 

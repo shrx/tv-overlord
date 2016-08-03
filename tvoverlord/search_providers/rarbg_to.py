@@ -30,7 +30,11 @@ class Provider():
         except requests.exceptions.ConnectionError:
             return []
 
+        if r.status_code == 403:
+            return []
+
         j = r.json()
+
         token = j['token']
 
         search_data = []
