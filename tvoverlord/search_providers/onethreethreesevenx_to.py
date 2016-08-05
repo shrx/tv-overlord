@@ -28,6 +28,8 @@ class Provider():
             search_tpl = '{}/sort-search/{}/seeders/desc/1/'
             search_string = urllib.parse.quote(search)
             url = search_tpl.format(self.base_url, search_string)
+            self.url = url
+
             try:
                 r = requests.get(url)
             except requests.exceptions.ConnectionError:

@@ -24,13 +24,15 @@ class Provider():
         show_data = []
         for try_url in self.provider_urls:
             url = '%s/rss/type/search/x/%s/' % (try_url, query)
+            self.url = url
             parsed = feedparser.parse(url)
 
             if len(parsed['entries']) == 0:
                 continue
 
             for show in parsed['entries']:
-
+                if not show:
+                    continue
                 if show['published_parsed']:
                     dt = datetime.fromtimestamp(
                         mktime(show['published_parsed']))

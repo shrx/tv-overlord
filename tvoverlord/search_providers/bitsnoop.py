@@ -18,6 +18,7 @@ class Provider(object):
     ]                                     # it causes the search to fail
     name = 'BitSnoop'
     shortname = 'BS'
+    url = ''
 
     @staticmethod
     def se_ep (season, episode, show_title):

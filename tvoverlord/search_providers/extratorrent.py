@@ -55,14 +55,13 @@ class Provider(object):
 
             url = '{}/rss.xml?type=search&cid={}&search=%s'.format(try_url, lookfor)
             full_url = url % encoded_search
-            # click.echo('>', full_url)
+            self.url = full_url
 
             parsed = feedparser.parse(full_url)
 
             if len(parsed['entries']) == 0:
                 continue
 
-            self.url = self.url + ' ' + full_url
 
             for show in parsed['entries']:
                 dt = datetime.fromtimestamp(mktime(show['published_parsed']))

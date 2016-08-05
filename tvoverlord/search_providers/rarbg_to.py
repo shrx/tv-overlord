@@ -31,6 +31,7 @@ class Provider():
             return []
 
         if r.status_code == 403:
+            self.url = url
             return []
 
         j = r.json()

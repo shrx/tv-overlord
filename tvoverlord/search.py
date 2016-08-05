@@ -68,6 +68,25 @@ class Search(object):
         self.se_order.append(search.name)
         return search_results + [search.name]
 
+    def test_each(self, search_string):
+        engines = self.torrent_engines + self.newsgroup_engines
+        indent = '  '
+        click.echo('Searching for: %s' % search_string)
+        for engine in engines:
+            search = engine.Provider()
+            name = '%s (%s)' % (search.name, search.shortname)
+            click.echo(style(name, bold=True))
+
+            results = search.search(search_string)
+
+            click.echo(indent + style(search.url, fg='blue', ul=True))
+            results_count = str(len(results))
+            if results_count == '0':
+                results_count = style(results_count, fg='red')
+            else:
+                results_count = style(results_count, fg='green')
+            click.echo(indent + 'Search results: %s' % results_count)
+
     def search(self, search_string, season=False,
                episode=False, search_type='torrent'):
         """

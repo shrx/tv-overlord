@@ -77,6 +77,7 @@ class Provider(object):
             'nfo': 0,   # has to have nfo  1=yes, 0=no
         }
         full_url = url + urllib.parse.urlencode(query)
+        self.url = full_url
 
         parsed = feedparser.parse(full_url)
 

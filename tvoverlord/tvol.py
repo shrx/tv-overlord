@@ -429,7 +429,9 @@ def redownload(criteria):
 @tvol.command(context_settings=CONTEXT_SETTINGS)
 @click.option('--edit', '-e', is_flag=True,
               help="Edit config.ini with default editor")
-def config(edit):
+@click.option('--test-se', type=str,
+              help="Test each search engine")
+def config(edit, test_se):
     """tvol's config information.
 
     Show information of where various files are, (config.ini,
@@ -438,6 +440,11 @@ def config(edit):
 
     if edit:
         click.edit(filename=Config.user_config)
+        return
+
+    if test_se:
+        search = Search()
+        search.test_each(test_se)
         return
 
     import shutil

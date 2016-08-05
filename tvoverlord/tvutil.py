@@ -39,11 +39,11 @@ def sxee(season='', episode=''):
     return se
 
 
-def style(text, fg=None, bg=None, bold=None, strike=None):
+def style(text, fg=None, bg=None, bold=None, strike=None, ul=None):
     if Config.is_win:
-        fancy = click.style(text, fg=fg, bg=bg, bold=bold)
+        fancy = click.style(text, fg=fg, bg=bg, bold=bold, underline=ul)
     else:
-        fancy = U.style(text, fg=fg, bg=bg, bold=bold, strike=strike)
+        fancy = U.style(text, fg=fg, bg=bg, bold=bold, strike=strike, ul=ul)
     return fancy
 
 

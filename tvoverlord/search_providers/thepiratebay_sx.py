@@ -15,7 +15,7 @@ class Provider (object):
     ]
     name = 'The Pirate Bay'
     shortname = 'PB'
-    
+
     url = ''
 
     @staticmethod
@@ -51,7 +51,7 @@ class Provider (object):
                 pretty_name = search_string
                 search_string = urllib.parse.quote(search)
                 url = '%s/search/%s/0/7/0' % (try_url, search_string)
-                self.url = self.url + ' ' + url
+                self.url = url
                 urls += '%s/0/7/0 ' % search_string
                 #click.echo('>', url)
                 try:
@@ -74,24 +74,24 @@ class Provider (object):
                     seeds = 0
 
                     tds = tr.find_all('td')[1:]
-                    name = tds[0].find('a', {'class':'detLink'}).string
 
                     # when searching using 'nondbshow', sometimes the last
                     # tr gets mangled.  All that can be extracted is the
                     # torrent name and magnet url.  This only happends
                     # when using BeautifulSoup, not a browser.
                     try:
+                        name = tds[0].find('a', {'class':'detLink'}).string
                         details = tds[0].find('font').contents[0].split(', ')
                         date = details[0].replace('Uploaded ', '')
                         size = details[1].replace('Size ', '').replace('MiB', 'MB').replace('GiB', 'GB')
                         seeds = tds[1].string
+                        magnet = tds[0].find('a', href=re.compile('magnet:.*')).attrs['href']
                     except IndexError:
                         # sometimes some fields are empty, so trying to
                         # access them throws an IndexError.  We can safely
                         # skip them.
                         pass
 
-                    magnet = tds[0].find('a', href=re.compile('magnet:.*')).attrs['href']
 
                     show_data.append([name, size, date, seeds, self.shortname, magnet])
 
