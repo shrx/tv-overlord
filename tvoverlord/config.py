@@ -196,6 +196,11 @@ class Config:
         ip = None
 
     try:
+        email = cfg.get('App Settings', 'email')
+    except configparser.NoOptionError:
+        email = False
+
+    try:
         single_file = True if cfg.get('App Settings', 'single file') == 'yes' else False
     except configparser.NoOptionError:
         single_file = False
