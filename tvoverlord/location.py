@@ -16,11 +16,7 @@ class Location:
     are compared since the last octet is regularly changed by the ISP.
     """
 
-    def __init__(self, parts_to_match=4):
-        if parts_to_match not in [1, 2, 3, 4]:
-            sys.exit('parts_to_match not between 1 and 4')
-        self.parts = parts_to_match
-
+    def __init__(self):
         url = 'http://api.ipify.org'
         try:
             r = requests.get(url)
@@ -29,17 +25,20 @@ class Location:
                 url))
         self.ip = r.text
 
-    def ips_match(self, ips):
+    def ips_match(self, ips, parts_to_match=4):
         """If the current ip matches one of the white listed ones.
 
         If they match, that means we are connected via a VPN.
         """
+        if parts_to_match not in [1, 2, 3, 4]:
+            sys.exit('parts_to_match not between 1 and 4')
+
         self.ips = ips
         for ip in ips:
             if not ip:
                 raise Exception('IP address cannot be empty')
             part_ip = ip.split('.')
-            part_ip = '.'.join(part_ip[:self.parts])
+            part_ip = '.'.join(part_ip[:parts_to_match])
             if self.ip.startswith(part_ip):
                 return True
 
@@ -69,6 +68,30 @@ class Location:
             click.edit(filename=Config.user_config)
         else:
             click.echo('Config is here: %s' % Config.user_config)
+
+    def getipintel(self):
+        """http://getipintel.net/"""
+        contact_email = Config.email
+
+        # if probability from getIPIntel is greater than this value, return 1
+        max_probability = 0.99
+        timeout = 5.00
+
+        # if you wish to use flags or json format, edit the request below
+        url = "http://check.getipintel.net/check.php?ip={}&contact={}"
+        url = url.format(self.ip, contact_email)
+        result = requests.get(url, timeout=timeout)
+
+        if (result.status_code != 200) or (int(result.content) < 0):
+            click.echo('An error occured while querying GetIPIntel')
+            click.echo('status code: %s' % result.status_code)
+            click.echo('contents:    %s' % result.content)
+            click.echo('current ip:  %s' % self.ip)
+
+        if (float(result.content) > max_probability):
+            return True  # is VPN
+        else:
+            return False  # not VPN
 
 
 if __name__ == '__main__':

@@ -275,11 +275,21 @@ def download(show_name, today, ignore, count, location):
 
     If SHOW_NAME is used, it will download any shows that match that title
     """
-    if Config.ip and not ignore:
-        L = Location(parts_to_match=Config.parts_to_match)
-        if not L.ips_match(Config.ip):
-            L.message()
-            sys.exit(1)
+    if not ignore and (Config.email or Config.ip):
+        L = Location()
+        if Config.email:
+            if not L.getipintel():
+                warning = click.style(
+                    'Warning:', bg='red', fg='white', bold=True)
+                msg = '{warning} not connected to a VPN'
+                click.echo(msg.format(warning=warning))
+                sys.exit(1)
+        if Config.ip:
+            if not L.ips_match(
+                    Config.ip,
+                    parts_to_match=Config.parts_to_match):
+                L.message()
+                sys.exit(1)
 
     shows = Shows(name_filter=show_name)
     for show in shows:
@@ -359,10 +369,10 @@ def parse_history(criteria):
     # work, pass it on as a string which should be a show title
     try:
         criteria = int(criteria)
-    except:
+    except ValueError:
         try:
             criteria = date_parser.parse(criteria)
-        except:
+        except ValueError:
             criteria = criteria
     return criteria
 
@@ -429,7 +439,9 @@ def redownload(criteria):
 @tvol.command(context_settings=CONTEXT_SETTINGS)
 @click.option('--edit', '-e', is_flag=True,
               help="Edit config.ini with default editor")
-def config(edit):
+@click.option('--test-se', type=str,
+              help="Test each search engine")
+def config(edit, test_se):
     """tvol's config information.
 
     Show information of where various files are, (config.ini,
@@ -438,6 +450,11 @@ def config(edit):
 
     if edit:
         click.edit(filename=Config.user_config)
+        return
+
+    if test_se:
+        search = Search()
+        search.test_each(test_se)
         return
 
     import shutil

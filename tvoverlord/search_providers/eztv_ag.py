@@ -29,6 +29,7 @@ class Provider():
             search = search.replace(' ', '-')
             search = urllib.parse.quote(search)
             url = search_tpl.format(self.base_url, search)
+            self.url = url
             try:
                 r = requests.get(url)
             except requests.exceptions.ConnectionError:
@@ -88,8 +89,12 @@ class Provider():
 
         html = r.content
         soup = BeautifulSoup(html, 'html.parser')
-        seeds = soup.find('span', class_='stat_red').get_text(strip=True)
-        seeds = seeds.replace(',', '')
+        seeds = soup.find('span', class_='stat_red')#.get_text(strip=True)
+        if seeds:
+            seeds = seeds.get_text(strip=True)
+            seeds = seeds.replace(',', '')
+        else:
+            seeds = 0
         # date = section.find_all('span')[7].get_text(strip=True)
 
         # title size date seeds shortname magnet

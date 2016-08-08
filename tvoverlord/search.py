@@ -38,6 +38,11 @@ class SearchError(Exception):
         return repr(self.value)
 
 
+def write_order(shows):
+    logfile = '/home/sm/projects/media-downloader/tvoverlord/show_order.org'
+    with open(logfile, 'a') as f:
+        f.write('| %s |\n' % (' | '.join(shows)))
+
 class Search(object):
     torrent_engines = [bitsnoop, extratorrent, thepiratebay_sx, btstorr_cc,
                        onethreethreesevenx_to, rarbg_to, eztv_ag]
@@ -47,10 +52,12 @@ class Search(object):
     newsgroup_engines = [nzbclub_com]
     # , nzbindex_com # <-- rss feed not working
 
+
     def __init__(self):
         self.season = ''
         self.episode = ''
         self.show_name = ''
+        self.se_order = []
 
     def job(self, engine, search_string, season, episode):
         search = engine.Provider()
@@ -58,7 +65,27 @@ class Search(object):
 
         # for info about each search
         # click.echo('%s -- %s' % (search.name, len(search_results)))
+        self.se_order.append(search.name)
         return search_results + [search.name]
+
+    def test_each(self, search_string):
+        engines = self.torrent_engines + self.newsgroup_engines
+        indent = '  '
+        click.echo('Searching for: %s' % search_string)
+        for engine in engines:
+            search = engine.Provider()
+            name = '%s (%s)' % (search.name, search.shortname)
+            click.echo(style(name, bold=True))
+
+            results = search.search(search_string)
+
+            click.echo(indent + style(search.url, fg='blue', ul=True))
+            results_count = str(len(results))
+            if results_count == '0':
+                results_count = style(results_count, fg='red')
+            else:
+                results_count = style(results_count, fg='green')
+            click.echo(indent + 'Search results: %s' % results_count)
 
     def search(self, search_string, season=False,
                episode=False, search_type='torrent'):
@@ -102,9 +129,10 @@ class Search(object):
 
         if self.search_type == 'torrent':
             engines = self.torrent_engines
-        else:
+        elif self.search_type == 'nzb':
             engines = self.newsgroup_engines
-            self.engine = engines[0]
+        else:
+            raise ValueError('search_type can only be "torrent" or "nzb"')
 
         socket.setdefaulttimeout(3.05)
         episodes = []
@@ -142,42 +170,46 @@ class Search(object):
         # go up 3 lines to remove the progress bar
         click.echo('[%sA' % 3)
 
+        write_order(self.se_order)
+
         if self.search_type == 'torrent':
-
-            # sort by seeds
-            episodes.sort(key=lambda x: int(x[3]), reverse=True)
-
-            # Remove torrents with 0 seeds
-            for i, episode in enumerate(episodes):
-                seeds = int(episode[3])
-                # click.echo(episode[0])
-                if not seeds:
-                    # click.echo('    %s %s' % (seeds, episode[0]))
-                    del episodes[i]
-
-            # remove duplicates since different sites might
-            # have the same torrent
-            titles = []
-            for i, episode in enumerate(episodes):
-                title = episode[0]
-                if title in titles:
-                    del episodes[i]
-                else:
-                    titles.append(title)
-
-            # remove duplicates based on the magnet hash
-            hashes = []
-            for i, episode in enumerate(episodes):
-                o = urllib.parse.urlparse(episode[5])
-                torrent_hash = urllib.parse.parse_qs(o.query)['xt']
-                torrent_hash = torrent_hash[0].split(':')[-1]
-                if torrent_hash in hashes:
-                    del episodes[i]
-                else:
-                    hashes.append(torrent_hash)
+            self.sort_torrents(episodes)
 
         # return search_results
         return [header] + [episodes]
+
+    def sort_torrents(self, episodes):
+        # sort by seeds
+        episodes.sort(key=lambda x: int(x[3]), reverse=True)
+
+        # Remove torrents with 0 seeds
+        for i, episode in enumerate(episodes):
+            seeds = int(episode[3])
+            # click.echo(episode[0])
+            if not seeds:
+                # click.echo('    %s %s' % (seeds, episode[0]))
+                del episodes[i]
+
+        # remove duplicates since different sites might
+        # have the same torrent
+        titles = []
+        for i, episode in enumerate(episodes):
+            title = episode[0]
+            if title in titles:
+                del episodes[i]
+            else:
+                titles.append(title)
+
+        # remove duplicates based on the magnet hash
+        hashes = []
+        for i, episode in enumerate(episodes):
+            o = urllib.parse.urlparse(episode[5])
+            torrent_hash = urllib.parse.parse_qs(o.query)['xt']
+            torrent_hash = torrent_hash[0].split(':')[-1]
+            if torrent_hash in hashes:
+                del episodes[i]
+            else:
+                hashes.append(torrent_hash)
 
     def magnet_filename(self):
         se_ep = sxxexx(self.season, self.episode)

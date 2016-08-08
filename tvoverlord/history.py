@@ -55,34 +55,46 @@ class History:
         # date, title, season, episode, magnet, oneoff, complete, filename
         if what:
             what = what.replace(' ', '').split(',')
-            line = ''
+            line = []
             for i in what:
-                line = line + '{%s}\t' % i
+                line.append('{%s}' % i)
+            line = '  '.join(line)
         else:
-            line = '{date}\t{title}\t{complete}\t{destination}'
+            line = '{date}  {title}  {complete}  {destination}'
 
+        lengths = [1] * len(self.sqldata[0])
+        data = []
+        lengths = {'date': 1, 'title': 1, 'filename': 1,
+                   'destination': 1, 'season': 1, 'episode': 1,
+                   'magnet': 1, 'oneoff': 1, 'complete': 1, }
+
+        # build list and get the max lengths
         for row in self.sqldata:
-            date = self.format_date(row[0])
-            title = row[1]
-            filename = self.exists(row[2])
-            season = row[4]
-            episode = row[5]
-            magnet = row[6]
-            oneoff = 'one off' if row[7] else 'tracked'
-            complete = 'complete' if row[8] else 'incomplete'
-            destination = self.exists(row[10])
+            fields = {
+                'date': self.format_date(row[0]),
+                'title': row[1],
+                'filename': self.exists(row[2]),
+                'destination': self.exists(row[10]),
+                'season': row[4],
+                'episode': row[5],
+                'magnet': row[6],
+                'oneoff': 'one off' if row[7] else 'tracked',
+                'complete': 'complete' if row[8] else 'incomplete',
+            }
+            data.append(fields)
 
-            fields = {'date': date,
-                      'title': title,
-                      'filename': filename,
-                      'destination': destination,
-                      'season': season,
-                      'episode': episode,
-                      'magnet': magnet,
-                      'oneoff': oneoff,
-                      'complete': complete}
+            for key, value in fields.items():
+                new = len(str(value))
+                old = lengths[key]
+                lengths[key] = max(new, old)
 
-            click.echo(line.format(**fields))
+        # pad each field to the data in lengths
+        for row in data:
+            for name in row:
+                row[name] = row[name].ljust(lengths[name])
+
+        for row in data:
+            click.echo(line.format(**row))
 
     def copy(self):
         title = 'Copy files to %s' % Config.tv_dir

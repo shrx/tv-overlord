@@ -88,9 +88,10 @@ class DownloadManager(DB):
             source = self.get_show_file(filename)
 
         if Config.template:
-            dest_filename = self.pretty_names(source, torrent_hash)
+            template = Config.template
         else:
-            dest_filename = os.path.basename(source)
+            template = '{show}/{original}'
+        dest_filename = self.pretty_names(source, torrent_hash, template)
         logging.info('Destination filename: %s' % dest_filename)
 
         dest = os.path.join(Config.tv_dir, dest_filename)
@@ -161,9 +162,13 @@ class DownloadManager(DB):
         else:
             sys.exit('Get size dir: "{}" does not exist'.format(start_path))
 
-    def pretty_names(self, filename, torrent_hash):
+    def pretty_names(self, filename, torrent_hash, template=None):
+        if not template:
+            template = '{show}/{original}'
+
         fields = {}
-        fields['show'], fields['searchname'], fields['season'], fields['episode'] = self.get_show_info(torrent_hash)
+        (fields['show'], fields['searchname'], fields['season'],
+         fields['episode']) = self.get_show_info(torrent_hash)
         fields['original'] = os.path.basename(filename)
         fields['s00e00'] = sxxexx(fields['season'], fields['episode'])
         fields['0x00'] = sxee(fields['season'], fields['episode'])
@@ -172,10 +177,6 @@ class DownloadManager(DB):
 
         if fields['searchname'] is None:
             fields['searchname'] = ''
-
-        template = Config.template
-        if not template:
-            template = '{show}/{original}'
 
         # search original filename for info
         fields['resolution'] = ''
@@ -217,7 +218,10 @@ class DownloadManager(DB):
                 chunks = section.strip('{}').split('|')
                 field = chunks[0].lower()
                 filters = [i.lower() for i in chunks[1:]]
-                if not fields[field]:
+                try:
+                    if not fields[field]:
+                        continue
+                except KeyError:
                     continue
                 complete = self.format(fields[field], filters)
                 new.append(complete)

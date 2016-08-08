@@ -18,6 +18,11 @@ class Provider():
     # two letters, used for showing what search engine each episode is from
     shortname = 'SE'
 
+    # This should be set when you have built the complete search url
+    # in the search method.  This information is used in the
+    # `tvol config --test-se=...`
+    url = ''
+
     # the search method will be called once with the show name, season
     # and episode.  If the search is a nondbshow search, the season
     # and episode won't be set.  The data that gets returned is an
@@ -26,6 +31,8 @@ class Provider():
     # [title, size, date, seeds, shortname, magneturl]
     def search(self, search_string, season=False, episode=False):
 
+        self.url = 'search-site.com/search/all/{}/c/d/1/?fmt=rss'.format(
+            search_string)
         show_data = []
 
         title = 'Mr.Robot.S02E03.HDTV.XviD-FUM[ettv]'
