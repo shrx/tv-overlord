@@ -160,13 +160,6 @@ This show the info command.
 This will show all the available shows for the current week from Sun
 to Sat.
 
-=tvol history 1 | column -ts$'\t';= \\
-Today's downloads formatted into columns.
-
-=tvol history list 365 > shows.tab= \\
-All episodes downloaded in the last year put into a file that can be
-imported into any spreadsheet program.
-
 
 ** A note on pirating
 
