@@ -327,11 +327,21 @@ def nondbshow(search_string, count, location, ignore):
     This just does a simple search and passes you choise to the bittorrent
     client.  The download is not recorded in the database.
     """
-    if Config.ip and not ignore:
-        L = Location(parts_to_match=Config.parts_to_match)
-        if not L.ips_match(Config.ip):
-            L.message()
-            sys.exit(1)
+    if not ignore and (Config.email or Config.ip):
+        L = Location()
+        if Config.email:
+            if not L.getipintel():
+                warning = click.style(
+                    'Warning:', bg='red', fg='white', bold=True)
+                msg = '{warning} not connected to a VPN'
+                click.echo(msg.format(warning=warning))
+                sys.exit(1)
+        if Config.ip:
+            if not L.ips_match(
+                    Config.ip,
+                    parts_to_match=Config.parts_to_match):
+                L.message()
+                sys.exit(1)
 
     nons = Show(show_type='nondb')
     nons.non_db(search_string, count)
@@ -502,7 +512,7 @@ def config(edit, test_se):
     click.secho('Ip addresse information:', fg=title, bold=bold, underline=ul)
     click.echo()
 
-    l = Location(parts_to_match=Config.parts_to_match)
+    l = Location()
     click.echo('Your current ip address:')
     click.secho('  %s' % l.ip, bold=True)
     if Config.ip:

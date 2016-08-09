@@ -44,6 +44,14 @@ no background processes.
 Python3 -- on Linux, OSX, or Windows
 
 
+** Table of contents                                                    :TOC:
+   - [[#features][Features]]
+   - [[#install][Install]]
+   - [[#configure][Configure]]
+   - [[#command-line-reference][Command line reference]]
+   - [[#screenshots][Screenshots]]
+   - [[#usefull-shell-commands][Usefull shell commands]]
+
 ** Features
 
 + Keeps track of downloaded shows.
@@ -63,14 +71,7 @@ Python3 -- on Linux, OSX, or Windows
 TV Overlord is a python 3 application and can be installed via pip3.
 If this method is used, all dependencies will be taken care of.
 
-There are two different methods to use when using pip.
-
 : sudo pip3 install tvoverlord
-
-If you use Bash as your shell, you can have tab completions.  Add this
-to your .bashrc file:
-
-: eval "$(_TVOL_COMPLETE=source tvol)"
 
 After its installed, you run it by typing:
 
@@ -96,6 +97,12 @@ To get help for each command, you can use:
 : tvol download --help
 : tvol addnew --help
 : # etc...
+
+If you use Bash as your shell, you can have tab completions.  Add this
+to your .bashrc file:
+
+: eval "$(_TVOL_COMPLETE=source tvol)"
+
 
 **** Setup the post download script
 
@@ -159,18 +166,3 @@ This show the info command.
 =tvol calendar --days -$(date '+%u'),7 -x= \\
 This will show all the available shows for the current week from Sun
 to Sat.
-
-
-** A note on pirating
-
-Downloading shows via the Internet is much easier than watching them
-on cable.  The shows are displayed in XBMC in a list and only the
-shows I want to watch are listed.  This isn't about saving money, but
-convenience.
-
-The problem is that I don't want to be a thief by getting these shows
-for free.  So, to make this work, I pay for the biggest cable package
-I can, but I don't use it.  As far as I'm concerned, this is the same
-as using TiVo and skipping the commercials.
-
-If you want to download shows, you should do this too.
