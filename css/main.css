@@ -30,13 +30,23 @@ h2{
     padding: 30px;
 }
 
+/*@media only screen and (max-width : 768px) {
+    .header{
+    }
+}*/
 .header img{
     position: relative;
     top: 45px;
     display: block;
     margin: 0 auto;
-    width: 100%;
+    /* width: 100%; */
+    width: 550px;
     max-width: 695px;
+}
+@media only screen and (max-width : 425px) {
+    .header img{
+        width: 100%;
+    }
 }
 .header p{
     color: white;
