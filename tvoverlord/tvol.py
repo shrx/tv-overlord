@@ -267,10 +267,7 @@ def list(today):
               help="Ignore 'Not connected to vpn' warning.")
 @click.option('--count', '-c', type=int, default=10,
               help='Number of search results to list. (default: 5)')
-@click.option('--location', '-l',
-              type=click.Path(exists=True, resolve_path=True),
-              help='Directory to download the nzb files to.')
-def download(show_name, today, ignore, count, location):
+def download(show_name, today, ignore, count):
     """Download available episodes.
 
     If SHOW_NAME is used, it will download any shows that match that title
@@ -318,10 +315,7 @@ def add(show_name):
               help='Number of search results to list. (default: 5)')
 @click.option('--ignore', '-i', is_flag=True,
               help="Ignore 'Not connected to vpn' warning.")
-@click.option('--location', '-l',
-              type=click.Path(exists=True, resolve_path=True),
-              help='Directory to download the nzb files to.')
-def nondbshow(search_string, count, location, ignore):
+def nondbshow(search_string, count, ignore):
     """Download anything, ignoring the database.
 
     This just does a simple search and passes you choise to the bittorrent
