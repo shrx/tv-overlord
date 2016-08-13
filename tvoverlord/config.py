@@ -229,6 +229,7 @@ class Config:
         click.echo('%s created:' % cb.user_config.name)
         click.echo('  %s' % cb.user_config)
     user_config = str(cb.user_config)
+    user_dir = str(cb.user_home)
 
     sql = [
         {

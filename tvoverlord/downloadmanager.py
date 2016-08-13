@@ -71,7 +71,7 @@ class DownloadManager(DB):
         filename = os.path.join(path, filename)
         self.save_info(torrent_hash, filename)
 
-        debug_command = '''export TR_TORRENT_NAME='%s'; export TR_TORRENT_DIR='%s'; export TR_TORRENT_HASH='%s'; ~/projects/media-downloader/src/transmission_done.py'''
+        debug_command = '''export TR_TORRENT_NAME='%s'; export TR_TORRENT_DIR='%s'; export TR_TORRENT_HASH='%s'; transmission_done'''
         logging.info(debug_command, filename, path, torrent_hash)
 
         if self.is_oneoff(torrent_hash):

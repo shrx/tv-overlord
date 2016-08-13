@@ -5,6 +5,7 @@ import os
 import sys
 from pprint import pprint as pp
 from tvoverlord.downloadmanager import DownloadManager
+from tvoverlord.tvol import __version__
 
 
 CONTEXT_SETTINGS = {'help_option_names': ['-h', '--help']}
@@ -12,6 +13,7 @@ CONTEXT_SETTINGS = {'help_option_names': ['-h', '--help']}
 
 @click.command(context_settings=CONTEXT_SETTINGS)
 @click.option('--debug', is_flag=True, help='Output debug info')
+@click.version_option(version=__version__)
 def transmission(debug):
     """This script passes the enviroment variables from transmission to
     tvoverlord.
@@ -52,6 +54,7 @@ def transmission(debug):
 @click.argument('torrent_name')
 @click.argument('torrent_dir')
 @click.option('--debug', is_flag=True, help='Output debug info')
+@click.version_option(version=__version__)
 def deluge(torrent_hash, torrent_name, torrent_dir, debug):
     """Manage torrents downloaded by deluge.
 

@@ -149,7 +149,7 @@ def tvol(no_cache):
 
     \b
        \/    TVOverlord source code is available at:
-     <(. )>  https://github.com/8cylinder/tv-overlord
+      [. ]   https://github.com/8cylinder/tv-overlord
        ^
       /^\\    Any feature requests or bug reports should go there.
      //^\\\\
@@ -226,7 +226,7 @@ def tfunct(series):
 @tvol.command(context_settings=CONTEXT_SETTINGS)
 @click.option('--today', '-t', is_flag=True,
               help="Also show today's episodes.")
-def showmissing(today):
+def list(today):
     """List episodes that are ready to download.
     """
     fp = FancyPrint()
@@ -298,7 +298,7 @@ def download(show_name, today, ignore, count, location):
 
 @tvol.command(context_settings=CONTEXT_SETTINGS)
 @click.argument('show_name')
-def addnew(show_name):
+def add(show_name):
     """Add a new tv show to the database.
 
     The SHOW_NAME can be a partial name, but the more accurate the name
@@ -327,11 +327,21 @@ def nondbshow(search_string, count, location, ignore):
     This just does a simple search and passes you choise to the bittorrent
     client.  The download is not recorded in the database.
     """
-    if Config.ip and not ignore:
-        L = Location(parts_to_match=Config.parts_to_match)
-        if not L.ips_match(Config.ip):
-            L.message()
-            sys.exit(1)
+    if not ignore and (Config.email or Config.ip):
+        L = Location()
+        if Config.email:
+            if not L.getipintel():
+                warning = click.style(
+                    'Warning:', bg='red', fg='white', bold=True)
+                msg = '{warning} not connected to a VPN'
+                click.echo(msg.format(warning=warning))
+                sys.exit(1)
+        if Config.ip:
+            if not L.ips_match(
+                    Config.ip,
+                    parts_to_match=Config.parts_to_match):
+                L.message()
+                sys.exit(1)
 
     nons = Show(show_type='nondb')
     nons.non_db(search_string, count)
@@ -468,10 +478,8 @@ def config(edit, test_se):
     click.secho('File locations:', fg=title, bold=bold, underline=ul)
     click.echo()
 
-    click.echo('Config file:     %s' % os.path.join(
-        Config.user_dir, Config.config_filename))
-    click.echo('Database file:   %s' % os.path.join(
-        Config.user_dir, Config.db_file))
+    click.echo('config file:     %s' % Config.user_config)
+    click.echo('Database file:   %s' % Config.db_file)
     click.echo('NZB staging dir: %s' % Config.staging)
     click.echo('TV dir:          %s' % Config.tv_dir)
     click.echo('Alt client:      %s' % Config.client)
@@ -502,7 +510,7 @@ def config(edit, test_se):
     click.secho('Ip addresse information:', fg=title, bold=bold, underline=ul)
     click.echo()
 
-    l = Location(parts_to_match=Config.parts_to_match)
+    l = Location()
     click.echo('Your current ip address:')
     click.secho('  %s' % l.ip, bold=True)
     if Config.ip:
