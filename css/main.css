@@ -25,6 +25,7 @@ h2{
     background-image: url('../images/masthead-bg.png');
     background-size: cover;
     background-position: center;
+    background-color: #BB3407;
     max-width: 1024px;
     height: 369px;
     padding: 30px;
@@ -35,7 +36,6 @@ h2{
     top: 45px;
     display: block;
     margin: 0 auto;
-    /* width: 100%; */
     width: 550px;
     max-width: 695px;
 }
@@ -97,6 +97,7 @@ h2{
     padding: 0 13% 100px 13%;
     background-color: #C4C4D0;
     margin-top: 40px;
+    line-height: 1.4;
 }
 @media only screen and (max-width : 768px) {
     .content{
@@ -134,4 +135,10 @@ h2{
 }
 .media{
     max-width: 100%;
+}
+.footer{
+    color: white;
+    background-color: #BB3407;
+    padding: 10px;
+    text-align: center;
 }
