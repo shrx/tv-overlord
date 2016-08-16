@@ -20,7 +20,7 @@ class Shows:
       default 'name'
     """
 
-    def __init__(self, name_filter='', by_date=False):
+    def __init__(self, name_filter='', by_date=False, status='active'):
         sqlfilter = ''
         if name_filter:
             sqlfilter = self.filter_by_name(name_filter)
@@ -29,8 +29,19 @@ class Shows:
             self.sort_field = 'next_episode, name'
         else:
             self.sort_field = "replace (name, 'The ', '')"
-        self.dbdata = self._query_db(sqlfilter)
+
+        if status == 'active':
+            statusfilter = 'status="active"'
+        elif status == 'inactive':
+            statusfilter = 'status="inactive"'
+        elif status == 'all':
+            statusfilter = 'status in ("active", "inactive")'
+        elif not status:
+            statusfilter = 'status="active"'
+
+        self.dbdata = self._query_db(sqlfilter, statusfilter)
         self.show_count = len(self.dbdata)
+
 
     def __iter__(self):
         self.index = len(self.dbdata)
@@ -58,9 +69,19 @@ class Shows:
     def sort_by_date(self):
         self.sort_field = 'next_episode, name'
 
-    def _query_db(self, sqlfilter=''):
-        if sqlfilter:
-            sqlfilter = 'AND %s' % sqlfilter
+    def _query_db(self, sqlfilter, statusfilter):
+        # print('>>>',sqlfilter, '|', statusfilter)
+        # if sqlfilter:
+            # sqlfilter = 'AND %s' % sqlfilter
+
+        # print('sqlfilter: %s, statusfilter: %s' % (sqlfilter, statusfilter))
+        if statusfilter and sqlfilter:
+            where = '%s AND %s' % (statusfilter, sqlfilter)
+        elif sqlfilter:
+            where = sqlfilter
+        elif statusfilter:
+            where = statusfilter
+
         sql = """
             SELECT
                 name,
@@ -73,13 +94,13 @@ class Shows:
             FROM
                 shows
             WHERE
-                status='active'
                 %s
             ORDER BY
                 %s;""" % (
-            sqlfilter,
+            where,
             self.sort_field
         )
+        # print(sql)
         conn = sqlite3.connect(Config.db_file)
         # conn.row_factory = tv_util.dict_factory
         conn.row_factory = dict_factory

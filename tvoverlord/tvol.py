@@ -155,7 +155,7 @@ def tvol(no_cache):
        ^
       /^\\    Any feature requests or bug reports should go there.
      //^\\\\
-    ^-._.--.-^^-.____._^-.^._
+    -^-._.--.-^^-.____._^-.^._
     """
     if no_cache:
         Config.use_cache = False
@@ -166,7 +166,10 @@ def tvol(no_cache):
 @tvol.command(context_settings=CONTEXT_SETTINGS)
 @click.argument('show_name', required=False)
 @click.option('--show-all', '-a', is_flag=True,
-              help='Show all shows including the ones marked inactive.')
+              help='Show all shows including ones that don\'t have upcoming episodes.')
+@click.option('--status', type=click.Choice(['active', 'inactive', 'all']),
+              default='active',
+              help='Display shows with this status.')
 @click.option('--sort-by-next', '-x', is_flag=True,
               help='Sort by release date instead of the default alphabetical.')
 @click.option('--ask-inactive', is_flag=True,
@@ -175,15 +178,22 @@ def tvol(no_cache):
               help='Show links to IMDB.com and TheTVDb.com for each show.')
 @click.option('--synopsis', is_flag=True,
               help='Display the show synopsis.')
-def info(show_name, show_all, sort_by_next,
+def info(show_name, show_all, sort_by_next, status,
          ask_inactive, show_links, synopsis):
     """Show information about your tv shows.
+
+    Info without any options, shows all shows with upcoming episodes.  If
+    --show-all is used, it will include shows that have no upcoming episodes.
+
+    Info's default is to only show shows that are active, but --status can
+    be used to change that.
 
     SHOW_NAME can be a full or partial name of a show.  If used, it
     will show information about any shows that match that string, else
     it will show informaton about all your shows.
     """
-    Info(show_name, show_all, sort_by_next,
+    db_status = status
+    Info(show_name, show_all, sort_by_next, db_status,
          ask_inactive, show_links, synopsis)
 
 
@@ -507,7 +517,7 @@ def config(edit, test_se):
     click.echo()
 
     l = Location()
-    click.echo('Your current ip address:')
+    click.echo('Your public ip address:')
     click.secho('  %s' % l.ip, bold=True)
     if Config.ip:
         click.echo()
