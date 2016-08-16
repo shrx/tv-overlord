@@ -14,6 +14,8 @@ from pprint import pprint as pp
 
 
 class ConfigBuilder:
+    is_win = True if platform.system() == 'Windows' else True
+
     def __init__(self, dir_name):
         self.dir_name = dir_name
         self.user_home = None
@@ -48,10 +50,19 @@ class ConfigBuilder:
         self.app_config = app_home / config_name
 
         if not self.user_config.exists():
-            shutil.copy(str(self.app_config), str(self.user_home))
+            self.write_config()
+            # shutil.copy(str(self.app_config), str(self.user_home))
             return True
         else:
             return False
+
+    def write_config(self):
+        # this will write the text file with the correct line endings
+        # for the platform
+        with self.app_config.open() as source, \
+             self.user_config.open('w') as dest:
+            for line in source:
+                dest.write(line)
 
     def create_modify_db(self, db_name, sqldata):
         """Create the DB is it doesn't exist"""
