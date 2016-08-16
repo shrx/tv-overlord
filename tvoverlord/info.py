@@ -135,6 +135,9 @@ def info(show_name, show_all, sort_by_next, db_status,
     for i in keys:
         full_output = full_output + show_info[i] + '\n\n'
 
+    # remove the last '\n\n'
+    full_output = full_output.strip()
+
     if len(keys) < 4:
         click.echo(full_output)
     elif Config.is_win:

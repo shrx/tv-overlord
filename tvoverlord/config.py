@@ -7,10 +7,14 @@ import sqlite3
 import click
 import shlex
 import pathlib
-
 from types import SimpleNamespace as SN
-
 from pprint import pprint as pp
+
+
+def message(msg, filename):
+    click.secho(msg, bold=True)
+    click.secho('  %s' % filename, fg='green')
+    return True
 
 
 class ConfigBuilder:
@@ -34,7 +38,7 @@ class ConfigBuilder:
         dir_path = pathlib.Path(dir_path)
         self.user_home = dir_path
         if not dir_path.exists():
-            dir_path.mkdir()
+            dir_path.mkdir(parents=True)
             return True
         else:
             return False
@@ -230,15 +234,17 @@ class Config:
     parts_to_match = 3
 
     # create files
+    files_created = False
     user_config_dir = 'tvoverlord'
     cb = ConfigBuilder(user_config_dir)
+
     if cb.create_config_dir():
-        click.echo('App config dir created:')
-        click.echo('  %s' % cb.user_home)
+        files_created = message('App config dir created:', cb.user_home)
 
     if cb.create_config('config.ini'):
-        click.echo('%s created:' % cb.user_config.name)
-        click.echo('  %s' % cb.user_config)
+        files_created = message(
+            '%s created:' % cb.user_config.name, cb.user_config)
+
     user_config = str(cb.user_config)
     user_dir = str(cb.user_home)
 
@@ -285,8 +291,13 @@ class Config:
         }
     ]
     if cb.create_modify_db('shows.sqlite3', sql):
-        click.echo('Database has been created/updated:')
-        click.echo('  %s' % cb.user_db)
+        files_created = message(
+            'Database has been created/updated:', cb.user_db)
+
+    if files_created:
+        click.echo('-' * console_columns)
+        click.echo()
+
     db_file = str(cb.user_db)
 
     categories = SN()
