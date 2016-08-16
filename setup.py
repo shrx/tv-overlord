@@ -43,6 +43,16 @@ setup(
         transmission_done=tvoverlord.client_finished:transmission
         tvol=tvoverlord.tvol:tvol
     ''',
+    # install_requires=[
+    #     'tvdb_api',
+    #     'beautifulsoup4',
+    #     'feedparser',
+    #     'requests',
+    #     'python-dateutil',
+    #     'click',
+    # ] + ([
+    #     'colorama',
+    # ] if 'Windows' == platform.system() else []),
     install_requires=[
         'tvdb_api',
         'beautifulsoup4',
@@ -50,16 +60,15 @@ setup(
         'requests',
         'python-dateutil',
         'click',
-    ] + ([
         'colorama',
-    ] if 'Windows' == platform.system() else []),
+    ],
     version=version,
     description='TV Overlord is a command line tool to download and manage TV shows from newsgroups or bittorent',
     long_description=long_description,
     license='MIT',
     author='Sheldon McGrandle',
     author_email='developer@8cylinder.com',
-    url='https://github.com/8cylinder/tv-overlord',
+    url='https://www.tvoverlord.com',
     keywords=[],
     classifiers=[
         'Programming Language :: Python',
