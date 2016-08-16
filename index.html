@@ -8,6 +8,7 @@
     <link href="https://fonts.googleapis.com/css?family=Source+Code+Pro:400,700" rel="stylesheet">
   </head>
   <body>
+
     <!-- header -->
     <div class="page">
       <div class="header-wrapper">
@@ -23,39 +24,41 @@
           </div>
         </div>
       </div>
+
       <!-- content -->
       <div class="content">
+
         <p>TV Overlord is a <b>semi automatic</b> command line tool to
           download and manage TV shows from newsgroups or bittorent.
           It will download nzb files or magnet links.</p>
+
         <p>TV Overlord is written in <a href="https://www.python.org/downloads/">python 3</a> and
           its installed on the command line:<br><span class="commandline">
           pip3 install tvoverlord</span></p>
+
         <p>It can show episodes ready to download.</p>
+
         <div class="image-wrapper">
-          <!-- <video class="media" controls autoplay>
-               <source src="images/showmissing.mp4" type="video/mp4">
-               <a href="images/showmissing.mp4">Show available episodes</a>
-               </video> -->
           <img class="media" src="images/showmissing.gif">
         </div>
+
         <p>It searches multiple sites simultaneously and combines the
           results into one list to select from.</p>
+
         <div class="image-wrapper">
-          <!-- <video class="media" controls autoplay>
-               <source src="images/download.mp4" type="video/mp4">
-               <a href="images/download.mp4">Download episode video</a>
-               </video> -->
           <img class="media" src="images/download.gif">
         </div>
+
         <p>TV Overlord keeps track of which shows have been downloaded
           and what shows are available to download.</p>
+
         <p>For each new episode of a tv show you are tracking, you are
           given a list of possible downloads to choose.  If you use a
           torrent search provider, a magnet link is passed to the
           default bittorent client.  If it is an NZB search, an NZB
           file is placed in a folder that is configured in the
           configuration file.</p>
+
         <p>For torrent files, you can also have your shows organized
           after downloading.  If you use transmission or deluge, those
           clients can be configured to call a script when each torrent
@@ -64,19 +67,24 @@
           folder organized into sub folders named for each tv
           show. Get more information about the <a href="https://github.com/8cylinder/tv-overlord/wiki/Rename-tags">
           Rename tags here.</a></p>
+
         <p>There are several bittorent search providers and two NZB
           search providers and new ones can be added fairly easily.
           See the search providers
           <a href="https://github.com/8cylinder/tv-overlord/tree/master/tvoverlord/search_providers"
           >README.org</a>, or by making a feature request in issues or
           a pull request.</p>
+
         <h2>Overview</h2>
+
         <ul>
           <li>Keeps track of downloaded shows.</li>
           <li>Show a list of shows available for download.</li>
           <li>Gives you a list of torrents or nzbs you can choose
             from.</li>
           <li>You can add new shows from the command line.</li>
+          <li><a href="https://github.com/8cylinder/tv-overlord/wiki/VPN-Detection">
+            Warn you when not using a vpn</a>.</li>
           <li>Will display info showing what show will be next and how
             many days till broadcast.  This list can be filtered and
             sorted in various ways.</li>
@@ -84,11 +92,15 @@
             specify a range of days to display, past or future.</li>
           <li>The ability to query download history and re-start a
             download.</li>
-          <li>Organize you tv show downloads into folders.</li>
-          <p>Get the <a href="https://github.com/8cylinder/tv-overlord/wiki/Command-line-reference">
-            detailed command line reference here</a>.</p>
+          <li><a href="https://github.com/8cylinder/tv-overlord/wiki/Rename-tags">
+            Organize you tv show downloads into folders</a>.</li>
         </ul>
+
+        <p>Get the <a href="https://github.com/8cylinder/tv-overlord/wiki/Command-line-reference">
+          detailed command line reference here</a>.</p>
+
         <h2>Why semi automatic</h2>
+
         <p>Semi automatic means that you manually run it and select
           from a list each episode you want. The reason for this is that
           not all torrents follow a naming convention that is parsable,
@@ -97,11 +109,24 @@
           I’ll use the parser built into my brain. Also I like that it
           runs when I like, its light weight, and there are no
           background processes.</p>
+
         <h2>Screenshots</h2>
-        <a href="images/calendar-x.png">
+
+        <a class="img-a" href="images/calendar-x.png">
           <img class="media" src="images/calendar-x.png">
         </a>
+
       </div>
+      <div class="footer">Let the Overlording begin.</div>
     </div>
+    <script>
+     (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+         (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+                              m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+     })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+     ga('create', 'UA-82438449-1', 'auto');
+     ga('send', 'pageview');
+    </script>
   </body>
 </html>
