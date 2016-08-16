@@ -56,11 +56,14 @@ def dict_factory(cursor, row):
     return d
 
 
-def format_paragraphs(msg):
+def format_paragraphs(msg, indent=''):
     paragraphs = re.split('\n\n+', msg)
     for i, paragraph in enumerate(paragraphs):
         paragraph = textwrap.dedent(paragraph).strip()
-        paragraph = textwrap.fill(paragraph)
+        paragraph = textwrap.fill(
+            paragraph,
+            initial_indent=indent,
+            subsequent_indent=indent)
         paragraphs[i] = paragraph
     document = '\n\n'.join(paragraphs)
     return document

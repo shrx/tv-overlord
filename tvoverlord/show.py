@@ -54,8 +54,7 @@ class Show:
             self._set_db_data(dbdata)
             self._get_thetvdb_series_data()
             self.search_provider = Search()
-
-        if show_type == 'nondb':
+        elif show_type == 'nondb':
             self.search_provider = Search()
 
         self.console_columns = Config.console_columns

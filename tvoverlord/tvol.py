@@ -11,14 +11,14 @@ import click
 from tvoverlord.shows import Shows
 from tvoverlord.show import Show
 from tvoverlord.config import Config
-from tvoverlord.tvutil import FancyPrint, dict_factory, style
+from tvoverlord.tvutil import FancyPrint, dict_factory, style, format_paragraphs
 from tvoverlord.location import Location
 from tvoverlord.history import History
 from tvoverlord.search import Search
 from tvoverlord.calendar import calendar as Calendar
 from tvoverlord.info import info as Info
 
-__version__ = '1.3'
+__version__ = '1.3.7'
 
 
 def edit_db(search_str):
@@ -44,9 +44,11 @@ def edit_db(search_str):
     is_error = False
 
     click.echo()
-    click.echo('While editing a field, hit <enter> in an empty field to leave it')
-    click.echo('unchanged and skip to the next one.  Type "<ctrl> c" to cancel all')
-    click.echo('edits.  The current value is shown in ()\'s beside the field name.')
+    click.echo(format_paragraphs('''
+      While editing a field, hit <enter> in an empty field to leave it
+      unchanged and skip to the next one.  Type "<ctrl> c" to cancel all
+      edits.  The current value is shown in ()\'s beside the field
+      name.'''))
     click.echo()
 
     title = '%s' % row['name']
@@ -149,11 +151,11 @@ def tvol(no_cache):
 
     \b
        \/    TVOverlord source code is available at:
-     <(. )>  https://github.com/8cylinder/tv-overlord
+      [. ]   https://github.com/8cylinder/tv-overlord
        ^
       /^\\    Any feature requests or bug reports should go there.
      //^\\\\
-    ^-._.--.-^^-.____._^-.^._
+    -^-._.--.-^^-.____._^-.^._
     """
     if no_cache:
         Config.use_cache = False
@@ -164,7 +166,10 @@ def tvol(no_cache):
 @tvol.command(context_settings=CONTEXT_SETTINGS)
 @click.argument('show_name', required=False)
 @click.option('--show-all', '-a', is_flag=True,
-              help='Show all shows including the ones marked inactive.')
+              help='Show all shows including ones that don\'t have upcoming episodes.')
+@click.option('--status', type=click.Choice(['active', 'inactive', 'all']),
+              default='active',
+              help='Display shows with this status.')
 @click.option('--sort-by-next', '-x', is_flag=True,
               help='Sort by release date instead of the default alphabetical.')
 @click.option('--ask-inactive', is_flag=True,
@@ -173,15 +178,22 @@ def tvol(no_cache):
               help='Show links to IMDB.com and TheTVDb.com for each show.')
 @click.option('--synopsis', is_flag=True,
               help='Display the show synopsis.')
-def info(show_name, show_all, sort_by_next,
+def info(show_name, show_all, sort_by_next, status,
          ask_inactive, show_links, synopsis):
     """Show information about your tv shows.
+
+    Info without any options, shows all shows with upcoming episodes.  If
+    --show-all is used, it will include shows that have no upcoming episodes.
+
+    Info's default is to only show shows that are active, but --status can
+    be used to change that.
 
     SHOW_NAME can be a full or partial name of a show.  If used, it
     will show information about any shows that match that string, else
     it will show informaton about all your shows.
     """
-    Info(show_name, show_all, sort_by_next,
+    db_status = status
+    Info(show_name, show_all, sort_by_next, db_status,
          ask_inactive, show_links, synopsis)
 
 
@@ -226,14 +238,13 @@ def tfunct(series):
 @tvol.command(context_settings=CONTEXT_SETTINGS)
 @click.option('--today', '-t', is_flag=True,
               help="Also show today's episodes.")
-def showmissing(today):
+def list(today):
     """List episodes that are ready to download.
     """
     fp = FancyPrint()
 
     shows = Shows()
 
-    if len(shows) > 20:
         with click.progressbar(
                 shows,
                 item_show_func=tfunct,
@@ -252,11 +263,6 @@ def showmissing(today):
                 if series.is_missing(today):
                     fp.standard_print(series.show_missing())
         fp.done()
-    else:
-        for show in shows:
-            if show.is_missing(today):
-                fp.standard_print(show.show_missing())
-        fp.done()
 
 
 @tvol.command(context_settings=CONTEXT_SETTINGS)
@@ -267,10 +273,7 @@ def showmissing(today):
               help="Ignore 'Not connected to vpn' warning.")
 @click.option('--count', '-c', type=int, default=10,
               help='Number of search results to list. (default: 5)')
-@click.option('--location', '-l',
-              type=click.Path(exists=True, resolve_path=True),
-              help='Directory to download the nzb files to.')
-def download(show_name, today, ignore, count, location):
+def download(show_name, today, ignore, count):
     """Download available episodes.
 
     If SHOW_NAME is used, it will download any shows that match that title
@@ -298,7 +301,7 @@ def download(show_name, today, ignore, count, location):
 
 @tvol.command(context_settings=CONTEXT_SETTINGS)
 @click.argument('show_name')
-def addnew(show_name):
+def add(show_name):
     """Add a new tv show to the database.
 
     The SHOW_NAME can be a partial name, but the more accurate the name
@@ -318,10 +321,7 @@ def addnew(show_name):
               help='Number of search results to list. (default: 5)')
 @click.option('--ignore', '-i', is_flag=True,
               help="Ignore 'Not connected to vpn' warning.")
-@click.option('--location', '-l',
-              type=click.Path(exists=True, resolve_path=True),
-              help='Directory to download the nzb files to.')
-def nondbshow(search_string, count, location, ignore):
+def nondbshow(search_string, count, ignore):
     """Download anything, ignoring the database.
 
     This just does a simple search and passes you choise to the bittorrent
@@ -340,8 +340,8 @@ def nondbshow(search_string, count, location, ignore):
             if not L.ips_match(
                     Config.ip,
                     parts_to_match=Config.parts_to_match):
-                L.message()
-                sys.exit(1)
+            L.message()
+            sys.exit(1)
 
     nons = Show(show_type='nondb')
     nons.non_db(search_string, count)
@@ -478,10 +478,8 @@ def config(edit, test_se):
     click.secho('File locations:', fg=title, bold=bold, underline=ul)
     click.echo()
 
-    click.echo('Config file:     %s' % os.path.join(
-        Config.user_dir, Config.config_filename))
-    click.echo('Database file:   %s' % os.path.join(
-        Config.user_dir, Config.db_file))
+    click.echo('config file:     %s' % Config.user_config)
+    click.echo('Database file:   %s' % Config.db_file)
     click.echo('NZB staging dir: %s' % Config.staging)
     click.echo('TV dir:          %s' % Config.tv_dir)
     click.echo('Alt client:      %s' % Config.client)
@@ -513,7 +511,7 @@ def config(edit, test_se):
     click.echo()
 
     l = Location()
-    click.echo('Your current ip address:')
+    click.echo('Your public ip address:')
     click.secho('  %s' % l.ip, bold=True)
     if Config.ip:
         click.echo()

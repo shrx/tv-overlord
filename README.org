@@ -65,7 +65,7 @@ no background processes.
 
 **** Requirements
 
-Python3 -- on Linux, OSX, or Windows
+Python 3.4 (or higher) -- on Linux, OSX, or Windows
 
 **** Install
 

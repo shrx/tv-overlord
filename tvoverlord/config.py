@@ -6,9 +6,142 @@ import shutil
 import sqlite3
 import click
 import shlex
+import pathlib
 from types import SimpleNamespace as SN
-
 from pprint import pprint as pp
+
+
+def message(msg, filename):
+    click.secho(msg, bold=True)
+    click.secho('  %s' % filename, fg='green')
+    return True
+
+
+class ConfigBuilder:
+    is_win = True if platform.system() == 'Windows' else True
+
+    def __init__(self, dir_name):
+        self.dir_name = dir_name
+        self.user_home = None
+        self.user_config = None
+        self.app_config = None
+        self.user_db = None
+        self.oldfields = None
+
+    def create_config_dir(self):
+        """Create the config dir
+
+        Create it in the default location for the users platform and
+        only if it doesn't already exist.
+        """
+        dir_path = click.get_app_dir(self.dir_name)
+        dir_path = pathlib.Path(dir_path)
+        self.user_home = dir_path
+        if not dir_path.exists():
+            dir_path.mkdir(parents=True)
+            return True
+        else:
+            return False
+
+    def create_config(self, config_name):
+        """Ensure that the config file exists
+
+        :param config_name: Name of config file
+        """
+        self.user_config = self.user_home / config_name
+
+        app_home = pathlib.Path(__file__).parent
+        self.app_config = app_home / config_name
+
+        if not self.user_config.exists():
+            self.write_config()
+            # shutil.copy(str(self.app_config), str(self.user_home))
+            return True
+        else:
+            return False
+
+    def write_config(self):
+        # this will write the text file with the correct line endings
+        # for the platform
+        with self.app_config.open() as source, \
+             self.user_config.open('w') as dest:
+            for line in source:
+                dest.write(line)
+
+    def create_modify_db(self, db_name, sqldata):
+        """Create the DB is it doesn't exist"""
+
+        self.user_db = self.user_home / db_name
+        if not self.user_db.exists():
+            sql = self.generate_tables(sqldata)
+            self.new_db(sql)
+            return True
+        else:
+            modified = False
+            for table in sqldata:
+                if self.table_changed(table):
+                    self.update_db(table)
+                    modified = True
+            return modified
+
+    def generate_table(self, table):
+        sql = ['CREATE TABLE %s (' % table['name']]
+        fieldsa = []
+        for field in table['fields']:
+            fieldsa.append('    %s %s' % (field[0], field[1]))
+        fields = ',\n'.join(fieldsa)
+        sql.append(fields)
+        sql.append(');')
+        sql = '\n'.join(sql)
+        return sql
+
+    def generate_tables(self, sqldata):
+        tables = []
+        for table in sqldata:
+            tables.append(self.generate_table(table))
+        sql = '\n'.join(tables)
+        return sql
+
+    def table_changed(self, table):
+        conn = sqlite3.connect(str(self.user_db))
+        sql = 'SELECT * from %s;' % table['name']
+        curs = conn.execute(sql)
+        self.oldfields = {f[0] for f in curs.description}
+        newfields = {f[0] for f in table['fields']}
+        return self.oldfields != newfields
+
+    def update_db(self, table):
+        backupname = 'backup_%s' % table['name']
+
+        backupsql = 'ALTER TABLE %s RENAME TO %s;' % (
+            table['name'], backupname)
+        newtable = self.generate_table(table)
+        fieldnames = ',\n'.join(self.oldfields)
+        copydata = 'INSERT INTO %s (%s) SELECT %s FROM %s;' % (
+            table['name'], fieldnames, fieldnames, backupname)
+        delbackup = 'DROP TABLE %s;' % backupname
+
+        conn = sqlite3.connect(str(self.user_db))
+        conn.isolation_level = None
+        curs = conn.cursor()
+        try:
+            curs.execute('BEGIN')
+            curs.execute(backupsql)
+            curs.execute(newtable)
+            curs.execute(copydata)
+            curs.execute(delbackup)
+            curs.execute('COMMIT')
+        except conn.Error as e:
+            click.echo('Database update failed')
+            click.echo(', '.join(e.args))
+            curs.execute('ROLLBACK')
+            sys.exit(1)
+
+    def new_db(self, sql):
+        conn = sqlite3.connect(str(self.user_db))
+        conn.executescript(sql)
+        conn.commit()
+        conn.close()
 
 
 class Config:
@@ -21,11 +154,6 @@ class Config:
 
     thetvdb_apikey = 'DFDB0A667C844513'
     use_cache = True
-
-    user_dir = click.get_app_dir('tvoverlord')
-    db_file = os.path.join(user_dir, 'shows.sqlite3')
-    config_filename = 'config.ini'
-    user_config = os.path.join(user_dir, 'config.ini')
 
     console_columns, console_rows = click.get_terminal_size()
     console_columns = int(console_columns)
@@ -105,86 +233,88 @@ class Config:
     # be between 1 and 4
     parts_to_match = 3
 
-    _msg = ''
-    # create app config dir
-    if not os.path.exists(user_dir):
-        os.makedirs(user_dir)
-        _msg += 'App config dir created\n'
-        _msg += '  %s\n' % user_dir
+    # create files
+    files_created = False
+    user_config_dir = 'tvoverlord'
+    cb = ConfigBuilder(user_config_dir)
 
-    # create config.ini
-    if not os.path.exists(user_config):
-        app_home = os.path.join(os.path.dirname(os.path.realpath(__file__)))
-        app_config = os.path.join(app_home, config_filename)
-        shutil.copy(app_config, user_dir)
-        _msg += 'config.ini created\n'
-        _msg += '  %s\n' % os.path.join(user_dir, config_filename)
+    if cb.create_config_dir():
+        files_created = message('App config dir created:', cb.user_home)
 
-    # create db
-    if not os.path.exists(db_file):
-        sql = '''
-            CREATE TABLE shows (
-                name TEXT,
-                search_engine_name TEXT,
-                display_name TEXT,
-                date_added TEXT,
-                network_status TEXT,
-                status TEXT,
-                thetvdb_series_id TEXT,
-                ragetv_series_id TEXT,
-                imdb_series_id TEXT,
-                alt_series_id TEXT,
-                season NUMERIC,
-                episode NUMERIC,
-                next_episode TEXT,
-                airs_time TEXT,
-                airs_dayofweek TEXT,
-                rating TEXT,
-                auto_download TEXT,
-                notes TEXT
-            );
-            CREATE TABLE tracking (
-                download_date TEXT,
-                show_title TEXT,
-                season TEXT,
-                episode TEXT,
-                download_data TEXT,
-                chosen TEXT,
-                chosen_hash TEXT,
-                one_off INTERGER,
-                complete INTERGER,
-                filename TEXT,
-                destination TEXT
-            );
-            '''
-        conn = sqlite3.connect(db_file)
-        curs = conn.cursor()
-        curs.executescript(sql)
-        conn.commit()
-        conn.close()
-        _msg += 'Database has been created\n'
-        _msg += '  %s\n' % db_file
+    if cb.create_config('config.ini'):
+        files_created = message(
+            '%s created:' % cb.user_config.name, cb.user_config)
 
-    if _msg:
-        click.secho('-' * console_columns, fg='yellow')
-        click.echo(_msg)
-        click.secho('-' * console_columns, fg='yellow')
+    user_config = str(cb.user_config)
+    user_dir = str(cb.user_home)
+
+    sql = [
+        {
+            'name': 'shows',
+            'fields': [
+                ['id', 'INTEGER PRIMARY KEY AUTOINCREMENT'],
+                ['name', 'TEXT'],
+                ['search_engine_name', 'TEXT'],
+                ['display_name', 'TEXT'],
+                ['date_added', 'TEXT'],
+                ['network_status', 'TEXT'],
+                ['status', 'TEXT'],
+                ['thetvdb_series_id', 'TEXT'],
+                ['ragetv_series_id', 'TEXT'],
+                ['imdb_series_id', 'TEXT'],
+                ['alt_series_id', 'TEXT'],
+                ['season', 'NUMERIC'],
+                ['episode', 'NUMERIC'],
+                ['next_episode', 'TEXT'],
+                ['airs_time', 'TEXT'],
+                ['airs_dayofweek', 'TEXT'],
+                ['rating', 'TEXT'],
+                ['auto_download', 'TEXT'],
+                ['notes', 'TEXT'],
+            ],
+        },
+        {
+            'name': 'tracking',
+            'fields': [
+                ['download_date', 'TEXT'],
+                ['show_title', 'TEXT'],
+                ['season', 'TEXT'],
+                ['episode', 'TEXT'],
+                ['download_data', 'TEXT'],
+                ['chosen', 'TEXT'],
+                ['chosen_hash', 'TEXT'],
+                ['one_off', 'INTERGER'],
+                ['complete', 'INTERGER'],
+                ['filename', 'TEXT'],
+                ['destination', 'TEXT'],
+            ]
+        }
+    ]
+    if cb.create_modify_db('shows.sqlite3', sql):
+        files_created = message(
+            'Database has been created/updated:', cb.user_db)
+
+    if files_created:
+        click.echo('-' * console_columns)
+        click.echo()
+
+    db_file = str(cb.user_db)
 
     categories = SN()
     categories.resolution = [
-            '1080p', '1080i', '720p', '720i', 'hr', '576p',
-            '480p', '368p', '360p']
+        '1080p', '1080i', '720p', '720i', 'hr', '576p',
+        '480p', '368p', '360p']
     categories.sources = [
-            'bluray', 'remux', 'dvdrip', 'webdl', 'hdtv', 'bdscr',
-            'dvdscr', 'sdtv', 'webrip', 'dsr', 'tvrip', 'preair',
-            'ppvrip', 'hdrip', 'r5', 'tc', 'ts', 'cam', 'workprint']
+        'bluray', 'remux', 'dvdrip', 'webdl', 'hdtv', 'bdscr',
+        'dvdscr', 'sdtv', 'webrip', 'dsr', 'tvrip', 'preair',
+        'ppvrip', 'hdrip', 'r5', 'tc', 'ts', 'cam', 'workprint']
     categories.codecs = [
-            '10bit', 'h265', 'h264', 'x264', 'xvid', 'divx']
+        '10bit', 'h265', 'h264', 'x264', 'xvid', 'divx']
     categories.audio = [
-            'truehd', 'dts', 'dtshd', 'flac', 'ac3', 'dd5.1', 'aac', 'mp3']
+        'truehd', 'dts', 'dtshd', 'flac', 'ac3', 'dd5.1', 'aac', 'mp3']
 
     cfg = configparser.ConfigParser(allow_no_value=True, interpolation=None)
-    cfg.read(user_config)
+    cfg.read(str(cb.user_config))
 
     # Settings from config.ini ---------------------------------
     # [App Settings]
@@ -201,7 +331,8 @@ class Config:
         email = False
 
     try:
-        single_file = True if cfg.get('App Settings', 'single file') == 'yes' else False
+        single_file = True if cfg.get(
+            'App Settings', 'single file') == 'yes' else False
     except configparser.NoOptionError:
         single_file = False
 
@@ -211,7 +342,8 @@ class Config:
         template = False
 
     try:
-        search_type = 'newsgroup' if cfg.get('App Settings', 'search type') == 'newsgroup' else 'torrent'
+        search_type = 'newsgroup' if cfg.get(
+            'App Settings', 'search type') == 'newsgroup' else 'torrent'
     except configparser.NoOptionError:
         search_type = 'torrent'
 
@@ -235,6 +367,7 @@ class Config:
         staging = os.path.expanduser(cfg.get('File Locations', 'staging'))
     except configparser.NoOptionError:
         staging = None
+
 
 if __name__ == '__main__':
     c = Config()

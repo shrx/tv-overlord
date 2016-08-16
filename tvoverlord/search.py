@@ -38,11 +38,6 @@ class SearchError(Exception):
         return repr(self.value)
 
 
-def write_order(shows):
-    logfile = '/home/sm/projects/media-downloader/tvoverlord/show_order.org'
-    with open(logfile, 'a') as f:
-        f.write('| %s |\n' % (' | '.join(shows)))
-
 class Search(object):
     torrent_engines = [bitsnoop, extratorrent, thepiratebay_sx, btstorr_cc,
                        onethreethreesevenx_to, rarbg_to, eztv_ag]
@@ -51,7 +46,6 @@ class Search(object):
     # for nzb searches, only the first one listed will be used
     newsgroup_engines = [nzbclub_com]
     # , nzbindex_com # <-- rss feed not working
-
 
     def __init__(self):
         self.season = ''
@@ -169,8 +163,6 @@ class Search(object):
 
         # go up 3 lines to remove the progress bar
         click.echo('[%sA' % 3)
-
-        write_order(self.se_order)
 
         if self.search_type == 'torrent':
             self.sort_torrents(episodes)

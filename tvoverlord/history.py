@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import os
+import sys
 import datetime
 from dateutil import parser
 from pprint import pprint as pp
@@ -62,9 +63,13 @@ class History:
         else:
             line = '{date}  {title}  {complete}  {destination}'
 
-        lengths = [1] * len(self.sqldata[0])
+        try:
+            lengths = [1] * len(self.sqldata[0])
+        except IndexError:
+            return  # no sql data
+
         data = []
-        lengths = {'date': 1, 'title': 1, 'filename': 1,
+        lengths = {'date': 1, 'title': 1, 'filename': 1, 'hash': 1,
                    'destination': 1, 'season': 1, 'episode': 1,
                    'magnet': 1, 'oneoff': 1, 'complete': 1, }
 
@@ -80,6 +85,7 @@ class History:
                 'magnet': row[6],
                 'oneoff': 'one off' if row[7] else 'tracked',
                 'complete': 'complete' if row[8] else 'incomplete',
+                'hash': row[3],
             }
             data.append(fields)
 
@@ -91,10 +97,17 @@ class History:
         # pad each field to the data in lengths
         for row in data:
             for name in row:
-                row[name] = row[name].ljust(lengths[name])
+                try:
+                    row[name] = row[name].ljust(lengths[name])
+                except AttributeError:
+                    # fields has None as value
+                    row[name] = ''.ljust(lengths[name])
 
         for row in data:
-            click.echo(line.format(**row))
+            try:
+                click.echo(line.format(**row).strip())
+            except KeyError:
+                sys.exit('Invalid key')
 
     def copy(self):
         title = 'Copy files to %s' % Config.tv_dir

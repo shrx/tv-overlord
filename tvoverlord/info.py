@@ -1,15 +1,14 @@
 import datetime
-import textwrap
 from pprint import pprint as pp
 from dateutil import parser as date_parser
 import click
 
 from tvoverlord.shows import Shows
 from tvoverlord.config import Config
-from tvoverlord.tvutil import style
+from tvoverlord.tvutil import style, format_paragraphs
 
 
-def info(show_name, show_all, sort_by_next,
+def info(show_name, show_all, sort_by_next, db_status,
          ask_inactive, show_links, synopsis):
     """Show information about your tv shows.
 
@@ -19,6 +18,7 @@ def info(show_name, show_all, sort_by_next,
     """
     show_info = {}
     counter = 0
+    status = 'active'
 
     # When the user specifies a single show, turn on --show-all
     # because the show they are asking for might an inactive show
@@ -30,6 +30,7 @@ def info(show_name, show_all, sort_by_next,
         synopsis = True
         show_links = True
         filter_name = show_name
+        db_status = 'all'
 
     if Config.is_win:
         colors = {'links': 'blue', 'ended': 'red',
@@ -38,15 +39,9 @@ def info(show_name, show_all, sort_by_next,
         colors = {'links': 20, 'ended': 'red',
                   'last': 48, 'future': 22}
 
-    shows = Shows(name_filter=filter_name)
+    shows = Shows(name_filter=filter_name, status=db_status)
     for show in shows:
         title = show.db_name
-
-        # check if the series object has a status attribute. if it
-        # doesn't then its probably a show that nothing is known
-        # about it yet.
-        if 'status' not in dir(show):
-            continue
 
         if show.status == 'Ended':
             status = style(show.status, fg=colors['ended'])
@@ -62,16 +57,15 @@ def info(show_name, show_all, sort_by_next,
 
         imdb_url = thetvdb_url = ''
         if show_links:
-            imdb_url = style('\n    IMDB.com:    http://imdb.com/title/%s' % show.imdb_id, fg=colors['links'])
+            imdb_url = style('\n    IMDB.com:    http://imdb.com/title/%s' % show.imdb_id,
+                             fg=colors['links'])
             thetvdb_url = style('\n    TheTVDB.com: http://thetvdb.com/?tab=series&id=%s' % show.id,
-                                     fg=colors['links'])
+                                fg=colors['links'])
 
         if synopsis and show.overview:
             paragraph = show.overview
             indent = '    '
-            paragraph = textwrap.fill(paragraph,
-                                      initial_indent=indent,
-                                      subsequent_indent=indent)
+            paragraph = format_paragraphs(paragraph, indent=indent)
             synopsis = '\n%s' % paragraph
 
         first_row_a = []
@@ -120,11 +114,7 @@ def info(show_name, show_all, sort_by_next,
             if episodes_list:
                 indent = '    '
                 episode_list = 'Future episodes: ' + ' - '.join(episodes_list)
-                episodes = textwrap.fill(
-                    style(episode_list, fg=colors['future']),
-                    initial_indent=indent,
-                    subsequent_indent=indent
-                )
+                episodes = format_paragraphs(episode_list, indent=indent)
                 show_info[sort_key] = first_row + '\n' + episodes
             else:
                 show_info[sort_key] = first_row
@@ -144,6 +134,9 @@ def info(show_name, show_all, sort_by_next,
     full_output = ''
     for i in keys:
         full_output = full_output + show_info[i] + '\n\n'
+
+    # remove the last '\n\n'
+    full_output = full_output.strip()
 
     if len(keys) < 4:
         click.echo(full_output)
