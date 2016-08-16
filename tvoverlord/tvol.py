@@ -18,7 +18,7 @@ from tvoverlord.search import Search
 from tvoverlord.calendar import calendar as Calendar
 from tvoverlord.info import info as Info
 
-__version__ = '1.3.6'
+__version__ = '1.3.7'
 
 
 def edit_db(search_str):
@@ -245,30 +245,24 @@ def list(today):
 
     shows = Shows()
 
-    if len(shows) > 20:
-        with click.progressbar(
-                shows,
-                item_show_func=tfunct,
-                show_percent=False,
-                show_eta=False,
-                width=Config.pb.width,
-                empty_char=style(Config.pb.empty_char,
-                                 fg=Config.pb.dark,
-                                 bg=Config.pb.dark),
-                fill_char=style(Config.pb.fill_char,
-                                fg=Config.pb.light,
-                                bg=Config.pb.light),
-                bar_template=Config.pb.template,
-        ) as bar:
-            for series in bar:
-                if series.is_missing(today):
-                    fp.standard_print(series.show_missing())
-        fp.done()
-    else:
-        for show in shows:
-            if show.is_missing(today):
-                fp.standard_print(show.show_missing())
-        fp.done()
+    with click.progressbar(
+            shows,
+            item_show_func=tfunct,
+            show_percent=False,
+            show_eta=False,
+            width=Config.pb.width,
+            empty_char=style(Config.pb.empty_char,
+                             fg=Config.pb.dark,
+                             bg=Config.pb.dark),
+            fill_char=style(Config.pb.fill_char,
+                            fg=Config.pb.light,
+                            bg=Config.pb.light),
+            bar_template=Config.pb.template,
+    ) as bar:
+        for series in bar:
+            if series.is_missing(today):
+                fp.standard_print(series.show_missing())
+    fp.done()
 
 
 @tvol.command(context_settings=CONTEXT_SETTINGS)
