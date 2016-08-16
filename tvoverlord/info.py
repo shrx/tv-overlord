@@ -1,12 +1,11 @@
 import datetime
-import textwrap
 from pprint import pprint as pp
 from dateutil import parser as date_parser
 import click
 
 from tvoverlord.shows import Shows
 from tvoverlord.config import Config
-from tvoverlord.tvutil import style
+from tvoverlord.tvutil import style, format_paragraphs
 
 
 def info(show_name, show_all, sort_by_next,
@@ -120,11 +119,7 @@ def info(show_name, show_all, sort_by_next,
             if episodes_list:
                 indent = '    '
                 episode_list = 'Future episodes: ' + ' - '.join(episodes_list)
-                episodes = textwrap.fill(
-                    style(episode_list, fg=colors['future']),
-                    initial_indent=indent,
-                    subsequent_indent=indent
-                )
+                episodes = format_paragraphs(episode_list, indent=indent)
                 show_info[sort_key] = first_row + '\n' + episodes
             else:
                 show_info[sort_key] = first_row

@@ -11,14 +11,14 @@ import click
 from tvoverlord.shows import Shows
 from tvoverlord.show import Show
 from tvoverlord.config import Config
-from tvoverlord.tvutil import FancyPrint, dict_factory, style
+from tvoverlord.tvutil import FancyPrint, dict_factory, style, format_paragraphs
 from tvoverlord.location import Location
 from tvoverlord.history import History
 from tvoverlord.search import Search
 from tvoverlord.calendar import calendar as Calendar
 from tvoverlord.info import info as Info
 
-__version__ = '1.3'
+__version__ = '1.3.4'
 
 
 def edit_db(search_str):
@@ -44,9 +44,11 @@ def edit_db(search_str):
     is_error = False
 
     click.echo()
-    click.echo('While editing a field, hit <enter> in an empty field to leave it')
-    click.echo('unchanged and skip to the next one.  Type "<ctrl> c" to cancel all')
-    click.echo('edits.  The current value is shown in ()\'s beside the field name.')
+    click.echo(format_paragraphs('''
+      While editing a field, hit <enter> in an empty field to leave it
+      unchanged and skip to the next one.  Type "<ctrl> c" to cancel all
+      edits.  The current value is shown in ()\'s beside the field
+      name.'''))
     click.echo()
 
     title = '%s' % row['name']
