@@ -82,11 +82,11 @@ your platform and put the database and config.ini there.
 
 After that you can start to use it, type:
 
-: tvol addnew 'Doctor Who'
+: tvol add 'Doctor Who'
 
 If this is the wrong show, try again but add the year:
 
-: tvol addnew 'Doctor Who 2005'
+: tvol add 'Doctor Who 2005'
 
 Then
 
@@ -95,7 +95,7 @@ Then
 To get help for each command, you can use:
 
 : tvol download --help
-: tvol addnew --help
+: tvol add --help
 : # etc...
 
 If you use Bash as your shell, you can have tab completions.  Add this
