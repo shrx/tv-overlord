@@ -7,6 +7,7 @@
 }
 html, body{
     height: 100%;
+    font-size: 15px;
 }
 h2{
     font-size: 18px;
@@ -139,11 +140,16 @@ a{
     max-width: 100%;
 }
 .footer{
+    background-image: url('../images/masthead-bg.png');
+    background-size: 350px;
+    background-repeat: no-repeat;
+    background-position: 27% -24px;
+    background-color: #C20000;
     color: white;
-    background-color: #BB3407;
     padding: 20px;
     padding-bottom: 25px;
     text-align: center;
+    font-weight: bold;
 }
 .img-a{
     padding: none !important;
@@ -154,21 +160,19 @@ a{
     float: right;
     width: 200px;
     padding: 10px 20px 20px 50px;
-    background-color: #9c2d0b;
+    background-color: #9c0b0b;
     margin-left: 10px;
     color: white;
 }
-/*
+
 @media only screen and (max-width : 425px) {
     .workbox{
-        max-width: 100%;
-        width: 100%;
-        float: none;
-        margin-left: 0;
-        text-align: center;
+        font-size: 13px;
+        width: 160px;
+        padding: 5px 0px 18px 45px;
     }
 }
-*/
+
 .workbox ul {
     list-style: none;
     margin: 0;
@@ -191,4 +195,13 @@ a{
     margin-right: -23px;
     position: relative;
     top: 7px;
+}
+@media only screen and (max-width : 425px) {
+    .workbox li::before{
+        width: 18px;
+        height: 18px;
+        top: 5px;
+        left: -28px;
+        margin-right: -20px;
+    }
 }
