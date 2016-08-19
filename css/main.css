@@ -141,7 +141,7 @@ a{
     color: white;
     padding: 3px 10px;
     display: inline-block;
-    margin: 5px 0;
+    margin: 15px 0 5px 0;
 }
 .content a, .content a:visited, .content a:active {
     color: #9A2B05;
@@ -154,16 +154,17 @@ a{
   text-align: center;
 }
 .media{
-    max-width: 100%;
+    width: 100%;
 }
 .footer{
     background-color: #C20000;
-    background: linear-gradient(90deg, #c20000, #ee7347, #c20000);
+    background: linear-gradient(90deg, #c20000, #ee7347, #ee7347, #c20000);
     color: white;
     padding: 20px;
     padding-bottom: 25px;
     text-align: center;
     font-weight: bold;
+    letter-spacing: 5px;
 }
 .img-a{
     padding: none !important;
@@ -177,6 +178,10 @@ a{
     background-color: #dddde4; /*#167108; #9c0b0b; */
     margin-left: 10px;
     color: white;
+    background: radial-gradient(ellipse 90px 40px, #ffffff, rgba(221, 221, 228, 0)), #DDDDE5;
+    background-position: -260px -70px;
+    background-repeat: no-repeat;
+    background-size: 250%;
 }
 
 @media only screen and (max-width : 425px) {
