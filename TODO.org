@@ -61,3 +61,23 @@ Move documentation to the wiki
  - Setup for a headless server
  - Configure tv dir tags
 
+** For 1.4.0 [0/6]
+
+1. [ ] Add additional dialog after a show has been added to select
+   what episode to start at.
+
+   : Start downloading at the [b]egining, [e]nd, or at a season and episode:
+
+2. [ ] Change 'watching' to 'downloading' in dialogs.  Watching is confusing.
+
+3. [ ] Add multiple choice selector for =tvol add= when more that one
+   show is found.
+
+4. [ ] =tvol editshow top gear= always returns "Top Gear: Extra Gear" if
+   both "top gear" and "Top Gear: Extra Gear" are in db.
+
+5. [ ] Add a blacklist in config.ini to turn off search engines.
+
+6. [ ] Add a =tvol addbulk --show-name NAME --season NUM --episode NUM=
+   for bulk adding of shows in a bash script
+
