@@ -32,15 +32,34 @@ def edit_db(search_str):
     conn.row_factory = dict_factory
     curs = conn.cursor()
     values = {'search': '%{}%'.format(search_str)}
-    curs.execute(sql, values)
-    row = curs.fetchone()
-    editcolor = 'green' if Config.is_win else 31
-    dirty = False
+    results = curs.execute(sql, values)
 
-    if not row:
+    data = []
+    for i in results:
+        data.append(i)
+
+    if len(data) == 0:
         click.echo('"%s" not found' % search_str)
         sys.exit()
+    elif len(data) > 1:
+        click.echo('Multiple shows found, type a number to edit.')
+        click.echo('Type "<ctrl> c" to cancel.')
+        click.echo()
+        for index, show in enumerate(data):
+            click.echo('  %s. %s' % (index + 1, show['name']))
+        click.echo()
+        choice = click.prompt(
+            'Choose number', default=1,
+            type=click.IntRange(min=1, max=len(data)))
+        idchoice = choice - 1
+        if idchoice not in range(len(data)):
+            sys.exit('Invalid choice: %s' % choice)
+        row = data[idchoice]
+    else:
+        row = data[0]
 
+    editcolor = 'green' if Config.is_win else 31
+    dirty = False
     is_error = False
 
     click.echo()
@@ -235,10 +254,10 @@ def tfunct(series):
     return title
 
 
-@tvol.command(context_settings=CONTEXT_SETTINGS)
+@tvol.command('list', context_settings=CONTEXT_SETTINGS)
 @click.option('--today', '-t', is_flag=True,
               help="Also show today's episodes.")
-def list(today):
+def list_missing(today):
     """List episodes that are ready to download.
     """
     fp = FancyPrint()
