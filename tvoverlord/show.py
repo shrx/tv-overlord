@@ -37,6 +37,8 @@ class Show:
     gueststars, seriesid, language, productioncode, firstaired,
     episodename
     """
+    tvapi = tvdb_api.Tvdb(apikey=Config.thetvdb_apikey,
+                               cache=Config.use_cache)
 
     def se_ep(self, season, episode):
         season_just = str(season).rjust(2, '0')
@@ -60,6 +62,7 @@ class Show:
         self.console_columns = Config.console_columns
 
         self.db = DB()
+
 
     def _set_db_data(self, dbdata):
         """Add the data from the local db"""
@@ -104,8 +107,11 @@ class Show:
 
         """
 
-        tv = tvdb_api.Tvdb(apikey=Config.thetvdb_apikey,
-                           cache=Config.use_cache)
+        # tv = tvdb_api.Tvdb(apikey=Config.thetvdb_apikey,
+        #                    cache=Config.use_cache)
+        # self.tvapi = tv
+        tv = self.tvapi
+
         try:
             series = tv[self.db_name]
             self.show_exists = True
@@ -211,7 +217,30 @@ class Show:
         return ret
 
     def add_new(self, name):
-        self.db_name = name
+        result = self.tvapi.search(name)
+
+        if len(result) > 1:
+            click.echo('Multiple shows found, type a number to select.')
+            click.echo('Type "<ctrl> c" to cancel.')
+            click.echo()
+            for index, show in enumerate(result):
+                click.echo('  %s. %s' % (index + 1, show['seriesname']))
+            click.echo()
+
+            choice = click.prompt(
+                'Choose number', default=1,
+                type=click.IntRange(min=1, max=len(result)))
+            idchoice = choice - 1
+            if idchoice not in range(len(result)):
+                sys.exit('Invalid choice: %s' % choice)
+            show = result[idchoice]
+        elif not result:
+            click.echo('No show found.')
+            return
+        else:
+            show = result[0]
+
+        self.db_name = show['seriesname']  # name
         self._get_thetvdb_series_data()
         indent = '  '
 
