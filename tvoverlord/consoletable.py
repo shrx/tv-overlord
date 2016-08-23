@@ -176,7 +176,7 @@ class ConsoleTable:
         return choice
 
     def ask(self, key):
-        click.echo('\nLetter, [s]kip, skip [r]est of show, [q]uit, [m]ark as watched, or [enter] for #1: ', nl=False)
+        click.echo('\nLetter, [s]kip, skip [r]est of show, [q]uit, [m]ark as downloaded, or [enter] for #1: ', nl=False)
         get = click.getchar()
         # On Windows, getchar returns a byte string which looks like a bug
         # https://github.com/pallets/click/issues/537
