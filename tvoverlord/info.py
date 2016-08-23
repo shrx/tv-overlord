@@ -62,15 +62,16 @@ def info(show_name, show_all, sort_by_next, db_status,
             thetvdb_url = style('\n    TheTVDB.com: http://thetvdb.com/?tab=series&id=%s' % show.id,
                                 fg=colors['links'])
 
+        synopsis_text = None
         if synopsis and show.overview:
             paragraph = show.overview
             indent = '    '
             paragraph = format_paragraphs(paragraph, indent=indent)
-            synopsis = '\n%s' % paragraph
+            synopsis_text = '\n%s' % paragraph
 
         first_row_a = []
         fancy_title = style(title, bold=True)
-        for i in [fancy_title + ',', se, status, imdb_url, thetvdb_url, synopsis]:
+        for i in [fancy_title + ',', se, status, imdb_url, thetvdb_url, synopsis_text]:
             if i: first_row_a.append(i)
         first_row = ' '.join(first_row_a)
 

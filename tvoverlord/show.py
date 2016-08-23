@@ -7,7 +7,7 @@ from pprint import pprint as pp
 import click
 
 from tvoverlord.search import Search, SearchError
-from tvoverlord.tvutil import style
+from tvoverlord.tvutil import style, sxxexx
 from tvoverlord.config import Config
 from tvoverlord.consoletable import ConsoleTable
 from tvoverlord.tracking import Tracking
@@ -239,11 +239,49 @@ class Show:
             pass
         click.echo(' %s' % correct)
 
-        if str(correct) == 'y':
-            self._add_new_db()
-            click.echo('Show added')
-        else:
+        if str(correct) != 'y':
             click.echo('Not added')
+            return
+
+        last_season = 1
+        last_episode = 0
+        for season in self.series:
+            last_season = season
+            for episode in self.series[season]:
+                b_date = self.series[season][episode]['firstaired']
+                if not b_date:
+                    continue  # some episodes have no broadcast date
+                split_date = b_date.split('-')
+                broadcast_date = datetime.datetime(
+                    int(split_date[0]), int(split_date[1]), int(split_date[2]))
+                today = datetime.datetime.today()
+                if broadcast_date > today:
+                    break
+                last_episode = episode
+
+        last_sxxexx = sxxexx(last_season, last_episode)
+        click.echo()
+        click.echo('The last episode broadcast was %s.' % last_sxxexx)
+        click.echo('Start downloading the [f]irst, [l]atest or season and episode?')
+        msg = 'Type "f", "l" or a season and episode number'
+        start = click.prompt(msg)
+
+        if start == 'f':
+            se = ep = 0
+        elif start == 'l':
+            se = last_season
+            ep = last_episode
+        else:
+            try:
+                se, ep = [int(i) for i in start.split()]
+            except ValueError:
+                sys.exit('Season and episode must be two numbers seperated by a space')
+
+        if ep > 0: ep -= 1  # episode in db is the NEXT episode
+
+        self._add_new_db(season=se, episode=ep)
+        click.echo()
+        click.echo('Show added')
 
     def non_db(self, search_str, display_count):
         self.db_name = search_str
