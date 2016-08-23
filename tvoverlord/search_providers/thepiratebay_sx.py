@@ -90,7 +90,7 @@ class Provider (object):
                         # sometimes some fields are empty, so trying to
                         # access them throws an IndexError.  We can safely
                         # skip them.
-                        pass
+                        continue
 
 
                     show_data.append([name, size, date, seeds, self.shortname, magnet])
