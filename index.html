@@ -18,7 +18,7 @@
     <div class="page">
       <div class="header-wrapper">
         <div class="header">
-          <img src="images/tvoverlord-logo.png">
+          <img alt="TV Overlord" src="images/tvoverlord-logo.png">
           <p>TV Overlord is a command line tool to download and manage
             TV shows.</p>
         </div>
@@ -43,10 +43,14 @@
           download and manage TV shows from newsgroups or bittorent.
           It will download nzb files or magnet links.</p>
 
-        <p>TV Overlord is an open source application written in <a href="https://www.python.org/downloads/">python 3</a> and
-          it's installed on the command line:<br><span class="commandline">
-          pip3 install tvoverlord</span> — <a href="https://github.com/8cylinder/tv-overlord/wiki/FAQ">More details here</a>.
-        </p>
+        <p>TV Overlord is an open source application written in
+          <a href="https://www.python.org/downloads/">python3</a> and
+          it's installed on the command line:</p>
+
+        <p><span class="commandline">
+          pip3 install tvoverlord</span> — <a target="_new" href="https://github.com/8cylinder/tv-overlord/wiki/FAQ">More details here</a>.</p>
+
+        <p>Current version: 1.4.0, <!-- <a class="clean" href="https://pypi.python.org/pypi/tvoverlord"><img class="inline-img" src="https://badge.fury.io/py/tvoverlord.svg"></a> --> <a href="#1.4.0">Changes</a></p>
 
         <p>It can show episodes ready to download.</p>
 
@@ -77,13 +81,13 @@
           is complete.  This script will extract the video file from
           the downloaded folder, rename it, and put it in a separate
           folder organized into sub folders named for each tv
-          show. Get more information about the <a href="https://github.com/8cylinder/tv-overlord/wiki/Rename-tags">
+          show. Get more information about the <a target="_new" href="https://github.com/8cylinder/tv-overlord/wiki/Rename-tags">
           Rename tags here.</a></p>
 
         <p>There are several bittorent search providers and two NZB
           search providers and new ones can be added fairly easily.
           See the search providers
-          <a href="https://github.com/8cylinder/tv-overlord/tree/master/tvoverlord/search_providers"
+          <a target="_new" href="https://github.com/8cylinder/tv-overlord/tree/master/tvoverlord/search_providers"
           >README.org</a>, or by making a feature request in issues or
           a pull request.</p>
 
@@ -95,7 +99,7 @@
           <li>Gives you a list of torrents or nzbs you can choose
             from.</li>
           <li>You can add new shows from the command line.</li>
-          <li><a href="https://github.com/8cylinder/tv-overlord/wiki/VPN-Detection">
+          <li><a target="_new" href="https://github.com/8cylinder/tv-overlord/wiki/VPN-Detection">
             Warn you when not using a vpn</a>.</li>
           <li>Will display info showing what show will be next and how
             many days till broadcast.  This list can be filtered and
@@ -104,11 +108,11 @@
             specify a range of days to display, past or future.</li>
           <li>The ability to query download history and re-start a
             download.</li>
-          <li><a href="https://github.com/8cylinder/tv-overlord/wiki/Rename-tags">
+          <li><a target="_new" href="https://github.com/8cylinder/tv-overlord/wiki/Rename-tags">
             Organize you tv show downloads into folders</a>.</li>
         </ul>
 
-        <p>Get the <a href="https://github.com/8cylinder/tv-overlord/wiki/Command-line-reference">
+        <p>Get the <a target="_new" href="https://github.com/8cylinder/tv-overlord/wiki/Command-line-reference">
           detailed command line reference here</a>.</p>
 
         <h2>Why semi automatic</h2>
@@ -124,9 +128,35 @@
 
         <h2>Screenshots</h2>
 
-        <a class="img-a" href="images/calendar-x.png">
+        <a class="clean" href="images/calendar-x.png">
           <img class="media" src="images/calendar-x.png">
         </a>
+
+        <h2>Changes</h2>
+        <h3>Version 1.4.0 <a id='1.4.0'></a></h3>
+        <ul>
+          <li>When editing a show with <code class="commandline">tvol
+            editshow &lt;show name&gt;</code> and more that one match
+            is found, a list is shown to choose from instead of
+            using the first match.</li>
+          <li>After adding a show with <code class="commandline">tvol
+            add &lt;show name&gt;</code> you are asked which episode
+            to start downloading at; first, last or a season and
+            episode.</li>
+          <li>When adding a new show and more than one match is found,
+            you are given a list to choose from instead of using the
+            first match.</li>
+          <li>An optional blacklist field has been added to config.ini.
+            Any of the search engines you don't want to use, they
+            can be added to a comma separated list. <a target="_new" href="https://github.com/8cylinder/tv-overlord/wiki/Config-file">More information here</a></li>
+          <li>Bulk adding shows is possible now with the --bulk flag,
+            <code class="commandline">tvol add --bulk &lt;show name&gt;
+            --season 2 --episode 3</code>.  If season or episode are not
+            used, they default to 0.  Also when using --bulk, no checks
+            are done. <a target="_new" href="https://github.com/8cylinder/tv-overlord/wiki/Command-line-reference#add">More information here</a></li>
+          <li>A bug that prevented using shows with more than 99
+            episodes has been fixed.</li>
+        </ul>
 
       </div>
       <div class="footer"><p>Let the overlording begin.<p></div>

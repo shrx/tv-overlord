@@ -7,3 +7,4 @@ README.txt
 /tvoverlord.egg-info
 .vagrant/
 show_order.org
+.sass-cache
