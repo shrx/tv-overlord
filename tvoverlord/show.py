@@ -117,21 +117,22 @@ class Show:
             self.show_exists = True
         except KeyError:
             click.echo('TheTVDB is down or very slow, try again.')
-            sys.exit()
+            sys.exit(1)
         except tvdb_api.tvdb_shownotfound:
             click.echo('Show not found: %s' % self.db_name)
             self.show_exists = False
-            return
+            sys.exit(1)
         except tvdb_api.tvdb_error as e_msg:
             click.echo()
             click.echo('Error: %s' % self.db_name)
             click.echo('-----------------------------')
             click.echo(e_msg)
-            return
+            sys.exit(1)
         except UnboundLocalError as e:
             click.echo('+++++++++++++++++++++++++')
             click.echo(e)
             click.echo('+++++++++++++++++++++++++')
+            sys.exit(1)
 
         for i in series.data:
             setattr(self, i, series.data[i])
@@ -311,6 +312,12 @@ class Show:
         self._add_new_db(season=se, episode=ep)
         click.echo()
         click.echo('Show added')
+
+    def add_bulk(self, seriesname, season=0, episode=0):
+
+        self.db_name = seriesname
+        self._get_thetvdb_series_data()
+        self._add_new_db(season=season, episode=episode)
 
     def non_db(self, search_str, display_count):
         self.db_name = search_str

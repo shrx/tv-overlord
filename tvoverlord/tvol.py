@@ -320,7 +320,13 @@ def download(show_name, today, ignore, count):
 
 @tvol.command(context_settings=CONTEXT_SETTINGS)
 @click.argument('show_name')
-def add(show_name):
+@click.option('--bulk', is_flag=True,
+              help='Bypass dialogs, no checks are done.')
+@click.option('--season', '-s', default=0,
+              help='Set the season when using --bulk.')
+@click.option('--episode', '-e', default=0,
+              help='Set the episode when using --bulk.')
+def add(show_name, bulk, season, episode):
     """Add a new tv show to the database.
 
     The SHOW_NAME can be a partial name, but the more accurate the name
@@ -329,9 +335,14 @@ def add(show_name):
 
     If you search for 'Doctor Who', the result will be the original series,
     but if you want the modern one, search for 'Doctor Who 2005'
+
+    If bulk is used, then season and episode can be used.
     """
     new_show = Show(show_type='new')
-    new_show.add_new(name=show_name)
+    if bulk == True:
+        new_show.add_bulk(show_name, season=season, episode=episode)
+    else:
+        new_show.add_new(name=show_name)
 
 
 @tvol.command(context_settings=CONTEXT_SETTINGS)
