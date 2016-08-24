@@ -151,6 +151,17 @@ This show the info command.
 
 ** Usefull shell commands
 
-=tvol calendar --days -$(date '+%u'),7 -x= \\
 This will show all the available shows for the current week from Sun
 to Sat.
+
+: tvol calendar --days -$(date '+%u'),7 -x
+
+
+To bulk import shows from a csv file (showname can't have a comma in it).
+
+#+BEGIN_SRC bash
+while IFS=, read showname season episode
+do
+    tvol add --bulk "${showname}" --season=${season} --episode=${episode}
+done < allshows.csv
+#+END_SRC
