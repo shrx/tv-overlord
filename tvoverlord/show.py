@@ -338,7 +338,10 @@ class Show:
         """Returns a list of missing episodes"""
         missing = []
         today = datetime.date.today()
-        last_watched = self.se_ep(self.db_current_season, self.db_last_episode)
+        last_watched = [
+            int(self.db_current_season),
+            int(self.db_last_episode)
+        ]
 
         # if SELF does not have the attribute: 'series'
         # it's because of an error in the xml downloaded
@@ -383,10 +386,12 @@ class Show:
 
                 last_season = self.series[i][j]['seasonnumber']
                 last_episode = self.series[i][j]['episodenumber']
-                last_broadcast = self.se_ep(last_season, last_episode)
+                last_broadcast = [
+                    int(last_season),
+                    int(last_episode)
+                ]
                 if last_season == '0' or last_episode == '0':
                     break  # don't display the S00E01 or S05E00 type special episodes
-
                 if last_watched < last_broadcast:
                     missing.append({'season': last_season,
                                     'episode': last_episode})
