@@ -127,8 +127,8 @@ def edit_db(search_str):
 
     click.echo()
 
-    if not click.confirm('Commit db edits?', default='Y'):
-        click.echo('Database edit cancelled.')
+    if not click.confirm('Are these changes correct? (you can always change it back)', default='Y'):
+        click.echo('Edits cancelled.')
         sys.exit()
 
     sql = '''UPDATE shows SET
@@ -145,8 +145,6 @@ def edit_db(search_str):
                   'tvdb_id': row['thetvdb_series_id']}
 
     curs.execute(sql, row_values)
-
-    click.echo('Database updated')
 
     conn.commit()
     conn.close()
