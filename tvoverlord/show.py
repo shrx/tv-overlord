@@ -309,15 +309,16 @@ class Show:
 
         if ep > 0: ep -= 1  # episode in db is the NEXT episode
 
-        self._add_new_db(season=se, episode=ep)
+        msg = self._add_new_db(season=se, episode=ep)
         click.echo()
-        click.echo('Show added')
+        click.echo(msg)
 
     def add_bulk(self, seriesname, season=0, episode=0):
 
         self.db_name = seriesname
         self._get_thetvdb_series_data()
-        self._add_new_db(season=season, episode=episode)
+        msg = self._add_new_db(season=season, episode=episode)
+        click.echo(msg)
 
     def non_db(self, search_str, display_count):
         self.db_name = search_str
@@ -462,11 +463,17 @@ class Show:
 
     def _add_new_db(self, season=0, episode=0):
         if self.db.show_exists(self.id):
-            sql = '''UPDATE shows SET status="active"
+            sql = '''UPDATE shows SET
+                        status="active",
+                        episode=:episode,
+                        season=:season
                      WHERE thetvdb_series_id=:thetvdb_id;'''
-            values = {'thetvdb_id': self.id}
-            click.echo()
-            click.echo('%s is already in the db. Its status is now set to "active"' % self.seriesname)
+            values = {
+                'thetvdb_id': self.id,
+                'episode': episode,
+                'season': season
+            }
+            msg = '%s is already in the db. Its status is now set to "active"' % self.seriesname
         else:
             sql = '''
                 INSERT INTO shows (
@@ -480,8 +487,12 @@ class Show:
                       'name': self.seriesname,
                       'season': season,
                       'episode': episode}
+            msg = '%s %s, added' % (self.seriesname, sxxexx(season, episode))
+
         conn = sqlite3.connect(Config.db_file)
         curs = conn.cursor()
         curs.execute(sql, values)
         conn.commit()
         conn.close()
+
+        return msg
