@@ -537,7 +537,7 @@ def config(edit, test_se):
 
     # ip addresses
     click.echo()
-    click.secho('Ip addresse information:', fg=title, bold=bold, underline=ul)
+    click.secho('Ip address information:', fg=title, bold=bold, underline=ul)
     click.echo()
 
     l = Location()
