@@ -7,3 +7,5 @@ README.txt
 /tvoverlord.egg-info
 .vagrant/
 show_order.org
+allshows.csv
+Vagrantfile
