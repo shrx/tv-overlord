@@ -5,29 +5,14 @@ import platform
 import concurrent.futures
 from pprint import pprint as pp
 import socket
-# from urllib.parse import urlparse
 import urllib
-import time
 import click
 
 from tvoverlord.config import Config
 from tvoverlord.util import U
 from tvoverlord.tvutil import style, sxxexx
 
-# torrent search engings
-from tvoverlord.search_providers import extratorrent
-from tvoverlord.search_providers import bitsnoop
-# from tvoverlord.search_providers import kickass_to
-from tvoverlord.search_providers import thepiratebay_sx
-from tvoverlord.search_providers import onethreethreesevenx_to
-# from tvoverlord.search_providers import torrentdownloads_me
-from tvoverlord.search_providers import rarbg_to
-from tvoverlord.search_providers import eztv_ag
-from tvoverlord.search_providers import btstorr_cc
-
-# newsgroup search engines
-from tvoverlord.search_providers import nzbclub_com
-from tvoverlord.search_providers import nzbindex_com
+from tvoverlord.search_providers import *
 
 
 class SearchError(Exception):
@@ -39,19 +24,22 @@ class SearchError(Exception):
 
 
 class Search(object):
-    torrent_engines = [bitsnoop, extratorrent, thepiratebay_sx, btstorr_cc,
-                       onethreethreesevenx_to, rarbg_to, eztv_ag]
-    # , torrentdownloads_me # <-- a suspicious number of seeds
-
-    # for nzb searches, only the first one listed will be used
-    newsgroup_engines = [nzbclub_com]
-    # , nzbindex_com # <-- rss feed not working
-
     def __init__(self):
         self.season = ''
         self.episode = ''
         self.show_name = ''
         self.se_order = []
+
+        torrent_engines = [
+            bitsnoop, extratorrent, thepiratebay_sx, btstorr_cc,
+            onethreethreesevenx_to, rarbg_to, eztv_ag]
+
+        # remove any providers listed in the blacklist
+        self.torrent_engines = [
+            i for i in torrent_engines if i.Provider.name not in Config.blacklist]
+
+        # for nzb searches, only the first one listed will be used
+        self.newsgroup_engines = [nzbclub_com]
 
     def job(self, engine, search_string, season, episode):
         search = engine.Provider()

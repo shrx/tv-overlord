@@ -358,6 +358,13 @@ class Config:
     except configparser.NoOptionError:
         magnet_dir = None
 
+    try:
+        blacklist = cfg.get('App Settings', 'blacklist')
+        # split, strip, and remove empty values from list
+        blacklist = [i.strip() for i in blacklist.split(',') if i.strip()]
+    except configparser.NoOptionError:
+        blacklist = []
+
     # [File Locations]
     try:
         tv_dir = os.path.expanduser(cfg.get('File Locations', 'tv dir'))

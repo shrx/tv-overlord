@@ -18,7 +18,7 @@ from tvoverlord.search import Search
 from tvoverlord.calendar import calendar as Calendar
 from tvoverlord.info import info as Info
 
-__version__ = '1.3.8'
+__version__ = '1.4.0'
 
 
 def edit_db(search_str):
@@ -533,9 +533,19 @@ def config(edit, test_se):
             for url in engine.Provider.provider_urls:
                 click.echo('  %s' % url)
 
+    # blacklisted search engines
+    if Config.blacklist:
+        click.echo()
+        click.secho('Search engine blacklist:',
+                    fg=title, bold=bold, underline=ul)
+        click.echo()
+        for bl in Config.blacklist:
+            click.echo(bl)
+
     # ip addresses
     click.echo()
-    click.secho('Ip address information:', fg=title, bold=bold, underline=ul)
+    click.secho('Ip address information:',
+                fg=title, bold=bold, underline=ul)
     click.echo()
 
     l = Location()
