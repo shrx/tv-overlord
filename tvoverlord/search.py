@@ -10,7 +10,7 @@ import click
 
 from tvoverlord.config import Config
 from tvoverlord.util import U
-from tvoverlord.tvutil import style, sxxexx
+from tvoverlord.tvutil import style, sxxexx, format_paragraphs
 
 from tvoverlord.search_providers import *
 
@@ -237,18 +237,28 @@ class Search(object):
                     sys.exit('\n"%s" not found.' % args[0])
 
             elif platform.system() == 'Linux':
+                err_msg = format_paragraphs('''
+                    You do not have a default handler for magnet
+                    links.  Either install a bittorent client or
+                    configure the "magnet folder" or "client"
+                    settings in config.ini.''')
+
                 isX = True if os.environ.get('DISPLAY') else False
                 if isX:
                     app = 'xdg-open'
                 else:
-                    sys.exit('\nNon X usage is not supported')
+                    click.echo()
+                    click.echo(err_msg)
+                    sys.exit(1)
 
                 try:
                     subprocess.Popen([app, chosen_show],
                                      stderr=subprocess.DEVNULL,
                                      stdout=subprocess.DEVNULL)
                 except OSError:
-                    sys.exit('\nYou do not have a bittorent client installed')
+                    click.echo()
+                    click.echo(err_msg)
+                    sys.exit(1)
 
             elif platform.system() == 'Darwin':
                 subprocess.Popen(["open", "--background", chosen_show])

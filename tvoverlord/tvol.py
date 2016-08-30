@@ -18,7 +18,7 @@ from tvoverlord.search import Search
 from tvoverlord.calendar import calendar as Calendar
 from tvoverlord.info import info as Info
 
-__version__ = '1.4.0'
+__version__ = '1.4.1'
 
 
 def edit_db(search_str):
