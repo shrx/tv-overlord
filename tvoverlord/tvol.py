@@ -336,6 +336,9 @@ def add(show_name, bulk, season, episode):
 
     If bulk is used, then season and episode can be used.
     """
+    if not show_name:
+        raise click.UsageError('Empty "show_name" not allowed.')
+
     new_show = Show(show_type='new')
     if bulk == True:
         new_show.add_bulk(show_name, season=season, episode=episode)
@@ -355,6 +358,9 @@ def nondbshow(search_string, count, ignore):
     This just does a simple search and passes you choise to the bittorrent
     client.  The download is not recorded in the database.
     """
+    if not search_string:
+        raise click.UsageError('Empty "search_string" not allowed.')
+
     if not ignore and (Config.email or Config.ip):
         L = Location()
         if Config.email:
@@ -399,6 +405,9 @@ def editshow(show_name):
         This can be 'active' or 'inactive'.  This can be used
         to turn off a show.
     """
+    if not show_name:
+        raise click.UsageError('Empty "search_string" not allowed.')
+
     edit_db(show_name)
 
 

@@ -322,17 +322,16 @@ class Show:
 
     def non_db(self, search_str, display_count):
         self.db_name = search_str
-        try:
-            show_data = self._ask(
-                self.search_provider.search(
-                    search_str, search_type=Config.search_type),
-                None, None, display_count)
-            if not show_data:
-                return
+        show_data = self._ask(
+            self.search_provider.search(
+                search_str, search_type=Config.search_type),
+            None, None, display_count)
 
-        except SearchError:
-            click.echo('No matches')
+        if not show_data:
             return
+        elif show_data == 'skip':
+            return
+
         self._download(show_data)
 
     def _get_missing(self, download_today=False):
@@ -392,7 +391,8 @@ class Show:
                     int(last_episode)
                 ]
                 if last_season == '0' or last_episode == '0':
-                    break  # don't display the S00E01 or S05E00 type special episodes
+                    # don't display the S00E01 or S05E00 type special episodes
+                    break
                 if last_watched < last_broadcast:
                     missing.append({'season': last_season,
                                     'episode': last_episode})
@@ -402,7 +402,8 @@ class Show:
         sql = 'UPDATE shows SET next_episode=:next_date WHERE name=:show_name'
         conn = sqlite3.connect(Config.db_file)
         curs = conn.cursor()
-        values = {'next_date': next_date.isoformat(), 'show_name': self.db_name}
+        values = {'next_date': next_date.isoformat(),
+                  'show_name': self.db_name}
         curs.execute(sql, values)
         conn.commit()
         conn.close()
