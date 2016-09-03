@@ -9,6 +9,7 @@ class Tell:
         enviroment = None
 
         if platform.system() == 'Linux':
+            self.is_notify = False
             desktop = os.environ.get('DESKTOP_SESSION')
             if desktop == 'gnome':
                 enviroment = 'gnome'
@@ -20,6 +21,7 @@ class Tell:
                     gi.require_version('Notify', '0.7')
                     from gi.repository import Notify
                     self.Notify = Notify
+                    self.is_notify = True
                 except(ImportError):
                     eviroment = None
             elif desktop == 'kde':
@@ -45,6 +47,8 @@ class Tell:
             self.windows_notify(title, message)
 
     def gnome_message(self, title, message):
+        if not self.is_notify:
+            return
         self.Notify.init('TV')
         icon = ''
         n = self.Notify.Notification.new(title, message, icon)

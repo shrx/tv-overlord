@@ -79,8 +79,15 @@ class DownloadManager(DB):
             return
 
         if not os.path.exists(Config.tv_dir):
-            logging.error('Destination: "{}" does not exist'.format(Config.tv_dir))
-            sys.exit()
+            logging.error(
+                'Destination: "{}" does not exist'.format(Config.tv_dir))
+            sys.exit(1)
+
+        if not os.path.exists(filename):
+            msg = 'Source: "{}" does not exist'.format(filename)
+            click.echo(msg, color=None)
+            logging.error(msg)
+            sys.exit(1)
 
         source = filename
         if Config.single_file:
@@ -264,6 +271,8 @@ class DownloadManager(DB):
         Returns:
             Returns the name of the largest file
         """
+        if not os.path.exists(name):
+            return false
         if os.path.isfile(name):
             logging.info('{} is a file'.format(name))
             return name
