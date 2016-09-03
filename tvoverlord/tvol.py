@@ -174,6 +174,21 @@ def tvol(no_cache):
      //^\\\\
     -^-._.--.-^^-.____._^-.^._
     """
+    if Config.version_notification:
+        import xmlrpc.client
+        from distutils.version import LooseVersion
+
+        pypi = xmlrpc.client.ServerProxy('https://pypi.python.org/pypi')
+        try:
+            available = pypi.package_releases('tvoverlord')[0]
+        except xmlrpc.client.ProtocolError as e:
+            click.echo('pypi is unavailable (%s)' % e.errcode)
+        else:
+            if LooseVersion(__version__) < LooseVersion(available):
+                msg = 'A new version of TV Overlord is available: %s' % available
+                msg = style(msg, fg='green')
+                click.secho(msg)
+
     if no_cache:
         Config.use_cache = False
     else:

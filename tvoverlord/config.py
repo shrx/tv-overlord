@@ -365,6 +365,12 @@ class Config:
     except configparser.NoOptionError:
         blacklist = []
 
+    try:
+        version_notification = True if cfg.get(
+            'App Settings', 'version notification') == 'yes' else False
+    except configparser.NoOptionError:
+        version_notification = False
+
     # [File Locations]
     try:
         tv_dir = os.path.expanduser(cfg.get('File Locations', 'tv dir'))
