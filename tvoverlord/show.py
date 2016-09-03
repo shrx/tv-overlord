@@ -325,7 +325,7 @@ class Show:
         show_data = self._ask(
             self.search_provider.search(
                 search_str, search_type=Config.search_type),
-            None, None, display_count)
+            None, None, display_count, nondb=True)
 
         if not show_data:
             return
@@ -408,7 +408,7 @@ class Show:
         conn.commit()
         conn.close()
 
-    def _ask(self, shows, season, episode, display_count):
+    def _ask(self, shows, season, episode, display_count, nondb=False):
         click.echo()
         if not shows[1]:
             # use ljust to cover over the progressbar
@@ -419,7 +419,7 @@ class Show:
         else:
             show_title = '%s' % shows[0][0][0]
 
-        tbl = ConsoleTable(shows)
+        tbl = ConsoleTable(shows, nondb=nondb)
         tbl.set_title(show_title)
         tbl.set_count(display_count)
         show_to_dl = tbl.generate()

@@ -16,7 +16,7 @@ from tvoverlord.tvutil import style
 
 
 class ConsoleTable:
-    def __init__(self, data):
+    def __init__(self, data, nondb=False):
         """Build a table to display data in the terminal
 
         @param data: An array of arrays.
@@ -40,7 +40,7 @@ class ConsoleTable:
             ]
           ]
         """
-
+        self.nondb = True if nondb else False
         self.display_count = 5
         self.is_postdownload = False
 
@@ -170,13 +170,16 @@ class ConsoleTable:
         choice = False
         while not choice:
             if self.is_postdownload:
-                choice = self.ask_postdownload(key)
+                choice = self.ask_simple(key)
             else:
-                choice = self.ask(key)
+                if self.nondb:
+                    choice = self.ask_simple(key)
+                else:
+                    choice = self.ask(key)
         return choice
 
     def ask(self, key):
-        click.echo('\nLetter, [s]kip, skip [r]est of show, [q]uit, [m]ark as downloaded, or [enter] for #1: ', nl=False)
+        click.echo('\nLetter, [s]kip, skip [r]est of show, [q]uit or [m]ark as downloaded: ', nl=False)
         get = click.getchar()
         # On Windows, getchar returns a byte string which looks like a bug
         # https://github.com/pallets/click/issues/537
@@ -213,14 +216,12 @@ class ConsoleTable:
                     key[0], key[len(self.table.body) - 1]))
             else:
                 choice = self.table.body[choice_num][-1:][0]
-        elif get == '[enter]':  # default choice: #1
-            choice = self.table.body[0][-1:][0]
         elif get not in key:
             self.display_error('Invalid choice, try again:')
 
         return choice
 
-    def ask_postdownload(self, key):
+    def ask_simple(self, key):
         click.echo('\nLetter or [q]uit: ', nl=False)
         get = click.getchar()
         # On Windows, getchar returns a byte string which looks like a bug
