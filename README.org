@@ -1,6 +1,8 @@
 
 [[http://i.imgur.com/S9hlqg0.png]]
 
+Website: [[http://www.tvoverlord.com][www.tvoverlord.com]]  ---  [[https://github.com/8cylinder/tv-overlord/wiki][Documentation]]
+
 TV Overlord is a *semi automatic* command line tool to download and
 manage TV shows from newsgroups or bittorent.  It will download nzb
 files or magnet links.
@@ -44,7 +46,6 @@ no background processes.
    - [[#install][Install]]
    - [[#configure][Configure]]
    - [[#command-line-reference][Command line reference]]
-   - [[#screenshots][Screenshots]]
    - [[#usefull-shell-commands][Usefull shell commands]]
 
 ** Features
@@ -131,22 +132,6 @@ create a tvoverlord directory there.
 ** Command line reference
 
 [[https://github.com/8cylinder/tv-overlord/wiki/Command-line-reference][Command line reference]]
-
-
-** Screenshots
-
-[[http://i.imgur.com/jMP4T3h.gif]] \\
-This screenshot shows the providers list command and downloading using
-an NZB search provider.
-
-[[http://i.imgur.com/umS1DqH.gif]] \\
-This shows using a bittorrent search provider to download.
-
-[[http://i.imgur.com/sBFl5sg.gif]] \\
-This shows the calendar.
-
-[[http://i.imgur.com/eg0Ui7U.gif]] \\
-This show the info command.
 
 
 ** Usefull shell commands
