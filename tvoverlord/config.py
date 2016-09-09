@@ -17,13 +17,14 @@ def message(msg, filename):
     return True
 
 
-class ConfigBuilder:
+class ConfigFileBuilder:
     is_win = True if platform.system() == 'Windows' else True
 
-    def __init__(self, dir_name):
+    def __init__(self, dir_name, app_config_name):
         self.dir_name = dir_name
         self.user_home = None
         self.user_config = None
+        self.app_config_name = app_config_name
         self.app_config = None
         self.user_db = None
         self.oldfields = None
@@ -51,7 +52,7 @@ class ConfigBuilder:
         self.user_config = self.user_home / config_name
 
         app_home = pathlib.Path(__file__).parent
-        self.app_config = app_home / config_name
+        self.app_config = app_home / self.app_config_name
 
         if not self.user_config.exists():
             self.write_config()
@@ -144,242 +145,261 @@ class ConfigBuilder:
         conn.close()
 
 
-class Config:
+class Configuration:
+
     def __init__(self):
-        pass
+        self.is_win = False
+        if platform.system() == 'Windows':
+            self.is_win = True
 
-    is_win = False
-    if platform.system() == 'Windows':
-        is_win = True
+        self.thetvdb_apikey = 'DFDB0A667C844513'
+        self.use_cache = True
 
-    thetvdb_apikey = 'DFDB0A667C844513'
-    use_cache = True
+        console_columns, console_rows = click.get_terminal_size()
+        self.console_columns = int(console_columns)
+        if self.is_win:
+            # On windows, columns are 1 char too wide
+            console_columns = console_columns - 1
 
-    console_columns, console_rows = click.get_terminal_size()
-    console_columns = int(console_columns)
-    if is_win:
-        # On windows, columns are 1 char too wide
-        console_columns = console_columns - 1
+        # progressbar settings
+        pb = SN()
+        pb.width = 50
+        if console_columns < 90:
+            pb.width = 30
+        if console_columns < 80:
+            pb.width = 20
+        if self.is_win:
+            pb.light = 'green'
+            pb.dark = 'blue'
+        else:
+            pb.light = 35
+            pb.dark = 23
+        pb.empty_char = ' '
+        pb.fill_char = '*'
+        pb.template = '%(label)s %(bar)s %(info)s'
+        self.pb = pb
 
-    # progressbar settings
-    pb = SN()
-    pb.width = 50
-    if console_columns < 90:
-        pb.width = 30
-    if console_columns < 80:
-        pb.width = 20
-    if is_win:
-        pb.light = 'green'
-        pb.dark = 'blue'
-    else:
-        pb.light = 35
-        pb.dark = 23
-    pb.empty_char = ' '
-    pb.fill_char = '*'
-    pb.template = '%(label)s %(bar)s %(info)s'
+        if self.is_win:
+            color = SN()
+            color.table = SN(
+                title=SN(fg='white', bg='green'),
+                header=SN(fg='white', bg='blue'),
+                body=SN(fg='white', bg=None),
+                bar=SN(fg='green', bg=None),
+                hidef=SN(fg='green', bg=None),
+            )
+            color.info = SN(
+                links=SN(fg='blue', bg=None),
+                ended=SN(fg='red', bg=None),
+                last=SN(fg='cyan', bg=None),
+                future=SN(fg='green', bg=None),
+            )
+            color.calendar = SN(
+                header=SN(fg='white', bg='blue'),
+                dates=SN(fg='white', bg=None),
+                titles=SN(fg='white', bg=None),
+                altdates=SN(fg='white', bg='blue'),
+                alttitles=SN(fg='white', bg='blue'),
+            )
+            color.missing = SN(fg='green', bg=None)
+            color.edit = SN(fg='yellow', bg='black')
+            color.warn = SN(fg='yellow', bg='black')
+        else:
+            color = SN()
+            color.table = SN(
+                title=SN(fg=None, bg=19),
+                header=SN(fg=None, bg=17),
+                body=SN(fg='white', bg=None),
+                bar=SN(fg=19, bg=None),
+                hidef=SN(fg=76, bg=None),
+            )
+            color.info = SN(
+                links=SN(fg=20, bg=None),
+                ended=SN(fg='red', bg=None),
+                last=SN(fg=48, bg=None),
+                future=SN(fg=22, bg=None),
+            )
+            color.calendar = SN(
+                header=SN(fg='white', bg=17),
+                dates=SN(fg='white', bg=None),
+                titles=SN(fg='white', bg=None),
+                altdates=SN(fg='white', bg=17),
+                alttitles=SN(fg='white', bg=18),
+            )
+            color.missing = SN(fg='green', bg=None)
+            color.edit = SN(fg='yellow', bg='black')
+            color.warn = SN(fg='yellow', bg='black')
 
-    if is_win:
-        color = SN()
-        color.table = SN(
-            title=SN(fg='white', bg='green'),
-            header=SN(fg='white', bg='blue'),
-            body=SN(fg='white', bg=None),
-            bar=SN(fg='green', bg=None),
-            hidef=SN(fg='green', bg=None),
-        )
-        color.info = SN(
-            links=SN(fg='blue', bg=None),
-            ended=SN(fg='red', bg=None),
-            last=SN(fg='cyan', bg=None),
-            future=SN(fg='green', bg=None),
-        )
-        color.calendar = SN(
-            header=SN(fg='white', bg='blue'),
-            dates=SN(fg='white', bg=None),
-            titles=SN(fg='white', bg=None),
-            altdates=SN(fg='white', bg='blue'),
-            alttitles=SN(fg='white', bg='blue'),
-        )
-        color.missing = SN(fg='green', bg=None)
-        color.edit = SN(fg='yellow', bg='black')
-        color.warn = SN(fg='yellow', bg='black')
-    else:
-        color = SN()
-        color.table = SN(
-            title=SN(fg=None, bg=19),
-            header=SN(fg=None, bg=17),
-            body=SN(fg='white', bg=None),
-            bar=SN(fg=19, bg=None),
-            hidef=SN(fg=76, bg=None),
-        )
-        color.info = SN(
-            links=SN(fg=20, bg=None),
-            ended=SN(fg='red', bg=None),
-            last=SN(fg=48, bg=None),
-            future=SN(fg=22, bg=None),
-        )
-        color.calendar = SN(
-            header=SN(fg='white', bg=17),
-            dates=SN(fg='white', bg=None),
-            titles=SN(fg='white', bg=None),
-            altdates=SN(fg='white', bg=17),
-            alttitles=SN(fg='white', bg=18),
-        )
-        color.missing = SN(fg='green', bg=None)
-        color.edit = SN(fg='yellow', bg='black')
-        color.warn = SN(fg='yellow', bg='black')
+        self.color = color
 
-    # number of ip address octets to match to be considered ok.  Must
-    # be between 1 and 4
-    parts_to_match = 3
+        # number of ip address octets to match to be considered ok.  Must
+        # be between 1 and 4
+        self.parts_to_match = 3
 
-    # create files
-    files_created = False
-    user_config_dir = 'tvoverlord'
-    cb = ConfigBuilder(user_config_dir)
+    def get_config_data(self, config_name=None):
+        # create files
+        files_created = False
+        user_config_dir = 'tvoverlord'
+        app_config_name = 'config.ini'
+        cb = ConfigFileBuilder(user_config_dir, app_config_name)
 
-    if cb.create_config_dir():
-        files_created = message('App config dir created:', cb.user_home)
+        if cb.create_config_dir():
+            files_created = message('App config dir created:', cb.user_home)
 
-    if cb.create_config('config.ini'):
-        files_created = message(
-            '%s created:' % cb.user_config.name, cb.user_config)
+        if config_name:
+            config_file = 'config.%s.ini' % config_name
+            db_file = 'shows.%s.sqlite3' % config_name
+        else:
+            config_file = 'config.ini'
+            db_file = 'shows.sqlite3'
 
-    user_config = str(cb.user_config)
-    user_dir = str(cb.user_home)
+        if cb.create_config(config_file):
+            files_created = message(
+                '%s created:' % cb.user_config.name, cb.user_config)
 
-    sql = [
-        {
-            'name': 'shows',
-            'fields': [
-                ['id', 'INTEGER PRIMARY KEY AUTOINCREMENT'],
-                ['name', 'TEXT'],
-                ['search_engine_name', 'TEXT'],
-                ['display_name', 'TEXT'],
-                ['date_added', 'TEXT'],
-                ['network_status', 'TEXT'],
-                ['status', 'TEXT'],
-                ['thetvdb_series_id', 'TEXT'],
-                ['ragetv_series_id', 'TEXT'],
-                ['imdb_series_id', 'TEXT'],
-                ['alt_series_id', 'TEXT'],
-                ['season', 'NUMERIC'],
-                ['episode', 'NUMERIC'],
-                ['next_episode', 'TEXT'],
-                ['airs_time', 'TEXT'],
-                ['airs_dayofweek', 'TEXT'],
-                ['rating', 'TEXT'],
-                ['auto_download', 'TEXT'],
-                ['notes', 'TEXT'],
-            ],
-        },
-        {
-            'name': 'tracking',
-            'fields': [
-                ['download_date', 'TEXT'],
-                ['show_title', 'TEXT'],
-                ['season', 'TEXT'],
-                ['episode', 'TEXT'],
-                ['download_data', 'TEXT'],
-                ['chosen', 'TEXT'],
-                ['chosen_hash', 'TEXT'],
-                ['one_off', 'INTERGER'],
-                ['complete', 'INTERGER'],
-                ['filename', 'TEXT'],
-                ['destination', 'TEXT'],
-            ]
-        }
-    ]
-    if cb.create_modify_db('shows.sqlite3', sql):
-        files_created = message(
-            'Database has been created/updated:', cb.user_db)
+        self.user_config = str(cb.user_config)
+        self.user_dir = str(cb.user_home)
 
-    if files_created:
-        click.echo('-' * console_columns)
-        click.echo()
+        sql = [
+            {
+                'name': 'shows',
+                'fields': [
+                    ['id', 'INTEGER PRIMARY KEY AUTOINCREMENT'],
+                    ['name', 'TEXT'],
+                    ['search_engine_name', 'TEXT'],
+                    ['display_name', 'TEXT'],
+                    ['date_added', 'TEXT'],
+                    ['network_status', 'TEXT'],
+                    ['status', 'TEXT'],
+                    ['thetvdb_series_id', 'TEXT'],
+                    ['ragetv_series_id', 'TEXT'],
+                    ['imdb_series_id', 'TEXT'],
+                    ['alt_series_id', 'TEXT'],
+                    ['season', 'NUMERIC'],
+                    ['episode', 'NUMERIC'],
+                    ['next_episode', 'TEXT'],
+                    ['airs_time', 'TEXT'],
+                    ['airs_dayofweek', 'TEXT'],
+                    ['rating', 'TEXT'],
+                    ['auto_download', 'TEXT'],
+                    ['notes', 'TEXT'],
+                ],
+            },
+            {
+                'name': 'tracking',
+                'fields': [
+                    ['download_date', 'TEXT'],
+                    ['show_title', 'TEXT'],
+                    ['season', 'TEXT'],
+                    ['episode', 'TEXT'],
+                    ['download_data', 'TEXT'],
+                    ['chosen', 'TEXT'],
+                    ['chosen_hash', 'TEXT'],
+                    ['one_off', 'INTERGER'],
+                    ['complete', 'INTERGER'],
+                    ['filename', 'TEXT'],
+                    ['destination', 'TEXT'],
+                ]
+            }
+        ]
+        if cb.create_modify_db(db_file, sql):
+            files_created = message(
+                'Database has been created/updated:', cb.user_db)
 
-    db_file = str(cb.user_db)
+        if files_created:
+            click.echo('-' * self.console_columns)
+            click.echo()
 
-    categories = SN()
-    categories.resolution = [
-        '1080p', '1080i', '720p', '720i', 'hr', '576p',
-        '480p', '368p', '360p']
-    categories.sources = [
-        'bluray', 'remux', 'dvdrip', 'webdl', 'hdtv', 'bdscr',
-        'dvdscr', 'sdtv', 'webrip', 'dsr', 'tvrip', 'preair',
-        'ppvrip', 'hdrip', 'r5', 'tc', 'ts', 'cam', 'workprint']
-    categories.codecs = [
-        '10bit', 'h265', 'h264', 'x264', 'xvid', 'divx']
-    categories.audio = [
-        'truehd', 'dts', 'dtshd', 'flac', 'ac3', 'dd5.1', 'aac', 'mp3']
+        self.db_file = str(cb.user_db)
 
-    cfg = configparser.ConfigParser(allow_no_value=True, interpolation=None)
-    cfg.read(str(cb.user_config))
+        categories = SN()
+        categories.resolution = [
+            '1080p', '1080i', '720p', '720i', 'hr', '576p',
+            '480p', '368p', '360p']
+        categories.sources = [
+            'bluray', 'remux', 'dvdrip', 'webdl', 'hdtv', 'bdscr',
+            'dvdscr', 'sdtv', 'webrip', 'dsr', 'tvrip', 'preair',
+            'ppvrip', 'hdrip', 'r5', 'tc', 'ts', 'cam', 'workprint']
+        categories.codecs = [
+            '10bit', 'h265', 'h264', 'x264', 'xvid', 'divx']
+        categories.audio = [
+            'truehd', 'dts', 'dtshd', 'flac', 'ac3', 'dd5.1', 'aac', 'mp3']
 
-    # Settings from config.ini ---------------------------------
-    # [App Settings]
-    try:
-        ip = cfg.get('App Settings', 'ip whitelist')
-        # split, strip, and remove empty values from whitelist
-        ip = [i.strip() for i in ip.split(',') if i.strip()]
-    except configparser.NoOptionError:
-        ip = None
+        self.categories = categories
 
-    try:
-        email = cfg.get('App Settings', 'email')
-    except configparser.NoOptionError:
-        email = False
+        cfg = configparser.ConfigParser(
+            allow_no_value=True, interpolation=None)
+        cfg.read(str(cb.user_config))
 
-    try:
-        single_file = True if cfg.get(
-            'App Settings', 'single file') == 'yes' else False
-    except configparser.NoOptionError:
-        single_file = False
+        # Settings from config.ini ---------------------------------
+        # [App Settings]
+        try:
+            ip = cfg.get('App Settings', 'ip whitelist')
+            # split, strip, and remove empty values from whitelist
+            self.ip = [i.strip() for i in ip.split(',') if i.strip()]
+        except configparser.NoOptionError:
+            self.ip = None
 
-    try:
-        template = cfg.get('App Settings', 'template')
-    except configparser.NoOptionError:
-        template = False
+        try:
+            self.email = cfg.get('App Settings', 'email')
+        except configparser.NoOptionError:
+            self.email = False
 
-    try:
-        search_type = 'nzb' if cfg.get(
-            'App Settings', 'search type') == 'nzb' else 'torrent'
-    except configparser.NoOptionError:
-        search_type = 'torrent'
+        try:
+            self.single_file = True if cfg.get(
+                'App Settings', 'single file') == 'yes' else False
+        except configparser.NoOptionError:
+            self.single_file = False
 
-    try:
-        client = cfg.get('App Settings', 'client')
-        client = shlex.split(client)
-    except configparser.NoOptionError:
-        client = None
+        try:
+            self.template = cfg.get('App Settings', 'template')
+        except configparser.NoOptionError:
+            self.template = False
 
-    try:
-        magnet_dir = cfg.get('App Settings', 'magnet folder')
-    except configparser.NoOptionError:
-        magnet_dir = None
+        try:
+            self.search_type = 'nzb' if cfg.get(
+                'App Settings', 'search type') == 'nzb' else 'torrent'
+        except configparser.NoOptionError:
+            self.search_type = 'torrent'
 
-    try:
-        blacklist = cfg.get('App Settings', 'blacklist')
-        # split, strip, and remove empty values from list
-        blacklist = [i.strip() for i in blacklist.split(',') if i.strip()]
-    except configparser.NoOptionError:
-        blacklist = []
+        try:
+            client = cfg.get('App Settings', 'client')
+            self.client = shlex.split(client)
+        except configparser.NoOptionError:
+            self.client = None
 
-    try:
-        version_notification = True if cfg.get(
-            'App Settings', 'version notification') == 'yes' else False
-    except configparser.NoOptionError:
-        version_notification = False
+        try:
+            self.magnet_dir = cfg.get('App Settings', 'magnet folder')
+        except configparser.NoOptionError:
+            self.magnet_dir = None
 
-    # [File Locations]
-    try:
-        tv_dir = os.path.expanduser(cfg.get('File Locations', 'tv dir'))
-    except configparser.NoOptionError:
-        tv_dir = None
-    try:
-        staging = os.path.expanduser(cfg.get('File Locations', 'staging'))
-    except configparser.NoOptionError:
-        staging = None
+        try:
+            blacklist = cfg.get('App Settings', 'blacklist')
+            # split, strip, and remove empty values from list
+            self.blacklist = [
+                i.strip() for i in blacklist.split(',') if i.strip()]
+        except configparser.NoOptionError:
+            self.blacklist = []
+
+        try:
+            self.version_notification = True if cfg.get(
+                'App Settings', 'version notification') == 'yes' else False
+        except configparser.NoOptionError:
+            self.version_notification = False
+
+        # [File Locations]
+        try:
+            self.tv_dir = os.path.expanduser(
+                cfg.get('File Locations', 'tv dir'))
+        except configparser.NoOptionError:
+            self.tv_dir = None
+        try:
+            self.staging = os.path.expanduser(
+                cfg.get('File Locations', 'staging'))
+        except configparser.NoOptionError:
+            self.staging = None
+
+Config = Configuration()
 
 
 if __name__ == '__main__':

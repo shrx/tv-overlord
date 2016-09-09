@@ -160,8 +160,10 @@ CONTEXT_SETTINGS = {
 @click.group(context_settings=CONTEXT_SETTINGS)
 @click.option('--no-cache', '-n', is_flag=True,
               help='Re-download the show data instead of using\nthe cached data.')
+@click.option('--config', 'config_name', default=None,
+              help='Alternative config name to use.')
 @click.version_option(version=__version__)
-def tvol(no_cache):
+def tvol(no_cache, config_name):
     """Download and manage tv shows.
 
     Use `tvol COMMAND -h` to get help for each command.
@@ -174,6 +176,8 @@ def tvol(no_cache):
      //^\\\\
     -^-._.--.-^^-.____._^-.^._
     """
+    Config.get_config_data(config_name)
+
     if Config.version_notification:
         import xmlrpc.client
         from distutils.version import LooseVersion

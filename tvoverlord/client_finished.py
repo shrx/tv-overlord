@@ -4,6 +4,7 @@ import click
 import os
 import sys
 from pprint import pprint as pp
+from tvoverlord.config import Config
 from tvoverlord.downloadmanager import DownloadManager
 from tvoverlord.tvol import __version__
 
@@ -32,6 +33,8 @@ def transmission(debug):
     used to manage the torrent after its been downloaded.
 
     """
+    Config.get_config_data()
+
     try:
         torrent_dir = os.environ['TR_TORRENT_DIR']
         torrent_hash = os.environ['TR_TORRENT_HASH']
@@ -65,6 +68,7 @@ def deluge(torrent_hash, torrent_name, torrent_dir, debug):
     The execute plugin is needed for this to work.
     http://dev.deluge-torrent.org/wiki/Plugins/Execute
     """
+    Config.get_config_data()
 
     if debug:
         click.echo('torrent_hash: %s' % torrent_hash)
