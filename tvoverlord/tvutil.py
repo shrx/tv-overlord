@@ -116,5 +116,14 @@ def disk_info(path):
         return free
 
 
+def itemize(shows):
+    depth = len(str(len(shows))) + 1
+    for i, show in enumerate(shows):
+        i = i + 1
+        number = '%s.' % i
+        number = number.rjust(depth)
+        click.echo('  %s %s' % (number, show.seriesname))
+
+
 if __name__ == '__main__':
     pass

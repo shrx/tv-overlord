@@ -40,6 +40,7 @@ class Show:
     tvapi = tvdb_api.Tvdb(apikey=Config.thetvdb_apikey,
                                cache=Config.use_cache)
 
+
     def se_ep(self, season, episode):
         season_just = str(season).rjust(2, '0')
         episode = str(episode).rjust(2, '0')
@@ -408,6 +409,24 @@ class Show:
         conn.commit()
         conn.close()
 
+    def edit(self, action):
+        if action == 'delete':
+            if click.confirm('Are you sure you want to delete %s?' % self.seriesname):
+                self.delete()
+                msg = '%s deleted' % self.seriesname
+            else:
+                msg = '%s not deleted' % self.seriesname
+        elif action == 'deactivate':
+            self.set_inactive()
+            msg = '%s deactivated' % self.seriesname
+        elif action == 'activate':
+            self.set_active()
+            msg = '%s activated' % self.seriesname
+        else:
+            sys.exit('Incorrect action for show.edit()')
+
+        return msg
+
     def _ask(self, shows, season, episode, display_count, nondb=False):
         click.echo()
         if not shows[1]:
@@ -438,9 +457,32 @@ class Show:
             destination=Config.staging,
             search_type=Config.search_type)
 
+    def set_active(self):
+        sql = '''UPDATE shows
+                 SET status="active"
+                 WHERE thetvdb_series_id=:tvdb_id'''
+        conn = sqlite3.connect(Config.db_file)
+        curs = conn.cursor()
+        values = {'tvdb_id': self.db_thetvdb_series_id}
+        curs.execute(sql, values)
+
+        conn.commit()
+        conn.close()
+
     def set_inactive(self):
         sql = '''UPDATE shows
                  SET status="inactive"
+                 WHERE thetvdb_series_id=:tvdb_id'''
+        conn = sqlite3.connect(Config.db_file)
+        curs = conn.cursor()
+        values = {'tvdb_id': self.db_thetvdb_series_id}
+        curs.execute(sql, values)
+
+        conn.commit()
+        conn.close()
+
+    def delete(self):
+        sql = '''DELETE from shows
                  WHERE thetvdb_series_id=:tvdb_id'''
         conn = sqlite3.connect(Config.db_file)
         curs = conn.cursor()

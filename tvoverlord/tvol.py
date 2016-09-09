@@ -199,6 +199,7 @@ def tvol(no_cache, config_name):
         Config.use_cache = True
 
 
+
 @tvol.command(context_settings=CONTEXT_SETTINGS)
 @click.argument('show_name', required=False)
 @click.option('--show-all', '-a', is_flag=True,
@@ -401,8 +402,11 @@ def nondbshow(search_string, count, ignore):
 
 
 @tvol.command(context_settings=CONTEXT_SETTINGS)
+@click.option('--action',
+              type=click.Choice(['delete', 'deactivate', 'activate']),
+              help='Preform actions on a show.')
 @click.argument('show_name')
-def editshow(show_name):
+def editshow(show_name, action):
     """Edit the contents of the database.
 
     This allows you to change the fields in the database for a show.
@@ -427,7 +431,27 @@ def editshow(show_name):
     if not show_name:
         raise click.UsageError('Empty "search_string" not allowed.')
 
-    edit_db(show_name)
+    if action:
+        shows = Shows(show_name, status='all')
+        shows = list(shows)
+        if len(shows) == 1:
+            msg = shows[0].edit(action)
+        elif len(shows) > 1:
+            click.echo('Multiple shows found, type a number to select.')
+            click.echo('Type "<ctrl> c" to cancel.')
+            click.echo()
+            click.echo(tvu.itemize(shows))
+            choice = click.prompt(
+                'Choose number',
+                type=click.IntRange(min=1, max=len(shows)))
+            choice -= 1  # tvu.itemize starts at 1, not 0
+            msg = shows[choice].edit(action)
+        else:
+            msg = 'No shows match: "%s"' % show_name
+
+        click.echo(msg)
+    else:
+        edit_db(show_name)
 
 
 def parse_history(criteria):
