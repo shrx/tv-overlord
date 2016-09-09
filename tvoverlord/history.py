@@ -111,26 +111,39 @@ class History:
 
     def copy(self):
         title = 'Copy files to %s' % Config.tv_dir
-        selected = self.display_list(title)
+        choice, data = self.display_list(title, table_type='copy')
+        click.echo()
 
-        torrent_hash = selected[3]
-        torrent_dir, torrent_name = os.path.split(selected[2])
-
-        DownloadManager(torrent_hash, torrent_dir, torrent_name)
+        if choice == 'copy_all':
+            for episode in data[1]:
+                torrent_hash = episode[3]
+                torrent_dir, torrent_name = os.path.split(episode[2])
+                click.echo('Copying: %s... ' % episode[1], nl=False)
+                DownloadManager(torrent_hash, torrent_dir, torrent_name)
+                click.echo('Done')
+        else:
+            selected = [i for i in data[1] if choice in i][0]
+            torrent_hash = selected[3]
+            torrent_dir, torrent_name = os.path.split(selected[2])
+            click.echo('Copying: %s... ' % selected[1], nl=False)
+            DownloadManager(torrent_hash, torrent_dir, torrent_name)
+            click.echo('Done')
 
     def download(self):
         title = 'Re-download'
-        selected = self.display_list(title, download=True)
+        choice, data = self.display_list(title, table_type='redownload')
+
+        selected = [i for i in data[1] if choice in i][0]
 
         url = selected[-1]
         search = Search()
         search.download(chosen_show=url, destination=Config.staging)
 
-    def display_list(self, title, download=False):
+    def display_list(self, title, table_type):
         sqldata = self.sqldata
         records = []
 
-        if download:
+        if table_type == 'redownload':
             data = [
                 [
                     title,
@@ -146,11 +159,11 @@ class History:
                     i[9],
                     i[9]]
                 )
-        else:
+        elif table_type == 'copy':
             data = [
                 [
                     title,
-                    ['Date downloaded', 'Show name, episode', 'Local file'],
+                    ['Date downloaded', 'Show name, episode', 'Source file'],
                     [16, 25, 0],
                     ['<', '<', '<']
                 ]
@@ -164,13 +177,11 @@ class History:
                 )
         data.append(records)
 
-        tbl = ConsoleTable(data)
+        tbl = ConsoleTable(data, table_type)
         tbl.set_count(None)
-        tbl.is_postdownload = True
-        torrent_hash = tbl.generate()
 
-        selected = [i for i in data[1] if torrent_hash in i][0]
-        return selected
+        result = tbl.generate()
+        return (result, data)
 
 
 if __name__ == '__main__':

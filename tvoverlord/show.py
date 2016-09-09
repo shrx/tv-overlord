@@ -419,7 +419,8 @@ class Show:
         else:
             show_title = '%s' % shows[0][0][0]
 
-        tbl = ConsoleTable(shows, nondb=nondb)
+        table_type = 'nondb' if nondb else 'download'
+        tbl = ConsoleTable(shows, table_type=table_type)
         tbl.set_title(show_title)
         tbl.set_count(display_count)
         show_to_dl = tbl.generate()
