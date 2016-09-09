@@ -11,7 +11,7 @@ import click
 from tvoverlord.shows import Shows
 from tvoverlord.show import Show
 from tvoverlord.config import Config
-from tvoverlord.tvutil import FancyPrint, dict_factory, style, format_paragraphs
+import tvoverlord.tvutil as tvu
 from tvoverlord.location import Location
 from tvoverlord.history import History
 from tvoverlord.search import Search
@@ -29,7 +29,7 @@ def edit_db(search_str):
 
     sql = 'SELECT * FROM shows WHERE name like :search'
     conn = sqlite3.connect(Config.db_file)
-    conn.row_factory = dict_factory
+    conn.row_factory = tvu.dict_factory
     curs = conn.cursor()
     values = {'search': '%{}%'.format(search_str)}
     results = curs.execute(sql, values)
@@ -63,7 +63,7 @@ def edit_db(search_str):
     is_error = False
 
     click.echo()
-    click.echo(format_paragraphs('''
+    click.echo(tvu.format_paragraphs('''
       While editing a field, hit <enter> in an empty field to leave it
       unchanged and skip to the next one.  Type "<ctrl> c" to cancel all
       edits.  The current value is shown in ()\'s beside the field
@@ -71,31 +71,31 @@ def edit_db(search_str):
     click.echo()
 
     title = '%s' % row['name']
-    click.echo(style(title, bold=True))
+    click.echo(tvu.style(title, bold=True))
     click.echo()
     try:
-        msg = style('Search engine name (%s): ', fg=editcolor)
+        msg = tvu.style('Search engine name (%s): ', fg=editcolor)
         new_search_engine_name = input(msg % (row['search_engine_name']))
         if not new_search_engine_name:
             new_search_engine_name = row['search_engine_name']
         else:
             dirty = True
 
-        msg = style('Current season (%s): ', fg=editcolor)
+        msg = tvu.style('Current season (%s): ', fg=editcolor)
         new_season = input(msg % (row['season']))
         if not new_season:
             new_season = str(row['season'])
         else:
             dirty = True
 
-        msg = style('Last episode (%s): ', fg=editcolor)
+        msg = tvu.style('Last episode (%s): ', fg=editcolor)
         new_episode = input(msg % (row['episode']))
         if not new_episode:
             new_episode = str(row['episode'])
         else:
             dirty = True
 
-        msg = style('Status (%s): ', fg=editcolor)
+        msg = tvu.style('Status (%s): ', fg=editcolor)
         new_status = input(msg % (row['status']))
         if not new_status:
             new_status = row['status']
@@ -190,7 +190,7 @@ def tvol(no_cache, config_name):
         else:
             if LooseVersion(__version__) < LooseVersion(available):
                 msg = 'A new version of TV Overlord is available: %s' % available
-                msg = style(msg, fg='green')
+                msg = tvu.style(msg, fg='green')
                 click.secho(msg)
 
     if no_cache:
@@ -277,7 +277,7 @@ def tfunct(series):
 def list_missing(today):
     """List episodes that are ready to download.
     """
-    fp = FancyPrint()
+    fp = tvu.FancyPrint()
 
     shows = Shows()
 
@@ -287,10 +287,10 @@ def list_missing(today):
             show_percent=False,
             show_eta=False,
             width=Config.pb.width,
-            empty_char=style(Config.pb.empty_char,
+            empty_char=tvu.style(Config.pb.empty_char,
                              fg=Config.pb.dark,
                              bg=Config.pb.dark),
-            fill_char=style(Config.pb.fill_char,
+            fill_char=tvu.style(Config.pb.fill_char,
                             fg=Config.pb.light,
                             bg=Config.pb.light),
             bar_template=Config.pb.template,

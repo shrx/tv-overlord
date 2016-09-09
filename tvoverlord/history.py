@@ -13,7 +13,7 @@ from tvoverlord.consoletable import ConsoleTable
 from tvoverlord.downloadmanager import DownloadManager
 from tvoverlord.search import Search
 from tvoverlord.util import U
-from tvoverlord.tvutil import style
+import tvoverlord.tvutil as tvu
 
 
 class History:
@@ -44,7 +44,7 @@ class History:
         elif os.path.exists(filename):
             filename = filename
         else:
-            filename = style(filename, fg='black', strike=True)
+            filename = tvu.style(filename, fg='black', strike=True)
         return filename
 
     def format_date(self, date):
