@@ -73,3 +73,27 @@ def deluge(torrent_hash, torrent_name, torrent_dir, debug):
 
     DownloadManager(torrent_hash, torrent_dir,
                     torrent_name, debug=debug)
+
+
+@click.command(context_settings=CONTEXT_SETTINGS)
+@click.argument('info_hash')
+@click.argument('torrent_name')
+@click.argument('torrent_dir')
+@click.option('--debug', is_flag=True, help='Output debug info')
+@click.version_option(version=__version__)
+def qbittorrent(info_hash, torrent_name, torrent_dir, debug):
+    """Manage torrents downloaded by qBittorrent.
+
+    \b
+    In tools > options > downloads > Run external program...
+    Add: /absolute/path/to/qbittorrent_done %I %N %D
+    """
+    Config.get_config_data()
+
+    if debug:
+        click.echo('info_hash: %s' % info_hash)
+        click.echo('torrent_dir: %s' % torrent_dir)
+        click.echo('torrent_name: %s' % torrent_name)
+
+    DownloadManager(info_hash, torrent_dir,
+                    torrent_name, debug=debug)

@@ -41,6 +41,7 @@ setup(
         [console_scripts]
         deluge_done=tvoverlord.client_finished:deluge
         transmission_done=tvoverlord.client_finished:transmission
+        qbittorrent_done=tvoverlord.client_finished:qbittorrent
         tvol=tvoverlord.tvol:tvol
     ''',
     # install_requires=[
