@@ -504,10 +504,12 @@ def redownload(criteria):
 
 @tvol.command(context_settings=CONTEXT_SETTINGS)
 @click.option('--edit', '-e', is_flag=True,
-              help="Edit config.ini with default editor")
+              help="Edit config.ini with default editor.")
 @click.option('--test-se', type=str,
-              help="Test each search engine")
-def config(edit, test_se):
+              help="Test each search engine.")
+@click.option('--show', is_flag=True,
+              help='If using --test-se, show the results of each search.')
+def config(edit, test_se, show):
     """tvol's config information.
 
     Show information of where various files are, (config.ini,
@@ -520,7 +522,7 @@ def config(edit, test_se):
 
     if test_se:
         search = Search()
-        search.test_each(test_se)
+        search.test_each(test_se, show)
         return
 
     import shutil

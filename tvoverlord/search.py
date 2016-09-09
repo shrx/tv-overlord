@@ -50,9 +50,10 @@ class Search(object):
         self.se_order.append(search.name)
         return search_results + [search.name]
 
-    def test_each(self, search_string):
+    def test_each(self, search_string, show_results):
         engines = self.torrent_engines + self.newsgroup_engines
         indent = '  '
+        click.echo()
         click.echo('Searching for: %s' % search_string)
         for engine in engines:
             search = engine.Provider()
@@ -68,6 +69,10 @@ class Search(object):
             else:
                 results_count = style(results_count, fg='green')
             click.echo(indent + 'Search results: %s' % results_count)
+
+            if show_results:
+                for result in results:
+                    click.echo('%s* %s' % (indent, result[0]))
 
     def search(self, search_string, season=False,
                episode=False, search_type='torrent'):
@@ -116,7 +121,8 @@ class Search(object):
         else:
             raise ValueError('search_type can only be "torrent" or "nzb"')
 
-        socket.setdefaulttimeout(3.05)
+        # socket.setdefaulttimeout(3.05)
+        socket.setdefaulttimeout(1)
         episodes = []
         with concurrent.futures.ThreadPoolExecutor(max_workers=8) as executor:
             res = {
