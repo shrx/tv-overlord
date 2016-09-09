@@ -25,6 +25,7 @@ class Provider():
 
         # get token for api
         url = '{}?get_token=get_token&app_id=tvoverlord'.format(self.baseurl)
+
         try:
             r = requests.get(url)
         except requests.exceptions.ConnectionError:
@@ -34,7 +35,10 @@ class Provider():
             self.url = url
             return []
 
-        j = r.json()
+        try:
+            j = r.json()
+        except ValueError:
+            return []  # not json
 
         token = j['token']
 

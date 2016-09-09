@@ -2,10 +2,9 @@ import urllib.request, urllib.parse, urllib.error
 from bs4 import BeautifulSoup
 import requests
 from pprint import pprint as pp
-import click
 
 import concurrent.futures
-import socket
+from difflib import SequenceMatcher as SM
 
 
 class Provider():
@@ -46,7 +45,9 @@ class Provider():
                 try:
                     tds = tr.find_all('td')
                     title = tds[1].get_text(strip=True)
-                    if search_string.lower() not in title.lower():
+                    matcher = SM(None, search_string.casefold(), title.casefold())
+                    ratio = matcher.ratio()
+                    if ratio < 0.15:
                         continue
                     detail_url = tds[1].a['href']
                     magnet = tds[2].a['href']
@@ -123,8 +124,9 @@ class Provider():
 
 if __name__ == '__main__':
 
+    import click
     p = Provider()
-    results = p.search('game of thrones')
+    results = p.search('Jonathan strange Norrell')
     # results = p.search('game of thrones', season=6, episode=6)
     # results = p.search('luther', season=1, episode=5)
     pp(results)

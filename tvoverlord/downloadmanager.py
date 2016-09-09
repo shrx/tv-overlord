@@ -79,8 +79,9 @@ class DownloadManager(DB):
             return
 
         if not os.path.exists(Config.tv_dir):
-            logging.error(
-                'Destination: "{}" does not exist'.format(Config.tv_dir))
+            msg = 'Destination: "{}" does not exist'.format(Config.tv_dir)
+            logging.error(msg)
+            print(msg)
             sys.exit(1)
 
         if not os.path.exists(filename):
@@ -104,7 +105,7 @@ class DownloadManager(DB):
         dest = os.path.join(Config.tv_dir, dest_filename)
         dest_path = os.path.dirname(dest)
 
-        if not os.path.exists(dest):
+        if not os.path.exists(dest_path):
             os.makedirs(dest_path, exist_ok=True)
             logging.info('creating dir: %s' % dest)
 
