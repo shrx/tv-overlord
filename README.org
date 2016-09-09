@@ -41,25 +41,29 @@ information about an episode, I'll use the parser built into my brain.
 Also I like that it runs when I like, its light weight, and there are
 no background processes.
 
+
 ** Table of contents                                                    :TOC:
+
    - [[#features][Features]]
    - [[#install][Install]]
    - [[#configure][Configure]]
    - [[#command-line-reference][Command line reference]]
    - [[#usefull-shell-commands][Usefull shell commands]]
 
+
 ** Features
 
-+ Keeps track of downloaded shows.
-+ Show a list of shows available for download.
++ Keeps track of [[https://github.com/8cylinder/tv-overlord/wiki/Command-line-reference#list-available][dowloaded shows]].
++ Show a list of shows [[https://github.com/8cylinder/tv-overlord/wiki/Command-line-reference#download][available for download]].
 + Gives you a list of torrents or nzbs you can choose from.
-+ You can add new shows from the command line.
-+ Will display info showing what show will be next and how many days
++ You can [[https://github.com/8cylinder/tv-overlord/wiki/Command-line-reference#add-new][add new shows]] from the command line.
++ Will [[https://github.com/8cylinder/tv-overlord/wiki/Command-line-reference#info][display info]] showing what show will be next and how many days
   till broadcast.  This list can be filtered and sorted in various ways.
-+ Displays a calendar of upcoming episodes.  You can also specify a range
++ Displays a [[https://github.com/8cylinder/tv-overlord/wiki/Command-line-reference#calender][calendar of upcoming episodes]].  You can also specify a range
   of days to display, past or future.
-+ The ability to query download history and re-start a download.
-+ Organize you tv show downloads into folders.
++ The ability to [[https://github.com/8cylinder/tv-overlord/wiki/Command-line-reference#history][query download history]] and re-start a download.
++ [[https://github.com/8cylinder/tv-overlord/wiki/Rename-tags][Organize]] you tv show downloads into folders.
++ Switch between [[https://github.com/8cylinder/tv-overlord/wiki/Config-file#multiple-configs][multiple configs]].
 
 
 ** Install
@@ -122,9 +126,9 @@ TV Overlord looks for the database and =config.ini= in the appropriate
 directory for your platform.  When tvoverlord is first run, it will
 create a tvoverlord directory there.
 
-  + OSX :: ~/Library/Application Support/tvoverlord
-  + Linux :: ~/.config/tvoverlord
-  + Windows :: C:\Users\<USERNAME>\AppData\Roaming\tvoverlord
+  + OSX :: =~/Library/Application Support/tvoverlord=
+  + Linux :: =~/.config/tvoverlord=
+  + Windows :: =C:\Users\<USERNAME>\AppData\Roaming\tvoverlord=
 
 [[https://github.com/8cylinder/tv-overlord/wiki/Config-file][Config file details]]
 
@@ -145,8 +149,17 @@ to Sat.
 To bulk import shows from a csv file (showname can't have a comma in it).
 
 #+BEGIN_SRC bash
-while IFS=, read showname season episode
-do
+while IFS=, read showname season episode; do
     tvol add --bulk "${showname}" --season=${season} --episode=${episode}
 done < allshows.csv
+#+END_SRC
+
+If using [[https://github.com/8cylinder/tv-overlord/wiki/Config-file#multiple-configs][multiple configs]]:
+
+#+BEGIN_SRC bash
+for config in '' 'nzb' 'torrent'; do
+    echo "Using $config config"
+    tvol --config=$config list
+    tvol --config=$config download
+done
 #+END_SRC
