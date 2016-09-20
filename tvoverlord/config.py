@@ -160,7 +160,6 @@ class ConfigFileBuilder:
 
 
 class Configuration:
-
     def __init__(self):
         self.is_win = False
         if platform.system() == 'Windows':
@@ -250,19 +249,41 @@ class Configuration:
         # be between 1 and 4
         self.parts_to_match = 3
 
-    def get_config_data(self, config_name=None):
-        # create files
+    def create_config(self, config_name, create=False):
         files_created = False
         user_config_dir = 'tvoverlord'
         app_config_name = 'config.ini'
         cb = ConfigFileBuilder(user_config_dir, app_config_name)
+        self.cb = cb
 
         if cb.create_config_dir():
             files_created = message('App config dir created:', cb.user_home)
 
-        if config_name:
+        if config_name and create is False:
             config_file = 'config.%s.ini' % config_name
             db_file = 'shows.%s.sqlite3' % config_name
+            config_home = click.get_app_dir(user_config_dir)
+
+            if not os.path.exists(os.path.join(config_home, config_file)):
+                msg = 'Warning: %s does not exist, using config.ini' % config_file
+                click.secho(msg, fg='yellow')
+                config_file = 'config.ini'
+            else:
+                msg = 'Using %s' % config_file
+                click.secho(msg, fg='yellow')
+
+            if not os.path.exists(os.path.join(config_home, db_file)):
+                msg = 'Warning: %s does not exist, using shows.sqlite3' % db_file
+                click.secho(msg, fg='yellow')
+                db_file = 'shows.sqlite3'
+            else:
+                msg = 'Using %s' % db_file
+                click.secho(msg, fg='yellow')
+
+        elif config_name and create is True:
+            config_file = 'config.%s.ini' % config_name
+            db_file = 'shows.%s.sqlite3' % config_name
+
         else:
             config_file = 'config.ini'
             db_file = 'shows.sqlite3'
@@ -335,6 +356,9 @@ class Configuration:
 
         self.db_file = str(cb.user_db)
 
+    def get_config_data(self, config_name=None):
+        self.create_config(config_name)
+
         categories = SN()
         categories.resolution = [
             '1080p', '1080i', '720p', '720i', 'hr', '576p',
@@ -352,7 +376,7 @@ class Configuration:
 
         cfg = configparser.ConfigParser(
             allow_no_value=True, interpolation=None)
-        cfg.read(str(cb.user_config))
+        cfg.read(str(self.cb.user_config))
 
         # Settings from config.ini ---------------------------------
         # [App Settings]
@@ -432,6 +456,7 @@ class Configuration:
                 cfg.get('File Locations', 'staging'))
         except configparser.NoOptionError:
             self.staging = None
+
 
 Config = Configuration()
 

@@ -583,13 +583,19 @@ def redownload(criteria):
               help="Test each search engine.")
 @click.option('--show', is_flag=True,
               help='If using --test-se, show the results of each search.')
-def config(edit, test_se, show):
+@click.option('--create', 'config_name', type=str,
+              help='Create a config set.')
+def config(edit, test_se, show, config_name):
     """tvol's config information.
 
     Show information of where various files are, (config.ini,
     database) and a list of the search engines and the url's they use.
     """
     send(te, v)
+
+    if config_name:
+        Config.create_config(config_name, create=True)
+        return
 
     if edit:
         click.edit(filename=Config.user_config)
