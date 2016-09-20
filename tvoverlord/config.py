@@ -92,6 +92,11 @@ class ConfigFileBuilder:
             fieldsa.append('    %s %s' % (field[0], field[1]))
         fields = ',\n'.join(fieldsa)
         sql.append(fields)
+        try:
+            extra = ', %s' % table['extra']
+            sql.append(extra)
+        except KeyError:
+            pass
         sql.append(');')
         sql = '\n'.join(sql)
         return sql
@@ -106,7 +111,16 @@ class ConfigFileBuilder:
     def table_changed(self, table):
         conn = sqlite3.connect(str(self.user_db))
         sql = 'SELECT * from %s;' % table['name']
-        curs = conn.execute(sql)
+
+        try:
+            curs = conn.execute(sql)
+        except sqlite3.OperationalError:
+            # the db exists, but this particular table doesn't exist
+            # yet.
+            newsql = self.generate_table(table)
+            self.new_db(newsql)
+        finally:
+            curs = conn.execute(sql)
         self.oldfields = {f[0] for f in curs.description}
         newfields = {f[0] for f in table['fields']}
         return self.oldfields != newfields
@@ -300,6 +314,15 @@ class Configuration:
                     ['filename', 'TEXT'],
                     ['destination', 'TEXT'],
                 ]
+            },
+            {
+                'name': 'settings',
+                'extra': 'UNIQUE(key)',
+                'fields': [
+                    ['id', 'INTEGER PRIMARY KEY AUTOINCREMENT'],
+                    ['key', 'TEXT'],
+                    ['value', 'TEXT'],
+                ]
             }
         ]
         if cb.create_modify_db(db_file, sql):
@@ -386,6 +409,17 @@ class Configuration:
                 'App Settings', 'version notification') == 'yes' else False
         except configparser.NoOptionError:
             self.version_notification = False
+
+
+        # collecting telemetry data is not ok only if the user has set
+        # 'telemetry: no'
+        try:
+            self.telemetry_ok = False if (
+                cfg.get('App Settings', 'telemetry') == 'no') else True
+            # if cfg.get('App Settings', 'telemetry') == 'no':
+                # self.telemetry_ok = False
+        except configparser.NoOptionError:
+            self.telemetry_ok = None
 
         # [File Locations]
         try:

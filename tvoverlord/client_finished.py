@@ -3,15 +3,29 @@
 import click
 import os
 import sys
+import threading
 from pprint import pprint as pp
 from tvoverlord.config import Config
 from tvoverlord.db import DB
 from tvoverlord.downloadmanager import DownloadManager
 from tvoverlord.tvol import __version__
 from tvoverlord.db import Database
+from tvoverlord.remote import Telemetry
 
 
 CONTEXT_SETTINGS = {'help_option_names': ['-h', '--help']}
+
+
+def telemetry(cmd):
+    def remote():
+        db2 = Database()
+        db2.configure()
+        te = Telemetry()
+        if te.have_permission(db=db2):
+            te.send(db=db2, cmd=cmd, version=__version__)
+
+    th = threading.Thread(target=remote, group=None)
+    th.start()
 
 
 @click.command(context_settings=CONTEXT_SETTINGS)
@@ -37,6 +51,7 @@ def transmission(debug):
     """
     Config.get_config_data()
     DB.configure()
+    telemetry('transmission_done')
 
     try:
         torrent_dir = os.environ['TR_TORRENT_DIR']
@@ -73,6 +88,7 @@ def deluge(torrent_hash, torrent_name, torrent_dir, debug):
     """
     Config.get_config_data()
     DB.configure()
+    telemetry('deluge_done')
 
     if debug:
         click.echo('torrent_hash: %s' % torrent_hash)
@@ -93,11 +109,12 @@ def qbittorrent(info_hash, torrent_name, torrent_dir, debug):
     """Manage torrents downloaded by qBittorrent.
 
     \b
-    In tools > options > downloads > Run external program...
+    In tools > options > downloads > Run external program
     Add: /absolute/path/to/qbittorrent_done %I %N %D
     """
     Config.get_config_data()
     DB.configure()
+    telemetry('qbittorrent_done')
 
     if debug:
         click.echo('info_hash: %s' % info_hash)

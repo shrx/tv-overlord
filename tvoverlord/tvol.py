@@ -3,6 +3,7 @@
 import sys
 import os
 import sqlite3
+import threading
 
 from pprint import pprint as pp
 from dateutil import parser as date_parser
@@ -17,8 +18,13 @@ from tvoverlord.history import History
 from tvoverlord.search import Search
 from tvoverlord.calendar import calendar as Calendar
 from tvoverlord.info import info as Info
+from tvoverlord.db import DB
+from tvoverlord.db import Database
+from tvoverlord.remote import VersionCheck
+from tvoverlord.remote import Telemetry
 
-__version__ = '1.4.2'
+
+__version__ = '1.4.3'
 
 
 def edit_db(search_str):
@@ -149,6 +155,45 @@ def edit_db(search_str):
     conn.commit()
     conn.close()
 
+
+def send(te, v):
+    """Asynchronously send telemetry data to remote server"""
+
+    ctx = click.get_current_context()
+    params = ctx.params
+    params.update(ctx.parent.params)
+    params['command'] = ctx.info_name
+    try:
+        # don't collect the show name
+        if params['show_name']:
+            params['show_name'] = True
+    except KeyError:
+        pass
+
+    try:
+        # don't collect the config name
+        if params['config_name']:
+            params['config_name'] = True
+    except KeyError:
+        pass
+
+    commands = '|'.join(['%s;%s' % (i, params[i]) for i in params])
+
+    def send_to_remote():
+        db2 = Database()
+        db2.configure()
+        if Config.version_notification:
+            # Get any new version messages while we are
+            # in a seperate thread.
+            v.get_version(db=db2)
+        if te.have_permission(db=db2):
+            # And send the telemetry data.
+            te.send(db=db2, cmd=commands, version=__version__)
+
+    th = threading.Thread(target=send_to_remote, group=None)
+    th.start()
+
+
 CONTEXT_SETTINGS = {
     # add -h in addition to --help
     'help_option_names': ['-h', '--help'],
@@ -156,6 +201,8 @@ CONTEXT_SETTINGS = {
     'token_normalize_func': lambda x: x.lower(),
 }
 
+te = Telemetry()
+v = VersionCheck(__version__)
 
 @click.group(context_settings=CONTEXT_SETTINGS)
 @click.option('--no-cache', '-n', is_flag=True,
@@ -177,27 +224,19 @@ def tvol(no_cache, config_name):
     -^-._.--.-^^-.____._^-.^._
     """
     Config.get_config_data(config_name)
+    DB.configure()
 
     if Config.version_notification:
-        import xmlrpc.client
-        from distutils.version import LooseVersion
+        if v.new_version():
+            msg = tvu.style(v.message, fg='green')
+            click.secho(msg)
 
-        pypi = xmlrpc.client.ServerProxy('https://pypi.python.org/pypi')
-        try:
-            available = pypi.package_releases('tvoverlord')[0]
-        except xmlrpc.client.ProtocolError as e:
-            click.echo('pypi is unavailable (%s)' % e.errcode)
-        else:
-            if LooseVersion(__version__) < LooseVersion(available):
-                msg = 'A new version of TV Overlord is available: %s' % available
-                msg = tvu.style(msg, fg='green')
-                click.secho(msg)
+    te.ask()
 
     if no_cache:
         Config.use_cache = False
     else:
         Config.use_cache = True
-
 
 
 @tvol.command(context_settings=CONTEXT_SETTINGS)
@@ -229,6 +268,8 @@ def info(show_name, show_all, sort_by_next, status,
     will show information about any shows that match that string, else
     it will show informaton about all your shows.
     """
+    send(te, v)
+
     db_status = status
     Info(show_name, show_all, sort_by_next, db_status,
          ask_inactive, show_links, synopsis)
@@ -260,6 +301,7 @@ def calendar(show_name, show_all, sort_by_next, no_color, days):
     --days 10,20   will start ten days from now and then show 20 days ahead.
     --days -20,10  will go back 20 days from today and then show ahead from there.
     """
+    send(te, v)
     Calendar(show_name, show_all, sort_by_next, no_color, days)
 
 
@@ -278,6 +320,7 @@ def tfunct(series):
 def list_missing(today):
     """List episodes that are ready to download.
     """
+    send(te, v)
     fp = tvu.FancyPrint()
 
     shows = Shows()
@@ -315,6 +358,7 @@ def download(show_name, today, ignore, count):
 
     If SHOW_NAME is used, it will download any shows that match that title
     """
+    send(te, v)
     if not ignore and (Config.email or Config.ip):
         L = Location()
         if Config.email:
@@ -356,6 +400,7 @@ def add(show_name, bulk, season, episode):
 
     If bulk is used, then season and episode can be used.
     """
+    send(te, v)
     if not show_name:
         raise click.UsageError('Empty "show_name" not allowed.')
 
@@ -378,6 +423,7 @@ def nondbshow(search_string, count, ignore):
     This just does a simple search and passes you choise to the bittorrent
     client.  The download is not recorded in the database.
     """
+    send(te, v)
     if not search_string:
         raise click.UsageError('Empty "search_string" not allowed.')
 
@@ -428,6 +474,7 @@ def editshow(show_name, action):
         This can be 'active' or 'inactive'.  This can be used
         to turn off a show.
     """
+    send(te, v)
     if not show_name:
         raise click.UsageError('Empty "search_string" not allowed.')
 
@@ -485,6 +532,7 @@ def history(criteria, what_to_show):
 
     eg. --what-to-show 'title,filename,magnet'
     """
+    send(te, v)
     if not criteria:
         criteria = 1
     criteria = parse_history(criteria)
@@ -502,6 +550,7 @@ def copy(criteria):
     will show downloads for that date, and if its a title or partial
     title, it will show all downloads for that show.
     """
+    send(te, v)
     if not criteria:
         criteria = 1
     criteria = parse_history(criteria)
@@ -519,6 +568,7 @@ def redownload(criteria):
     will show downloads for that date, and if its a title or partial
     title, it will show all downloads for that show.
     """
+    send(te, v)
     if not criteria:
         criteria = 1
     criteria = parse_history(criteria)
@@ -539,6 +589,7 @@ def config(edit, test_se, show):
     Show information of where various files are, (config.ini,
     database) and a list of the search engines and the url's they use.
     """
+    send(te, v)
 
     if edit:
         click.edit(filename=Config.user_config)
