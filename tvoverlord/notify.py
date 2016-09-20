@@ -4,7 +4,7 @@ import platform
 
 
 class Tell:
-    def __init__(self, message, title='TV'):
+    def __init__(self, message, title='TV Overlord'):
 
         enviroment = None
 

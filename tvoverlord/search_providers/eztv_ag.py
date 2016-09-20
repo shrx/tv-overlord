@@ -2,9 +2,7 @@ import urllib.request, urllib.parse, urllib.error
 from bs4 import BeautifulSoup
 import requests
 from pprint import pprint as pp
-
 import concurrent.futures
-from difflib import SequenceMatcher as SM
 
 
 class Provider():
@@ -24,6 +22,7 @@ class Provider():
 
         search_data = []
         for search in searches:
+            search_string = search
             search_tpl = '{}/search/{}'
             search = search.replace(' ', '-')
             search = urllib.parse.quote(search)
@@ -45,9 +44,7 @@ class Provider():
                 try:
                     tds = tr.find_all('td')
                     title = tds[1].get_text(strip=True)
-                    matcher = SM(None, search_string.casefold(), title.casefold())
-                    ratio = matcher.ratio()
-                    if ratio < 0.15:
+                    if not self.match(search_string, title):
                         continue
                     detail_url = tds[1].a['href']
                     magnet = tds[2].a['href']
@@ -55,7 +52,8 @@ class Provider():
                         continue
                     size = tds[3].get_text(strip=True)
                     date = tds[4].get_text(strip=True)
-                except TypeError:
+                except TypeError as e:
+                    print(e)
                     continue
 
                 search_data.append([detail_url, title, date, magnet, size])
@@ -79,6 +77,17 @@ class Provider():
                 show_data.append(self._get_details(torrent))
 
         return show_data
+
+    def match(self, search_str, title):
+        search_str = search_str.casefold()
+        search_str = search_str.split()
+        title = title.casefold()
+        for i in search_str:
+            if i == 'the':
+                continue
+            if i not in title:
+                return False
+        return True
 
     def _get_details(self, torrent):
         url = '{}{}'.format(self.base_url, torrent[0])
