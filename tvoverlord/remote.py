@@ -28,7 +28,8 @@ class VersionCheck:
         try:
             r = requests.get(self.fburl)
             r.raise_for_status()
-        except requests.exceptions.RequestException:
+        except requests.exceptions.RequestException as e:
+            # print(e)
             return False
         content = r.content.decode('ascii')
         j = json.loads(content)
@@ -114,7 +115,7 @@ class Telemetry:
             r = requests.put(url, data=data)
             r.raise_for_status()
         except requests.exceptions.RequestException as e:
-            print(e)
+            # print(e)
             return False
         else:
             return True

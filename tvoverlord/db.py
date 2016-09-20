@@ -158,12 +158,15 @@ class Database(object):
         try:
             value = result[0][2]
             value = json.loads(value)
-        except json.decoder.JSONDecodeError:
+        # no JSONDecodeError in python 3.4
+        # its a ValueError instead
+        # except json.decoder.JSONDecodeError:
+            # value = False
+        except ValueError:
             value = False
         except IndexError:
             value = False
 
-        # print('>>>get', type(value), value)
         return value
 
 DB = Database()
