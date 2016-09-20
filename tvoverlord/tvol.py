@@ -24,7 +24,7 @@ from tvoverlord.remote import VersionCheck
 from tvoverlord.remote import Telemetry
 
 
-__version__ = '1.4.3b1'
+__version__ = '1.4.3'
 
 
 def edit_db(search_str):

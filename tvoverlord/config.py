@@ -429,19 +429,16 @@ class Configuration:
             self.blacklist = []
 
         try:
-            self.version_notification = True if cfg.get(
-                'App Settings', 'version notification') == 'yes' else False
+            self.version_notification = False if cfg.get(
+                'App Settings', 'version notification') == 'no' else True
         except configparser.NoOptionError:
-            self.version_notification = False
-
+            self.version_notification = True
 
         # collecting telemetry data is not ok only if the user has set
         # 'telemetry: no'
         try:
             self.telemetry_ok = False if (
                 cfg.get('App Settings', 'telemetry') == 'no') else True
-            # if cfg.get('App Settings', 'telemetry') == 'no':
-                # self.telemetry_ok = False
         except configparser.NoOptionError:
             self.telemetry_ok = None
 
