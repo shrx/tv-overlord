@@ -18,7 +18,7 @@ import tvoverlord.tvutil as tvu
 
 class History:
     def __init__(self, criteria=1):
-        self.db = DB()
+        self.db = DB
 
         if criteria is None:
             criteria = 1

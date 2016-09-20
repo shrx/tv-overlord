@@ -4,6 +4,7 @@ import click
 from tvoverlord.show import Show
 from tvoverlord.config import Config
 from tvoverlord.tvutil import dict_factory
+from tvoverlord.db import DB
 
 
 class Shows:
@@ -100,16 +101,9 @@ class Shows:
             where,
             self.sort_field
         )
-        # print(sql)
-        conn = sqlite3.connect(Config.db_file)
-        # conn.row_factory = tv_util.dict_factory
-        conn.row_factory = dict_factory
-        curs = conn.cursor()
-        ddata = curs.execute(sql)
+        ddata = DB.run_sql(sql, named_fields=True)
         data = []
         for i in ddata:
             data.append(i)
         self.show_count = len(data)
-        conn.commit()
-        conn.close()
         return data

@@ -5,8 +5,10 @@ import os
 import sys
 from pprint import pprint as pp
 from tvoverlord.config import Config
+from tvoverlord.db import DB
 from tvoverlord.downloadmanager import DownloadManager
 from tvoverlord.tvol import __version__
+from tvoverlord.db import Database
 
 
 CONTEXT_SETTINGS = {'help_option_names': ['-h', '--help']}
@@ -34,6 +36,7 @@ def transmission(debug):
 
     """
     Config.get_config_data()
+    DB.configure()
 
     try:
         torrent_dir = os.environ['TR_TORRENT_DIR']
@@ -69,6 +72,7 @@ def deluge(torrent_hash, torrent_name, torrent_dir, debug):
     http://dev.deluge-torrent.org/wiki/Plugins/Execute
     """
     Config.get_config_data()
+    DB.configure()
 
     if debug:
         click.echo('torrent_hash: %s' % torrent_hash)
@@ -93,6 +97,7 @@ def qbittorrent(info_hash, torrent_name, torrent_dir, debug):
     Add: /absolute/path/to/qbittorrent_done %I %N %D
     """
     Config.get_config_data()
+    DB.configure()
 
     if debug:
         click.echo('info_hash: %s' % info_hash)

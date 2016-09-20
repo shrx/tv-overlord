@@ -7,20 +7,9 @@ import click
 from tvoverlord.db import DB
 
 
-class Tracking(DB):
+class Tracking:
     def __init__(self):
-
-        sql = '''
-            CREATE TABLE IF NOT EXISTS tracking (
-                download_date TEXT,
-                show_title TEXT,
-                season TEXT,
-                episode TEXT,
-                download_data TEXT,
-                chosen TEXT,
-                chosen_hash TEXT
-            );'''
-        self.run_sql(sql)
+        pass
 
     def save(self, show_title, season, episode, data, chosen_url):
         magnet_hash = self._extract_hash(chosen_url)
@@ -49,8 +38,7 @@ class Tracking(DB):
             'hash': magnet_hash,
             'one_off': oneoff,
         }
-
-        self.run_sql(sql, values)
+        DB.run_sql(sql, values)
 
     def _extract_hash(self, url):
         if not url.startswith('magnet:'):
@@ -69,7 +57,7 @@ class Tracking(DB):
         sql = '''
             SELECT * FROM tracking;
         '''
-        rows = self.run_sql(sql, named_fields=True)
+        rows = DB.run_sql(sql, named_fields=True)
         return rows
 
 

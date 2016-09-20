@@ -1,6 +1,7 @@
 from tvoverlord.config import Config
 from pprint import pprint as pp
 import sqlite3
+import json
 
 
 def dict_factory(cursor, row):
@@ -12,15 +13,17 @@ def dict_factory(cursor, row):
     return d
 
 
-class DB(object):
+class Database(object):
+    def configure(self):
+        self.conn = sqlite3.connect(Config.db_file)
+
     def named_sql(self, sql, values=False):
         pass
 
     def run_sql(self, sql, values=False, named_fields=False):
-        conn = sqlite3.connect(Config.db_file)
         if named_fields:
-            conn.row_factory = dict_factory
-        curs = conn.cursor()
+            self.conn.row_factory = dict_factory
+        curs = self.conn.cursor()
         if values:
             results = curs.execute(sql, values)
         else:
@@ -31,9 +34,13 @@ class DB(object):
             for i in results:
                 rowsdata.append(i)
 
-        conn.commit()
-        conn.close()
+        self.conn.commit()
         return rowsdata
+
+    def get_show_count(self):
+        sql = '''SELECT COUNT(*) FROM shows'''
+        data = self.run_sql(sql)[0][0]
+        return data
 
     def get_show_info(self, hash):
         sql = '''SELECT  show_title, tracking.season,
@@ -116,3 +123,47 @@ class DB(object):
                  WHERE complete IS NULL'''
         data = self.run_sql(sql)
         return data
+
+    def set_config(self, key, value):
+        """Insert or update a key, value in the settings table
+
+        This depends on the table settings having a table constraint
+        of `UNIQUE(key)`
+
+        CREATE TABLE settings (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          key TEXT,
+          value TEXT,
+          UNIQUE(key)
+        )
+        """
+
+        sql = """
+            INSERT OR REPLACE INTO settings (key, value)
+            values ('%s', :value)
+        """ % key
+        value = json.dumps(value)
+        # print('>>>set', value)
+        values = {'value': value}
+        self.run_sql(sql, values)
+
+    def get_config(self, key):
+        sql = """
+            SELECT * FROM settings
+            WHERE key = :key
+        """
+        values = {'key': key}
+        result = self.run_sql(sql, values)
+
+        try:
+            value = result[0][2]
+            value = json.loads(value)
+        except json.decoder.JSONDecodeError:
+            value = False
+        except IndexError:
+            value = False
+
+        # print('>>>get', type(value), value)
+        return value
+
+DB = Database()

@@ -62,7 +62,7 @@ class Show:
 
         self.console_columns = Config.console_columns
 
-        self.db = DB()
+        self.db = DB
 
 
     def _set_db_data(self, dbdata):
@@ -254,7 +254,7 @@ class Show:
         click.echo('-' * len(self.seriesname))
         if self.overview:
             click.echo(textwrap.fill(self.overview, initial_indent=indent,
-                                subsequent_indent=indent))
+                                     subsequent_indent=indent))
         else:
             click.echo('No description provided.')
         click.echo()
@@ -308,7 +308,8 @@ class Show:
             except ValueError:
                 sys.exit('Season and episode must be two numbers seperated by a space')
 
-        if ep > 0: ep -= 1  # episode in db is the NEXT episode
+        if ep > 0:
+            ep -= 1  # episode in db is the NEXT episode
 
         msg = self._add_new_db(season=se, episode=ep)
         click.echo()
@@ -401,13 +402,9 @@ class Show:
 
     def set_next_episode(self, next_date):
         sql = 'UPDATE shows SET next_episode=:next_date WHERE name=:show_name'
-        conn = sqlite3.connect(Config.db_file)
-        curs = conn.cursor()
         values = {'next_date': next_date.isoformat(),
                   'show_name': self.db_name}
-        curs.execute(sql, values)
-        conn.commit()
-        conn.close()
+        DB.run_sql(sql, values)
 
     def edit(self, action):
         if action == 'delete':
@@ -461,49 +458,29 @@ class Show:
         sql = '''UPDATE shows
                  SET status="active"
                  WHERE thetvdb_series_id=:tvdb_id'''
-        conn = sqlite3.connect(Config.db_file)
-        curs = conn.cursor()
         values = {'tvdb_id': self.db_thetvdb_series_id}
-        curs.execute(sql, values)
-
-        conn.commit()
-        conn.close()
+        DB.run_sql(sql, values)
 
     def set_inactive(self):
         sql = '''UPDATE shows
                  SET status="inactive"
                  WHERE thetvdb_series_id=:tvdb_id'''
-        conn = sqlite3.connect(Config.db_file)
-        curs = conn.cursor()
         values = {'tvdb_id': self.db_thetvdb_series_id}
-        curs.execute(sql, values)
-
-        conn.commit()
-        conn.close()
+        DB.run_sql(sql, values)
 
     def delete(self):
         sql = '''DELETE from shows
                  WHERE thetvdb_series_id=:tvdb_id'''
-        conn = sqlite3.connect(Config.db_file)
-        curs = conn.cursor()
         values = {'tvdb_id': self.db_thetvdb_series_id}
-        curs.execute(sql, values)
-
-        conn.commit()
-        conn.close()
+        DB.run_sql(sql, values)
 
     def _update_db(self, season, episode):
         sql = """UPDATE shows
                  SET season=:season, episode=:episode
                  WHERE thetvdb_series_id=:tvdb_id"""
-        conn = sqlite3.connect(Config.db_file)
-        curs = conn.cursor()
         values = {'season': season, 'episode': episode,
                   'tvdb_id': self.db_thetvdb_series_id}
-        curs.execute(sql, values)
-
-        conn.commit()
-        conn.close()
+        DB.run_sql(sql, values)
 
     def _add_new_db(self, season=0, episode=0):
         if self.db.show_exists(self.id):
@@ -531,12 +508,12 @@ class Show:
                       'name': self.seriesname,
                       'season': season,
                       'episode': episode}
+            episode += 1
+            episode = str(episode)
+            if season == 0:
+                season += 1
+            season = str(season)
             msg = '%s %s, added' % (self.seriesname, sxxexx(season, episode))
 
-        conn = sqlite3.connect(Config.db_file)
-        curs = conn.cursor()
-        curs.execute(sql, values)
-        conn.commit()
-        conn.close()
-
+        DB.run_sql(sql, values)
         return msg

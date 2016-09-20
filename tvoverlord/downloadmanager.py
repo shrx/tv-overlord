@@ -15,7 +15,7 @@ from tvoverlord.notify import Tell
 from tvoverlord.tvutil import disk_info, sxxexx, sxee
 
 
-class DownloadManager(DB):
+class DownloadManager:
     """Manage media files after they have been downloaded
 
     A torrent client calls it's resprective manager; transmission_done.py
@@ -69,12 +69,12 @@ class DownloadManager(DB):
         logging.info('filename: %s', filename)
 
         filename = os.path.join(path, filename)
-        self.save_info(torrent_hash, filename)
+        DB.save_info(torrent_hash, filename)
 
         debug_command = '''export TR_TORRENT_NAME='%s'; export TR_TORRENT_DIR='%s'; export TR_TORRENT_HASH='%s'; transmission_done'''
         logging.info(debug_command, filename, path, torrent_hash)
 
-        if self.is_oneoff(torrent_hash):
+        if DB.is_oneoff(torrent_hash):
             logging.info('Download is a one off, doing nothing.')
             return
 
@@ -109,12 +109,12 @@ class DownloadManager(DB):
             os.makedirs(dest_path, exist_ok=True)
             logging.info('creating dir: %s' % dest)
 
-        self.save_dest(torrent_hash, dest)
+        DB.save_dest(torrent_hash, dest)
 
         logging.info('copying %s to %s' % (source, dest))
         if self.copy(source, dest):
             Tell('%s done' % os.path.basename(dest))
-            self.set_torrent_complete(torrent_hash)
+            DB.set_torrent_complete(torrent_hash)
         else:
             logging.info('Destination full')
             Tell('Destination full')
@@ -176,7 +176,7 @@ class DownloadManager(DB):
 
         fields = {}
         (fields['show'], fields['searchname'], fields['season'],
-         fields['episode']) = self.get_show_info(torrent_hash)
+         fields['episode']) = DB.get_show_info(torrent_hash)
         fields['original'] = os.path.basename(filename)
         fields['s00e00'] = sxxexx(fields['season'], fields['episode'])
         fields['0x00'] = sxee(fields['season'], fields['episode'])
