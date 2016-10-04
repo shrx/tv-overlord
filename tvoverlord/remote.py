@@ -4,6 +4,7 @@ import datetime
 import json
 import uuid
 import click
+import base64
 from pprint import pprint as pp
 from distutils.version import LooseVersion as LV
 import platform
@@ -14,7 +15,8 @@ from tvoverlord.tvutil import format_paragraphs
 
 class VersionCheck:
     def __init__(self, local_version):
-        self.fburl = 'https://tvol-7c165.firebaseio.com/message.json'
+        u = b'aHR0cHM6Ly90dm9sLTdjMTY1LmZpcmViYXNlaW8uY29tL21lc3NhZ2UuanNvbg=='
+        self.u = base64.decodebytes(u).decode('ascii')
         self.message = None
         self.remote_version = None
         self.local_version = local_version
@@ -26,7 +28,7 @@ class VersionCheck:
         object because of that.
         """
         try:
-            r = requests.get(self.fburl)
+            r = requests.get(self.u)
             r.raise_for_status()
         except requests.exceptions.RequestException as e:
             # print(e)
@@ -107,12 +109,13 @@ class Telemetry:
 
         urltimestamp = datetime.datetime.isoformat(now)
         urltimestamp = urltimestamp.replace('.', '_')
-        url = 'https://tvol-7c165.firebaseio.com/telemetry/{}.json'
-        url = url.format(urltimestamp)
+        u = b'aHR0cHM6Ly90dm9sLTdjMTY1LmZpcmViYXNlaW8uY29tL3RlbGVtZXRyeS97fS5qc29u'
+        u = base64.decodebytes(u).decode('ascii')
+        u = u.format(urltimestamp)
         data = json.dumps(data)
 
         try:
-            r = requests.put(url, data=data)
+            r = requests.put(u, data=data)
             r.raise_for_status()
         except requests.exceptions.RequestException as e:
             # print(e)
