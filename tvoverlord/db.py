@@ -143,7 +143,6 @@ class Database(object):
             values ('%s', :value)
         """ % key
         value = json.dumps(value)
-        # print('>>>set', value)
         values = {'value': value}
         self.run_sql(sql, values)
 

@@ -163,6 +163,7 @@ def send(te, v):
     params = ctx.params
     params.update(ctx.parent.params)
     params['command'] = ctx.info_name
+
     try:
         # don't collect the show name
         if params['show_name']:
@@ -171,9 +172,23 @@ def send(te, v):
         pass
 
     try:
-        # don't collect the config name
+        # don't collect the create config name
+        if params['create_config_name']:
+            params['create_config_name'] = True
+    except KeyError:
+        pass
+
+    try:
+        # don't collect the config's create
         if params['config_name']:
             params['config_name'] = True
+    except KeyError:
+        pass
+
+    try:
+        # don't collect the nondb search string
+        if params['search_string']:
+            params['search_string'] = True
     except KeyError:
         pass
 
@@ -359,21 +374,13 @@ def download(show_name, today, ignore, count):
     If SHOW_NAME is used, it will download any shows that match that title
     """
     send(te, v)
-    if not ignore and (Config.email or Config.ip):
+    if not ignore and Config.warnvpn:
         L = Location()
-        if Config.email:
-            if not L.getipintel():
-                warning = click.style(
-                    'Warning:', bg='red', fg='white', bold=True)
-                msg = '{warning} not connected to a VPN'
-                click.echo(msg.format(warning=warning))
-                sys.exit(1)
-        if Config.ip:
+        if Config.warnvpn:
             if not L.ips_match(
-                    Config.ip,
                     parts_to_match=Config.parts_to_match):
-                L.message()
-                sys.exit(1)
+                if not L.message():
+                    sys.exit(1)
 
     shows = Shows(name_filter=show_name)
     for show in shows:
@@ -427,21 +434,13 @@ def nondbshow(search_string, count, ignore):
     if not search_string:
         raise click.UsageError('Empty "search_string" not allowed.')
 
-    if not ignore and (Config.email or Config.ip):
+    if not ignore and Config.warnvpn:
         L = Location()
-        if Config.email:
-            if not L.getipintel():
-                warning = click.style(
-                    'Warning:', bg='red', fg='white', bold=True)
-                msg = '{warning} not connected to a VPN'
-                click.echo(msg.format(warning=warning))
-                sys.exit(1)
-        if Config.ip:
+        if Config.warnvpn:
             if not L.ips_match(
-                    Config.ip,
                     parts_to_match=Config.parts_to_match):
-                L.message()
-                sys.exit(1)
+                if not L.message():
+                    sys.exit(1)
 
     nons = Show(show_type='nondb')
     nons.non_db(search_string, count)
@@ -583,9 +582,9 @@ def redownload(criteria):
               help="Test each search engine.")
 @click.option('--show', is_flag=True,
               help='If using --test-se, show the results of each search.')
-@click.option('--create', 'config_name', type=str,
+@click.option('--create', 'create_config_name', type=str,
               help='Create a config set.')
-def config(edit, test_se, show, config_name):
+def config(edit, test_se, show, create_config_name):
     """tvol's config information.
 
     Show information of where various files are, (config.ini,
@@ -593,8 +592,8 @@ def config(edit, test_se, show, config_name):
     """
     send(te, v)
 
-    if config_name:
-        Config.create_config(config_name, create=True)
+    if create_config_name:
+        Config.create_config(create_config_name, create=True)
         return
 
     if edit:

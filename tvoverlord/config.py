@@ -379,13 +379,11 @@ class Configuration:
         cfg.read(str(self.cb.user_config))
 
         # Settings from config.ini ---------------------------------
-        # [App Settings]
         try:
-            ip = cfg.get('App Settings', 'ip whitelist')
-            # split, strip, and remove empty values from whitelist
-            self.ip = [i.strip() for i in ip.split(',') if i.strip()]
+            self.warnvpn = True if cfg.get(
+                'App Settings', 'warn vpn') == 'yes' else False
         except configparser.NoOptionError:
-            self.ip = None
+            self.warnvpn = False
 
         try:
             self.email = cfg.get('App Settings', 'email')
