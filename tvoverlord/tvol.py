@@ -245,7 +245,7 @@ def tvol(no_cache, config_name):
     if Config.version_notification:
         if v.new_version():
             msg = tvu.style(v.message, fg='green')
-            click.secho(msg)
+            click.secho(msg, err=True)
 
     te.ask()
 
@@ -638,6 +638,7 @@ def config(edit, test_se, show, create_config_name):
     if files:
         click.echo()
         click.secho('Config sets', fg=title, bold=bold, underline=ul)
+        click.echo()
         count = 1
         for gr, items in groupby(files, key=lambda f: f.split('.')[1]):
             config_set = ', '.join(list(items))
