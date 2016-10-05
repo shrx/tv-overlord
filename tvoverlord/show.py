@@ -7,7 +7,7 @@ from pprint import pprint as pp
 import click
 
 from tvoverlord.search import Search, SearchError
-from tvoverlord.tvutil import style, sxxexx
+from tvoverlord.tvutil import style, sxxexx, format_paragraphs
 from tvoverlord.config import Config
 from tvoverlord.consoletable import ConsoleTable
 from tvoverlord.tracking import Tracking
@@ -213,58 +213,35 @@ class Show:
     def add_new(self, name):
         result = self.tvapi.search(name)
 
-        if len(result) > 1:
-            click.echo('Multiple shows found, type a number to select.')
-            click.echo('Type "<ctrl> c" to cancel.')
-            click.echo()
-            for index, show in enumerate(result):
-                click.echo('  %s. %s' % (index + 1, show['seriesname']))
-            click.echo()
-
-            choice = click.prompt(
-                'Choose number', default=1,
-                type=click.IntRange(min=1, max=len(result)))
-            idchoice = choice - 1
-            if idchoice not in range(len(result)):
-                sys.exit('Invalid choice: %s' % choice)
-            show = result[idchoice]
-        elif not result:
+        if not result:
             click.echo('No show found.')
             return
         else:
-            show = result[0]
+            click.echo('Multiple shows found, type a number to select.')
+            click.echo('Type "<ctrl> c" to cancel.')
+            click.echo()
+            indent = '     '
+            for index, show in enumerate(result):
+                title = show['seriesname']
+                click.echo(' %2s. ' % (index + 1), nl=False)
+                click.secho(title, bold=True)
+                if 'overview' in show:
+                    click.echo(format_paragraphs(
+                        show['overview'], indent=indent))
+                if 'firstaired' in show:
+                    click.secho(
+                        '%sFirst aired: %s' % (indent, show['firstaired']),
+                        fg='green')
+                click.echo()
+
+            choice = click.prompt(
+                'Choose number (or [enter] for #1)', default=1,
+                type=click.IntRange(min=1, max=len(result)))
+            idchoice = choice - 1
+            show = result[idchoice]
 
         self.db_name = show['seriesname']  # name
         self._get_thetvdb_series_data()
-        indent = '  '
-
-        if not self.show_exists:
-            sys.exit()
-
-        click.echo()
-        click.echo(self.seriesname)
-        click.echo('-' * len(self.seriesname))
-        if self.overview:
-            click.echo(textwrap.fill(self.overview, initial_indent=indent,
-                                     subsequent_indent=indent))
-        else:
-            click.echo('No description provided.')
-        click.echo()
-        click.echo('%sFirst aired: %s' % (indent, self.firstaired))
-        click.echo('%sStatus: %s' % (indent, self.status))
-        click.echo()
-        click.echo('Is this the correct show? [y/n]', nl=False)
-        correct = click.getchar(echo=False)
-        try:
-            # this is nessesary for windows
-            correct = correct.decode('utf-8')
-        except AttributeError:
-            pass
-        click.echo(' %s' % correct)
-
-        if str(correct) != 'y':
-            click.echo('Not added')
-            return
 
         last_season = 1
         last_episode = 0
@@ -282,11 +259,10 @@ class Show:
                     break
                 last_episode = episode
 
-        last_sxxexx = sxxexx(last_season, last_episode)
+        last_sxxexx = style(sxxexx(last_season, last_episode), bold=True)
         click.echo()
         click.echo('The last episode broadcast was %s.' % last_sxxexx)
-        click.echo('Start downloading the [f]irst, [l]atest or season and episode?')
-        msg = 'Type "f", "l" or a season and episode number'
+        msg = 'Start downloading the [f]irst, [l]atest or season and episode?'
         start = click.prompt(msg)
 
         if start == 'f':
