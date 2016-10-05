@@ -4,6 +4,8 @@ import sys
 import os
 import sqlite3
 import threading
+import re
+from itertools import groupby
 
 from pprint import pprint as pp
 from dateutil import parser as date_parser
@@ -629,6 +631,19 @@ def config(edit, test_se, show, create_config_name):
         script = script + ':'
         click.echo('%s %s' % (script.ljust(18), loc))
 
+    # config sets
+    files = [f for f in os.listdir(Config.user_dir)
+             if re.match('^.*\..*\.(sqlite3|ini)', f)]
+    files.sort(key=lambda f: f.split('.')[1])
+    if files:
+        click.echo()
+        click.secho('Config sets', fg=title, bold=bold, underline=ul)
+        count = 1
+        for gr, items in groupby(files, key=lambda f: f.split('.')[1]):
+            config_set = ', '.join(list(items))
+            click.echo('%s. %s' % (count, config_set))
+            count += 1
+
     # search engines
     click.echo()
     click.secho('Search engines:', fg=title, bold=bold, underline=ul)
@@ -660,11 +675,12 @@ def config(edit, test_se, show, create_config_name):
     l = Location()
     click.echo('Your public ip address:')
     click.secho('  %s' % l.ip, bold=True)
-    if Config.ip:
+    if Config.warnvpn:
         click.echo()
         click.echo('Your whitelisted ip addresses:')
+        whitelist = DB.get_config('ip_whitelist')
         short = '.'.join(l.ip.split('.')[:Config.parts_to_match])
-        for ip in Config.ip:
+        for ip in whitelist:
             color = None
             if ip.startswith(short):
                 color = 'green'
