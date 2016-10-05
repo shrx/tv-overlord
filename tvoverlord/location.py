@@ -65,11 +65,13 @@ class Location:
         msg = """
           {warning} not connected to a VPN
 
-          Your current ip is not in the good ip list.  Would you like
-          this ip added to the list? [y/n]""".format(warning=warning)
+          Your current public ip ({ip}) is not in the good ip list.
+          Would you like this ip added to the whitelist? [y/n]""".format(
+              warning=warning, ip=self.ip)
 
         msg = format_paragraphs(msg)
-        click.echo(msg)
+        click.echo()
+        click.echo(msg, nl=False)
         c = click.getchar()
         click.echo()
         if c == 'y':
