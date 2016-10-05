@@ -81,14 +81,12 @@ class DownloadManager:
         if not os.path.exists(Config.tv_dir):
             msg = 'Destination: "{}" does not exist'.format(Config.tv_dir)
             logging.error(msg)
-            print(msg)
-            sys.exit(1)
+            sys.exit(msg)
 
         if not os.path.exists(filename):
             msg = 'Source: "{}" does not exist'.format(filename)
-            click.echo(msg, color=None)
             logging.error(msg)
-            sys.exit(1)
+            sys.exit(msg)
 
         source = filename
         if Config.single_file:
@@ -146,8 +144,7 @@ class DownloadManager:
         elif sys.platform.startswith(('darwin', 'linux')):
             cmd = ['cp', '-r', source, destination]
         else:
-            click.echo('Unknown platform')
-            sys.exit(1)
+            sys.exit('Unknown platform')
 
         subprocess.call(
             cmd,

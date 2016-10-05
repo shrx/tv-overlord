@@ -115,8 +115,7 @@ class Provider(object):
         """
 
         if not os.path.isdir(destination):
-            click.echo('\n%s does not exist' % destination)
-            sys.exit()
+            sys.exit('\n%s does not exist' % destination)
 
         href = chosen_show
         filename = href.split('/')[-1]

@@ -254,8 +254,7 @@ class Search(object):
                     app = 'xdg-open'
                 else:
                     click.echo()
-                    click.echo(err_msg)
-                    sys.exit(1)
+                    sys.exit(err_msg)
 
                 try:
                     subprocess.Popen([app, chosen_show],
@@ -263,8 +262,7 @@ class Search(object):
                                      stdout=subprocess.DEVNULL)
                 except OSError:
                     click.echo()
-                    click.echo(err_msg)
-                    sys.exit(1)
+                    sys.exit(err_msg)
 
             elif platform.system() == 'Darwin':
                 subprocess.Popen(["open", "--background", chosen_show])

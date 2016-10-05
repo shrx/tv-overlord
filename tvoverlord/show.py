@@ -117,23 +117,15 @@ class Show:
             series = tv[self.db_name]
             self.show_exists = True
         except KeyError:
-            click.echo('TheTVDB is down or very slow, try again.')
-            sys.exit(1)
+            sys.exit('TheTVDB is down or very slow, try again.')
         except tvdb_api.tvdb_shownotfound:
-            click.echo('Show not found: %s' % self.db_name)
             self.show_exists = False
-            sys.exit(1)
+            sys.exit('Show not found: %s' % self.db_name)
         except tvdb_api.tvdb_error as e_msg:
-            click.echo()
-            click.echo('Error: %s' % self.db_name)
-            click.echo('-----------------------------')
             click.echo(e_msg)
-            sys.exit(1)
+            sys.exit('Error: %s' % self.db_name)
         except UnboundLocalError as e:
-            click.echo('+++++++++++++++++++++++++')
-            click.echo(e)
-            click.echo('+++++++++++++++++++++++++')
-            sys.exit(1)
+            sys.exit(e)
 
         for i in series.data:
             setattr(self, i, series.data[i])
@@ -306,7 +298,7 @@ class Show:
             try:
                 se, ep = [int(i) for i in start.split()]
             except ValueError:
-                sys.exit('Season and episode must be two numbers seperated by a space')
+                sys.exit('Season and episode must be two numbers seperated by a space.')
 
         if ep > 0:
             ep -= 1  # episode in db is the NEXT episode
@@ -513,7 +505,7 @@ class Show:
             if season == 0:
                 season += 1
             season = str(season)
-            msg = '%s %s, added' % (self.seriesname, sxxexx(season, episode))
+            msg = '%s %s added.' % (self.seriesname, sxxexx(season, episode))
 
         DB.run_sql(sql, values)
         return msg

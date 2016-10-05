@@ -58,8 +58,7 @@ def transmission(debug):
         torrent_hash = os.environ['TR_TORRENT_HASH']
         torrent_name = os.environ['TR_TORRENT_NAME']
     except KeyError:
-        click.echo('Enviroment variables not set')
-        sys.exit(1)
+        sys.exit('Enviroment variables not set')
 
     if debug:
         click.echo('torrent_hash: %s' % torrent_hash)

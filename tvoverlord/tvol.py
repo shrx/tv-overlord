@@ -45,8 +45,7 @@ def edit_db(search_str):
         data.append(i)
 
     if len(data) == 0:
-        click.echo('"%s" not found' % search_str)
-        sys.exit()
+        sys.exit('"%s" not found' % search_str)
     elif len(data) > 1:
         click.echo('Multiple shows found, type a number to edit.')
         click.echo('Type "<ctrl> c" to cancel.')
@@ -347,11 +346,11 @@ def list_missing(today):
             show_eta=False,
             width=Config.pb.width,
             empty_char=tvu.style(Config.pb.empty_char,
-                             fg=Config.pb.dark,
-                             bg=Config.pb.dark),
+                                 fg=Config.pb.dark,
+                                 bg=Config.pb.dark),
             fill_char=tvu.style(Config.pb.fill_char,
-                            fg=Config.pb.light,
-                            bg=Config.pb.light),
+                                fg=Config.pb.light,
+                                bg=Config.pb.light),
             bar_template=Config.pb.template,
     ) as bar:
         for series in bar:
@@ -412,7 +411,7 @@ def add(show_name, bulk, season, episode):
         raise click.UsageError('Empty "show_name" not allowed.')
 
     new_show = Show(show_type='new')
-    if bulk == True:
+    if bulk is True:
         new_show.add_bulk(show_name, season=season, episode=episode)
     else:
         new_show.add_new(name=show_name)

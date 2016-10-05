@@ -147,8 +147,8 @@ class ConfigFileBuilder:
             curs.execute(delbackup)
             curs.execute('COMMIT')
         except conn.Error as e:
-            click.echo('Database update failed')
-            click.echo(', '.join(e.args))
+            click.echo('Database update failed', err=True)
+            click.echo(', '.join(e.args), err=True)
             curs.execute('ROLLBACK')
             sys.exit(1)
 
@@ -266,19 +266,13 @@ class Configuration:
 
             if not os.path.exists(os.path.join(config_home, config_file)):
                 msg = 'Warning: %s does not exist, using config.ini' % config_file
-                click.secho(msg, fg='yellow')
+                click.secho(msg, fg='yellow', err=True)
                 config_file = 'config.ini'
-            else:
-                msg = 'Using %s' % config_file
-                click.secho(msg, fg='yellow')
 
             if not os.path.exists(os.path.join(config_home, db_file)):
                 msg = 'Warning: %s does not exist, using shows.sqlite3' % db_file
-                click.secho(msg, fg='yellow')
+                click.secho(msg, fg='yellow', err=True)
                 db_file = 'shows.sqlite3'
-            else:
-                msg = 'Using %s' % db_file
-                click.secho(msg, fg='yellow')
 
         elif config_name and create is True:
             config_file = 'config.%s.ini' % config_name

@@ -160,8 +160,7 @@ class Provider(object):
 
     def download(self, chosen_show, destination, final_name):
         if not os.path.isdir(destination):
-            click.echo('\n%s does not exist' % destination)
-            sys.exit()
+            sys.exit('\n%s does not exist' % destination)
 
         href = chosen_show
         filename = href.split('/')[-1]

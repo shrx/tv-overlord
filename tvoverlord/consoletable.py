@@ -204,8 +204,7 @@ class ConsoleTable:
                 # inadvertent selection if there was an 'M' option.
                 # The non char key causes a UnicodeDecodeError so
                 # we'll stop here.
-                click.echo('Invalid key')
-                sys.exit()
+                sys.exit('Invalid key')
 
         click.echo(get)
         choice = False
