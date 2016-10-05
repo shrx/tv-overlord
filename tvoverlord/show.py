@@ -5,6 +5,7 @@ import textwrap
 import tvdb_api
 from pprint import pprint as pp
 import click
+import logging
 
 from tvoverlord.search import Search, SearchError
 from tvoverlord.tvutil import style, sxxexx, format_paragraphs
@@ -38,7 +39,8 @@ class Show:
     episodename
     """
     tvapi = tvdb_api.Tvdb(apikey=Config.thetvdb_apikey,
-                               cache=Config.use_cache)
+                          cache=Config.use_cache)
+    logging.getLogger('tvdb_api').setLevel(logging.WARNING)
 
 
     def se_ep(self, season, episode):

@@ -5,7 +5,7 @@ import datetime
 import subprocess
 import sys
 from pprint import pprint as pp
-import logging
+# import logging
 import itertools
 import click
 
@@ -46,46 +46,35 @@ class DownloadManager:
     transfered to the destination.
     """
     def __init__(self, torrent_hash, path, filename, debug=False):
-        # set up logging and write to the config dir.
-        if os.path.exists(Config.user_dir):
-            log_file = os.path.join(Config.user_dir, 'tvol.log')
-            logging.basicConfig(
-                format='%(asctime)s: %(levelname)s: %(message)s',
-                datefmt='%Y-%m-%d %H:%M:%S',
-                filename=log_file,
-                level=logging.DEBUG)
-        else:
-            sys.exit('User dir: "{}" does not exist'.format(Config.user_dir))
-
         if debug:
-            console = logging.StreamHandler()
-            formater = logging.Formatter('>>> %(message)s')
+            console = Config.logging.StreamHandler()
+            formater = Config.logging.Formatter('>>> %(message)s')
             console.setFormatter(formater)
-            logging.getLogger('').addHandler(console)
+            Config.logging.getLogger('').addHandler(console)
 
-        logging.info('-' * 50)
-        logging.info('hash: %s', torrent_hash)
-        logging.info('path: %s', path)
-        logging.info('filename: %s', filename)
+        Config.logging.info('-' * 50)
+        Config.logging.info('hash: %s', torrent_hash)
+        Config.logging.info('path: %s', path)
+        Config.logging.info('filename: %s', filename)
 
         filename = os.path.join(path, filename)
         DB.save_info(torrent_hash, filename)
 
         debug_command = '''export TR_TORRENT_NAME='%s'; export TR_TORRENT_DIR='%s'; export TR_TORRENT_HASH='%s'; transmission_done'''
-        logging.info(debug_command, filename, path, torrent_hash)
+        Config.logging.info(debug_command, filename, path, torrent_hash)
 
         if DB.is_oneoff(torrent_hash):
-            logging.info('Download is a one off, doing nothing.')
+            Config.logging.info('Download is a one off, doing nothing.')
             return
 
         if not os.path.exists(Config.tv_dir):
             msg = 'Destination: "{}" does not exist'.format(Config.tv_dir)
-            logging.error(msg)
+            Config.logging.error(msg)
             sys.exit(msg)
 
         if not os.path.exists(filename):
             msg = 'Source: "{}" does not exist'.format(filename)
-            logging.error(msg)
+            Config.logging.error(msg)
             sys.exit(msg)
 
         source = filename
@@ -98,23 +87,23 @@ class DownloadManager:
         else:
             template = '{show}/{original}'
         dest_filename = self.pretty_names(source, torrent_hash, template)
-        logging.info('Destination filename: %s' % dest_filename)
+        Config.logging.info('Destination filename: %s' % dest_filename)
 
         dest = os.path.join(Config.tv_dir, dest_filename)
         dest_path = os.path.dirname(dest)
 
         if not os.path.exists(dest_path):
             os.makedirs(dest_path, exist_ok=True)
-            logging.info('creating dir: %s' % dest)
+            Config.logging.info('creating dir: %s' % dest)
 
         DB.save_dest(torrent_hash, dest)
 
-        logging.info('copying %s to %s' % (source, dest))
+        Config.logging.info('copying %s to %s' % (source, dest))
         if self.copy(source, dest):
             Tell('%s done' % os.path.basename(dest))
             DB.set_torrent_complete(torrent_hash)
         else:
-            logging.info('Destination full')
+            Config.logging.info('Destination full')
             Tell('Destination full')
             sys.exit('Destination full')
 
@@ -272,7 +261,7 @@ class DownloadManager:
         if not os.path.exists(name):
             return false
         if os.path.isfile(name):
-            logging.info('{} is a file'.format(name))
+            Config.logging.info('{} is a file'.format(name))
             return name
         files_sizes = []
         for root, dirs, files in os.walk(name):

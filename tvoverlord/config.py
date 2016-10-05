@@ -7,6 +7,8 @@ import sqlite3
 import click
 import shlex
 import pathlib
+import logging
+import logging.handlers
 from types import SimpleNamespace as SN
 from pprint import pprint as pp
 
@@ -258,6 +260,23 @@ class Configuration:
 
         if cb.create_config_dir():
             files_created = message('App config dir created:', cb.user_home)
+
+        if cb.user_home:
+            log_file = str(cb.user_home / 'tvol.log')
+            f = logging.Formatter(
+                fmt='%(asctime)s: %(levelname)s %(filename)s:%(lineno)d: %(message)s',
+                datefmt="%Y-%m-%d %H:%M:%S")
+
+            handler = logging.handlers.RotatingFileHandler(
+                log_file, maxBytes=500000, backupCount=1)
+
+            root_logger = logging.getLogger()
+            root_logger.setLevel(logging.DEBUG)
+            handler.setFormatter(f)
+            handler.setLevel(logging.DEBUG)
+            root_logger.addHandler(handler)
+
+            self.logging = root_logger
 
         if config_name and create is False:
             config_file = 'config.%s.ini' % config_name
