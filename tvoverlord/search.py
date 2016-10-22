@@ -10,7 +10,7 @@ import click
 
 from tvoverlord.config import Config
 from tvoverlord.util import U
-from tvoverlord.tvutil import style, sxxexx, format_paragraphs
+import tvoverlord.tvutil as tu
 
 from tvoverlord.search_providers import *
 
@@ -58,16 +58,16 @@ class Search(object):
         for engine in engines:
             search = engine.Provider()
             name = '%s (%s)' % (search.name, search.shortname)
-            click.echo(style(name, bold=True))
+            click.echo(tu.style(name, bold=True))
 
             results = search.search(search_string)
 
-            click.echo(indent + style(search.url, fg='blue', ul=True))
+            click.echo(indent + tu.style(search.url, fg='blue', ul=True))
             results_count = str(len(results))
             if results_count == '0':
-                results_count = style(results_count, fg='red')
+                results_count = tu.style(results_count, fg='red')
             else:
-                results_count = style(results_count, fg='green')
+                results_count = tu.style(results_count, fg='green')
             click.echo(indent + 'Search results: %s' % results_count)
 
             if show_results:
@@ -243,7 +243,7 @@ class Search(object):
                     sys.exit('\n"%s" not found.' % args[0])
 
             elif platform.system() == 'Linux':
-                err_msg = format_paragraphs('''
+                err_msg = tu.format_paragraphs('''
                     You do not have a default handler for magnet
                     links.  Either install a bittorent client or
                     configure the "magnet folder" or "client"
