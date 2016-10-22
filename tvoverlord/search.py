@@ -130,37 +130,34 @@ class Search(object):
                     self.job, engine, search_string, season, episode
                 ): engine for engine in engines
             }
-            with click.progressbar(
-                    concurrent.futures.as_completed(res),
-                    label=U.style('  %s' % search_string, bold=True),
-                    empty_char=style(Config.pb.empty_char,
-                                     fg=Config.pb.dark,
-                                     bg=Config.pb.dark),
-                    fill_char=style(Config.pb.fill_char,
-                                    fg=Config.pb.light,
-                                    bg=Config.pb.light),
-                    length=len(engines),
-                    show_percent=False,
-                    show_eta=False,
-                    item_show_func=self.progress_title,
-                    width=Config.pb.width,
-                    bar_template=Config.pb.template,
-                    show_pos=True,
-            ) as bar:
-                for future in bar:
-                    results = future.result()
-                    # remove the search engine name from the end of
-                    # the results array that was added in self.job()
-                    # so progress_title() could make use of it.
-                    results = results[:-1]
-                    episodes = episodes + results
+
+            names = [i.Provider().name for i in engines]
+            names = [' %s ' % i for i in names]
+            names = [tu.style(i, fg='white', bg='red') for i in names]
+            for future in concurrent.futures.as_completed(res):
+
+                results = future.result()
+                finished_name = results[-1]
+                row = ''
+                for i, e in enumerate(names):
+                    e = click.unstyle(e).strip()
+                    if e == finished_name:
+                        e = ' %s ' % e
+                        names[i] = tu.style(e, fg='white', bg='green')
+
+                print(' '.join(names))
+                # move up one line
+                click.echo('[%sA' % 2)
+
+                episodes = episodes + results[:-1]
 
         # go up 3 lines to remove the progress bar
-        click.echo('[%sA' % 3)
+        click.echo('[%sA' % 2)
 
         if self.search_type == 'torrent':
             self.sort_torrents(episodes)
 
+        self.episodes = episodes
         # return search_results
         return [header] + [episodes]
 
