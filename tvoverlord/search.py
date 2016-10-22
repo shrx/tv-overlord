@@ -197,13 +197,17 @@ class Search(object):
             else:
                 hashes.append(torrent_hash)
 
-    def magnet_filename(self):
-        se_ep = sxxexx(self.season, self.episode)
+    def magnet_filename(self, chosen_show=None):
+        se_ep = tu.sxxexx(self.season, self.episode)
         if se_ep:
             fullname = '%s %s.magnet' % (self.show_name, se_ep)
+            fullname = fullname.replace(' ', '_')
         else:
-            fullname = '%s.magnet' % (self.show_name)
-        fullname = fullname.replace(' ', '_')
+            show_fname = self.show_name
+            for f in self.episodes:
+                if chosen_show == f[5]:
+                    show_fname = tu.clean_filename(f[0], strict=True)
+            fullname = '%s.magnet' % (show_fname)
         return fullname
 
     def config_command(self, chosen_show):
@@ -219,14 +223,13 @@ class Search(object):
         download method and return the name of the file downloaded
         back to get-nzb.v2.py
         """
-
         downloaded_filename = ''
         if chosen_show.startswith("magnet:"):
 
             # write magnet links to a file
             if Config.magnet_dir:
                 Config.magnet_dir = os.path.expanduser(Config.magnet_dir)
-                fn = self.magnet_filename()
+                fn = self.magnet_filename(chosen_show)
                 if os.path.isdir(Config.magnet_dir):
                     full = os.path.join(Config.magnet_dir, fn)
                     with open(full, 'w') as f:
@@ -284,7 +287,11 @@ class Search(object):
                                 self.episode.rjust(2, '0'))
                 )
             else:
-                final_name = '%s.nzb' % (self.show_name)
+                show_fname = 'unknown'
+                for f in self.episodes:
+                    if chosen_show == f[4]:
+                        show_fname = tu.clean_filename(f[0], strict=True)
+                final_name = '%s.nzb' % (show_fname)
 
             downloader = self.newsgroup_engines[0].Provider()
             downloaded_filename = downloader.download(
