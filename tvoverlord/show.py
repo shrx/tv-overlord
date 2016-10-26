@@ -6,6 +6,7 @@ import tvdb_api
 from pprint import pprint as pp
 import click
 import logging
+import re
 
 from tvoverlord.search import Search, SearchError
 from tvoverlord.tvutil import style, sxxexx, format_paragraphs
@@ -14,6 +15,7 @@ from tvoverlord.consoletable import ConsoleTable
 from tvoverlord.tracking import Tracking
 from tvoverlord.db import DB
 
+RE_CLEANUP_FOR_SEARCH = re.compile(r'[^A-Za-z0-9]+')
 
 class Show:
     """
@@ -138,9 +140,9 @@ class Show:
         if self.db_search_engine_name:
             search_title = self.db_search_engine_name
         else:
-            search_title = self.db_name
-
-        # if self does not have the attirbute series
+            # cleanup name because e.g. "'" in the name is preventing results
+            search_title = RE_CLEANUP_FOR_SEARCH.sub(' ', self.db_name)
+        # if self does not have the attribute series
         # its because of an error in the xml downloaded
         # from thetvdb site
         if not hasattr(self, 'series'):
