@@ -6,6 +6,8 @@ import textwrap
 import re
 import urllib
 import click
+import unicodedata
+import string
 from pprint import pprint as pp
 from collections import namedtuple
 
@@ -123,6 +125,18 @@ def itemize(shows):
         number = '%s.' % i
         number = number.rjust(depth)
         click.echo('  %s %s' % (number, show.seriesname))
+
+
+def clean_filename(fname, strict=False):
+    if strict:
+        valid_chars = '-_.(){alpha}{nums}'.format(
+            alpha=string.ascii_letters, nums=string.digits)
+    else:
+        valid_chars = '-_.()[] {alpha}{nums}'.format(
+            alpha=string.ascii_letters, nums=string.digits)
+    fname = unicodedata.normalize('NFKD', fname)
+    clean = ''.join(c for c in fname if c in valid_chars)
+    return clean
 
 
 if __name__ == '__main__':

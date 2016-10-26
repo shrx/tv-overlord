@@ -10,7 +10,7 @@ import click
 
 from tvoverlord.config import Config
 from tvoverlord.util import U
-from tvoverlord.tvutil import style, sxxexx, format_paragraphs
+import tvoverlord.tvutil as tu
 
 from tvoverlord.search_providers import *
 
@@ -58,16 +58,16 @@ class Search(object):
         for engine in engines:
             search = engine.Provider()
             name = '%s (%s)' % (search.name, search.shortname)
-            click.echo(style(name, bold=True))
+            click.echo(tu.style(name, bold=True))
 
             results = search.search(search_string)
 
-            click.echo(indent + style(search.url, fg='blue', ul=True))
+            click.echo(indent + tu.style(search.url, fg='blue', ul=True))
             results_count = str(len(results))
             if results_count == '0':
-                results_count = style(results_count, fg='red')
+                results_count = tu.style(results_count, fg='red')
             else:
-                results_count = style(results_count, fg='green')
+                results_count = tu.style(results_count, fg='green')
             click.echo(indent + 'Search results: %s' % results_count)
 
             if show_results:
@@ -130,37 +130,34 @@ class Search(object):
                     self.job, engine, search_string, season, episode
                 ): engine for engine in engines
             }
-            with click.progressbar(
-                    concurrent.futures.as_completed(res),
-                    label=U.style('  %s' % search_string, bold=True),
-                    empty_char=style(Config.pb.empty_char,
-                                     fg=Config.pb.dark,
-                                     bg=Config.pb.dark),
-                    fill_char=style(Config.pb.fill_char,
-                                    fg=Config.pb.light,
-                                    bg=Config.pb.light),
-                    length=len(engines),
-                    show_percent=False,
-                    show_eta=False,
-                    item_show_func=self.progress_title,
-                    width=Config.pb.width,
-                    bar_template=Config.pb.template,
-                    show_pos=True,
-            ) as bar:
-                for future in bar:
-                    results = future.result()
-                    # remove the search engine name from the end of
-                    # the results array that was added in self.job()
-                    # so progress_title() could make use of it.
-                    results = results[:-1]
-                    episodes = episodes + results
+
+            names = [i.Provider().name for i in engines]
+            names = [' %s ' % i for i in names]
+            names = [tu.style(i, fg='white', bg='red') for i in names]
+            for future in concurrent.futures.as_completed(res):
+
+                results = future.result()
+                finished_name = results[-1]
+                row = ''
+                for i, e in enumerate(names):
+                    e = click.unstyle(e).strip()
+                    if e == finished_name:
+                        e = ' %s ' % e
+                        names[i] = tu.style(e, fg='white', bg='green')
+
+                print(' '.join(names))
+                # move up one line
+                click.echo('[%sA' % 2)
+
+                episodes = episodes + results[:-1]
 
         # go up 3 lines to remove the progress bar
-        click.echo('[%sA' % 3)
+        click.echo('[%sA' % 2)
 
         if self.search_type == 'torrent':
             self.sort_torrents(episodes)
 
+        self.episodes = episodes
         # return search_results
         return [header] + [episodes]
 
@@ -197,13 +194,17 @@ class Search(object):
             else:
                 hashes.append(torrent_hash)
 
-    def magnet_filename(self):
-        se_ep = sxxexx(self.season, self.episode)
+    def magnet_filename(self, chosen_show=None):
+        se_ep = tu.sxxexx(self.season, self.episode)
         if se_ep:
             fullname = '%s %s.magnet' % (self.show_name, se_ep)
+            fullname = fullname.replace(' ', '_')
         else:
-            fullname = '%s.magnet' % (self.show_name)
-        fullname = fullname.replace(' ', '_')
+            show_fname = self.show_name
+            for f in self.episodes:
+                if chosen_show == f[5]:
+                    show_fname = tu.clean_filename(f[0], strict=True)
+            fullname = '%s.magnet' % (show_fname)
         return fullname
 
     def config_command(self, chosen_show):
@@ -219,14 +220,13 @@ class Search(object):
         download method and return the name of the file downloaded
         back to get-nzb.v2.py
         """
-
         downloaded_filename = ''
         if chosen_show.startswith("magnet:"):
 
             # write magnet links to a file
             if Config.magnet_dir:
                 Config.magnet_dir = os.path.expanduser(Config.magnet_dir)
-                fn = self.magnet_filename()
+                fn = self.magnet_filename(chosen_show)
                 if os.path.isdir(Config.magnet_dir):
                     full = os.path.join(Config.magnet_dir, fn)
                     with open(full, 'w') as f:
@@ -243,7 +243,7 @@ class Search(object):
                     sys.exit('\n"%s" not found.' % args[0])
 
             elif platform.system() == 'Linux':
-                err_msg = format_paragraphs('''
+                err_msg = tu.format_paragraphs('''
                     You do not have a default handler for magnet
                     links.  Either install a bittorent client or
                     configure the "magnet folder" or "client"
@@ -284,7 +284,11 @@ class Search(object):
                                 self.episode.rjust(2, '0'))
                 )
             else:
-                final_name = '%s.nzb' % (self.show_name)
+                show_fname = 'unknown'
+                for f in self.episodes:
+                    if chosen_show == f[4]:
+                        show_fname = tu.clean_filename(f[0], strict=True)
+                final_name = '%s.nzb' % (show_fname)
 
             downloader = self.newsgroup_engines[0].Provider()
             downloaded_filename = downloader.download(

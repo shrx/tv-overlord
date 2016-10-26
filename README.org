@@ -3,7 +3,7 @@
 
 Website: [[http://www.tvoverlord.com][www.tvoverlord.com]]  ---  [[https://github.com/8cylinder/tv-overlord/wiki][Documentation]]
 
-Current version: *1.4.4*, Wed Oct 05/2016
+https://badge.fury.io/py/tvoverlord.svg
 
 TV Overlord is a *semi automatic* command line tool to download and
 manage TV shows from newsgroups or bittorent.  It will download nzb
