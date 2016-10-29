@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import urllib.request, urllib.parse, urllib.error
+import socket
 import os
 import sys
 from time import mktime
@@ -130,7 +131,18 @@ class Provider(object):
             # Could be a movie or one off download.
             fullname = destination + '/' + filename
 
-        urllib.request.urlretrieve(href, fullname)
+        # uncomment to test timeout errors:
+        # socket.setdefaulttimeout(0.1)
+        try:
+            urllib.request.urlretrieve(href, fullname)
+        except socket.timeout:
+            click.echo()
+            click.echo('Download timed out, try again.')
+            sys.exit(1)
+        except urllib.error.URLError:
+            click.echo()
+            click.echo('Download timed out, try again.')
+            sys.exit(1)
 
         return filename
 
