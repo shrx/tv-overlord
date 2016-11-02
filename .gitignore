@@ -9,3 +9,4 @@ README.txt
 show_order.org
 allshows.csv
 Vagrantfile
+__pycache__
