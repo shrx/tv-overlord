@@ -51,8 +51,8 @@
         <p><span class="commandline">
           pip3 install tvoverlord</span> — <a href="https://github.com/8cylinder/tv-overlord/wiki/FAQ">More details here</a>.</p>
 
-        <p>Latest version: <strong>1.4.4</strong> —
-          <a href="#1.4.4">Changes</a></p>
+        <p>Latest version: <strong>1.4.5</strong> —
+          <a href="#1.4.5">Changes</a></p>
 
         <p>&nbsp;</p>
 
@@ -191,6 +191,28 @@
             the user is connected to a VPN.  Now, an IP whitelist is being stored in the
             db.  More <a href="https://github.com/8cylinder/tv-overlord/wiki/Config-file">
             information here</a>.</li>
+        </ul>
+
+        <h3>Version 1.4.5, 2016-11-11<a id="1.4.5"></a></h3>
+        <ul>
+          <li><p>Change download progressbar to "status lights".</p>
+            <p>The progressbar was the wrong tool since it implied
+              that searching was happening sequentially when it is
+              actually searching in parallel.  This also shows which
+              search engines are the slowest.</p></li>
+          <li><p>Added a search engine exclude option to downloading.</p>
+            <p>Using <code class="commandline">tvol download --exclude
+            pb</code> the piratebay would be excluded from searches.</p>
+            <p>This can be a comma separated list as well and if there
+            are spaces they should be wrapped in quotes.  The long and
+            short names can be used.  You can find these with the config
+            command under "Search engines".  Some examples:</p>
+            <ul>
+              <li>pb</li>
+              <li>PB,rb,13</li>
+              <li>'the pirate bay, rarbg, ez'</li>
+            </ul>
+          </li>
         </ul>
 
       </div>
