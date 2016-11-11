@@ -435,7 +435,7 @@ class Configuration:
             blacklist = cfg.get('App Settings', 'blacklist')
             # split, strip, and remove empty values from list
             self.blacklist = [
-                i.strip() for i in blacklist.split(',') if i.strip()]
+                i.strip().lower() for i in blacklist.split(',') if i.strip()]
         except configparser.NoOptionError:
             self.blacklist = []
 

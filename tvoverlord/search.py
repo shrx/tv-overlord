@@ -35,8 +35,15 @@ class Search(object):
             onethreethreesevenx_to, rarbg_to, eztv_ag]
 
         # remove any providers listed in the blacklist
-        self.torrent_engines = [
-            i for i in torrent_engines if i.Provider.name not in Config.blacklist]
+        self.torrent_engines = []
+        for engine in torrent_engines:
+            inlist = True
+            if engine.Provider.shortname.lower() in Config.blacklist:
+                inlist = False
+            if engine.Provider.name.lower() in Config.blacklist:
+                inlist = False
+            if inlist:
+                self.torrent_engines.append(engine)
 
         # for nzb searches, only the first one listed will be used
         self.newsgroup_engines = [nzbclub_com]
@@ -133,20 +140,22 @@ class Search(object):
             }
 
             names = [i.Provider().name for i in engines]
+            names.sort()
             names = [' %s ' % i for i in names]
             names = [tu.style(i, fg='white', bg='red') for i in names]
             for future in concurrent.futures.as_completed(res):
 
                 results = future.result()
                 finished_name = results[-1]
-                row = ''
                 for i, e in enumerate(names):
                     e = click.unstyle(e).strip()
                     if e == finished_name:
                         e = ' %s ' % e
                         names[i] = tu.style(e, fg='white', bg='green')
 
-                print(' '.join(names))
+                title = '%s %s' % (search_string.strip(),
+                                   tu.sxxexx(season, episode))
+                click.echo('%s  %s' % (title, ' '.join(names)))
                 # move up one line
                 click.echo('[%sA' % 2)
 

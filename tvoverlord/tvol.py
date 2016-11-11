@@ -369,7 +369,9 @@ def list_missing(today):
               help="Ignore 'Not connected to vpn' warning.")
 @click.option('--count', '-c', type=int, default=10,
               help='Number of search results to list. (default: 5)')
-def download(show_name, today, ignore, count):
+@click.option('--exclude', '-x',
+              help='Comma seperated list of search engines to ignore.')
+def download(show_name, today, ignore, count, exclude):
     """Download available episodes.
 
     If SHOW_NAME is used, it will download any shows that match that title
@@ -382,6 +384,11 @@ def download(show_name, today, ignore, count):
                     parts_to_match=Config.parts_to_match):
                 if not L.message():
                     sys.exit(1)
+
+    if exclude:
+        blacklist = [
+            i.strip().lower() for i in exclude.split(',') if i.strip()]
+        Config.blacklist = list(set(Config.blacklist + blacklist))
 
     shows = Shows(name_filter=show_name)
     for show in shows:
