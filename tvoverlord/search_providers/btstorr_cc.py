@@ -11,7 +11,10 @@ from tvoverlord.util import U
 
 class Provider():
     name = 'Bit Torrent Scene'
-    provider_urls = ['http://www.btstorr.cc/']
+    # http://www.btstorr.cc
+    provider_urls = ['http://bittorrentstart.com', 'http://diriri.xyz',
+                     'http://minova.club', 'http://mytorrentz.tv',
+                     'http://torrentspy.online']
     shortname = 'BT'
 
     def search(self, search_string, season=False, episode=False):
