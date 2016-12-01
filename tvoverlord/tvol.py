@@ -26,7 +26,7 @@ from tvoverlord.remote import VersionCheck
 from tvoverlord.remote import Telemetry
 
 
-__version__ = '1.4.4'
+__version__ = '1.4.6'
 
 
 def edit_db(search_str):
@@ -109,6 +109,23 @@ def edit_db(search_str):
         else:
             dirty = True
 
+        date_pretty = 'y' if row['search_by_date'] == 1 else 'n'
+        msg = tvu.style('Search by date (%s) [y/n]: ', fg=editcolor)
+        new_date = input(msg % (date_pretty))
+        if not new_date:
+            new_date = date_pretty
+        else:
+            dirty = True
+
+        click.echo('The format string can be any valid Python format string.')
+        click.echo('See: https://docs.python.org/3/library/datetime.html#strftime-and-strptime-behavior')
+        msg = tvu.style('Date format string (%s): ', fg=editcolor)
+        new_format = input(msg % (row['date_format']))
+        if not new_format:
+            new_format = row['date_format']
+        else:
+            dirty = True
+
     except KeyboardInterrupt:
         click.echo('\nDatabase edit canceled.')
         sys.exit(0)
@@ -129,6 +146,10 @@ def edit_db(search_str):
         click.echo('Error: Status must be either "active" or "inactive"')
         is_error = True
 
+    if new_date not in ['y', 'n']:
+        click.echo('Error: Search by date must be either "y" or "n"')
+        is_error = True
+
     if is_error:
         sys.exit(1)
 
@@ -142,14 +163,20 @@ def edit_db(search_str):
                 season=:season,
                 episode=:episode,
                 status=:status,
-                search_engine_name=:search_engine_name
+                search_engine_name=:search_engine_name,
+                search_by_date=:search_by_date,
+                date_format=:date_format
              WHERE thetvdb_series_id=:tvdb_id'''
 
-    row_values = {'season': new_season,
-                  'episode': new_episode,
-                  'status': new_status,
-                  'search_engine_name': new_search_engine_name,
-                  'tvdb_id': row['thetvdb_series_id']}
+    row_values = {
+        'season': new_season,
+        'episode': new_episode,
+        'status': new_status,
+        'search_engine_name': new_search_engine_name,
+        'tvdb_id': row['thetvdb_series_id'],
+        'search_by_date': 1 if new_date == 'y' else 0,
+        'date_format': new_format,
+    }
 
     curs.execute(sql, row_values)
 

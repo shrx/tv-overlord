@@ -88,6 +88,8 @@ class Shows:
                 name,
                 season,
                 episode,
+                search_by_date,
+                date_format,
                 thetvdb_series_id,
                 ragetv_series_id,
                 search_engine_name,

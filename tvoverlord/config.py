@@ -325,6 +325,8 @@ class Configuration:
                     ['alt_series_id', 'TEXT'],
                     ['season', 'NUMERIC'],
                     ['episode', 'NUMERIC'],
+                    ['search_by_date', 'INTEGER'],
+                    ['date_format', 'TEXT'],
                     ['next_episode', 'TEXT'],
                     ['airs_time', 'TEXT'],
                     ['airs_dayofweek', 'TEXT'],

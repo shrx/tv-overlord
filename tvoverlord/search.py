@@ -48,8 +48,11 @@ class Search(object):
         # for nzb searches, only the first one listed will be used
         self.newsgroup_engines = [nzbclub_com]
 
-    def job(self, engine, search_string, season, episode):
+    def job(self, engine, search_string, season, episode, date_search):
         search = engine.Provider()
+        if date_search:
+            search_string = '%s %s' % (search_string, date_search)
+            season = episode = False
         search_results = search.search(search_string, season, episode)
 
         # for info about each search
@@ -81,8 +84,8 @@ class Search(object):
                 for result in results:
                     click.echo('%s* %s' % (indent, result[0]))
 
-    def search(self, search_string, season=False,
-               episode=False, search_type='torrent'):
+    def search(self, search_string, season=False, episode=False,
+               date_search=None, search_type='torrent'):
         """
         Return an array of values:
 
@@ -128,14 +131,13 @@ class Search(object):
         else:
             raise ValueError('search_type can only be "torrent" or "nzb"')
 
-
         # socket.setdefaulttimeout(5)
         # socket.setdefaulttimeout(0.1)
         episodes = []
         with concurrent.futures.ThreadPoolExecutor(max_workers=8) as executor:
             res = {
                 executor.submit(
-                    self.job, engine, search_string, season, episode
+                    self.job, engine, search_string, season, episode, date_search
                 ): engine for engine in engines
             }
 
@@ -153,11 +155,16 @@ class Search(object):
                         e = ' %s ' % e
                         names[i] = tu.style(e, fg='white', bg='green')
 
-                title = '%s %s' % (search_string.strip(),
-                                   tu.sxxexx(season, episode))
-                click.echo('%s  %s' % (title, ' '.join(names)))
-                # move up one line
-                click.echo('[%sA' % 2)
+                if date_search:
+                    title = '%s %s' % (search_string.strip(),
+                                       date_search)
+                else:
+                    title = '%s %s' % (search_string.strip(),
+                                       tu.sxxexx(season, episode))
+                click.echo(tu.style(title, bold=True))
+                click.echo(' '.join(names))
+                # move up two lines
+                click.echo('[%sA' % 3)
 
                 episodes = episodes + results[:-1]
 

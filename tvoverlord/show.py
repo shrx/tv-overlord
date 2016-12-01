@@ -80,6 +80,9 @@ class Show:
         # name to use for searching, thats why we use search_engine_name
         self.db_search_engine_name = dbdata['search_engine_name']
         self.db_status = dbdata['status']
+        self.search_by_date = dbdata['search_by_date']
+        self.date_format = dbdata['date_format']
+
 
     def _get_thetvdb_series_data(self):
         """Dynamicaly add all the data from Thetvdb.com
@@ -149,11 +152,23 @@ class Show:
             return
 
         for episode in missing:
+            if self.search_by_date:
+                if self.date_format:
+                    date_search = episode['date'].strftime(self.date_format)
+                else:
+                    date_search = episode['date'].strftime('%Y %m %d')
+                season_number = episode_number = None
+            else:
+                date_search = None
+                season_number = episode['season']
+                episode_number = episode['episode']
+
             showid = None
             results = self.search_provider.search(
                 search_title,
-                season=episode['season'],
-                episode=episode['episode'],
+                season=season_number,
+                episode=episode_number,
+                date_search=date_search,
                 search_type=Config.search_type,
             )
 
@@ -161,8 +176,9 @@ class Show:
                 showid = self._ask(
                     results,
                     display_count=episode_display_count,
-                    season=episode['season'],
-                    episode=episode['episode']
+                    season=season_number,
+                    episode=episode_number,
+                    date_search=date_search,
                 )
             else:
                 click.echo('"%s" is listed in TheTVDB, but not found in any search engines' % (
@@ -369,7 +385,8 @@ class Show:
                     break
                 if last_watched < last_broadcast:
                     missing.append({'season': last_season,
-                                    'episode': last_episode})
+                                    'episode': last_episode,
+                                    'date': broadcast_date})
         return missing
 
     def set_next_episode(self, next_date):
@@ -396,14 +413,18 @@ class Show:
 
         return msg
 
-    def _ask(self, shows, season, episode, display_count, nondb=False):
+    def _ask(self, shows, season, episode, display_count,
+             nondb=False, date_search=None):
         click.echo()
         if not shows[1]:
             # use ljust to cover over the progressbar
             click.secho('No results found.'.ljust(Config.console_columns))
+            click.echo(' ' * Config.console_columns)
             return 'skip'
         if season and episode:
             show_title = '%s %s' % (self.db_name, self.se_ep(season, episode))
+        elif date_search:
+            show_title = '%s %s' % (self.db_name, date_search)
         else:
             show_title = '%s' % shows[0][0][0]
 
