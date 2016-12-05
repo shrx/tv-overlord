@@ -78,7 +78,7 @@ def edit_db(search_str):
     click.echo()
 
     title = '%s' % row['name']
-    click.echo(tvu.style(title, bold=True))
+    click.echo(tvu.style(title, bold=True, ul=True))
     click.echo()
     try:
         msg = tvu.style('Search engine name (%s): ', fg=editcolor)
@@ -117,18 +117,22 @@ def edit_db(search_str):
         else:
             dirty = True
 
-        click.echo('The format string can be any valid Python format string.')
-        click.echo('See: https://docs.python.org/3/library/datetime.html#strftime-and-strptime-behavior')
-        msg = tvu.style('Date format string (%s): ', fg=editcolor)
-        new_format = input(msg % (row['date_format']))
-        if not new_format:
-            new_format = row['date_format']
-        else:
-            dirty = True
+        new_format = row['date_format']
+        if new_date == 'y':
+            click.echo('  The optional date format string can be any valid Python format string.')
+            click.echo('  https://docs.python.org/3/library/datetime.html#strftime-and-strptime-behavior')
+            msg = tvu.style('  Date format string (%s): ', fg=editcolor)
+            new_format = input(msg % (row['date_format']))
+            if not new_format:
+                new_format = row['date_format']
+            else:
+                dirty = True
 
     except KeyboardInterrupt:
-        click.echo('\nDatabase edit canceled.')
+        click.echo('\n\nDatabase edit cancelled.')
         sys.exit(0)
+
+    click.echo()
 
     if dirty is False:
         click.echo('No changes made.')
@@ -153,10 +157,8 @@ def edit_db(search_str):
     if is_error:
         sys.exit(1)
 
-    click.echo()
-
     if not click.confirm('Are these changes correct? (you can always change it back)', default='Y'):
-        click.echo('Edits cancelled.')
+        click.echo('\nDatabase edit cancelled.')
         sys.exit()
 
     sql = '''UPDATE shows SET

@@ -84,7 +84,7 @@ setup(
         'Topic :: Internet',
         'Topic :: Multimedia :: Video',
         'Natural Language :: English',
-        'Development Status :: 4 - Beta',
+        'Development Status :: 5 - Production/Stable',
     ],
 )
 
