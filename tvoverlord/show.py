@@ -41,10 +41,7 @@ class Show:
     gueststars, seriesid, language, productioncode, firstaired,
     episodename
     """
-    tvapi = tvdb_api.Tvdb(apikey=Config.thetvdb_apikey,
-                          cache=Config.use_cache)
     logging.getLogger('tvdb_api').setLevel(logging.WARNING)
-
 
     def se_ep(self, season, episode):
         season_just = str(season).rjust(2, '0')
@@ -58,6 +55,9 @@ class Show:
         if show_type not in typelist:
             raise Exception('incorrect show type')
 
+        self.tvapi = tvdb_api.Tvdb(apikey=Config.thetvdb_apikey,
+                                   cache=Config.use_cache)
+
         if show_type == 'current':
             self._set_db_data(dbdata)
             self._get_thetvdb_series_data()
@@ -65,6 +65,7 @@ class Show:
         elif show_type == 'nondb':
             self.search_provider = Search()
 
+        self.show_type = show_type
         self.console_columns = Config.console_columns
 
         self.db = DB
@@ -194,7 +195,9 @@ class Show:
                     date_search = episode['date'].strftime(self.date_format)
                 else:
                     date_search = episode['date'].strftime('%Y %m %d')
-                season_number = episode_number = None
+                # season_number = episode_number = None
+                season_number = episode['season']
+                episode_number = episode['episode']
             else:
                 date_search = None
                 season_number = episode['season']
@@ -452,16 +455,17 @@ class Show:
 
     def _ask(self, shows, season, episode, display_count,
              nondb=False, date_search=None):
+        print('>>>sed', season, episode, date_search)
         click.echo()
         if not shows[1]:
             # use ljust to cover over the progressbar
             click.secho('No results found.'.ljust(Config.console_columns))
             click.echo(' ' * Config.console_columns)
             return 'skip'
-        if season and episode:
-            show_title = '%s %s' % (self.db_name, self.se_ep(season, episode))
-        elif date_search:
+        if date_search:
             show_title = '%s %s' % (self.db_name, date_search)
+        elif season and episode:
+            show_title = '%s %s' % (self.db_name, self.se_ep(season, episode))
         else:
             show_title = '%s' % shows[0][0][0]
 
@@ -474,7 +478,9 @@ class Show:
         # save data to Tracking
         tracking = Tracking()
         if show_to_dl not in ['skip', 'skip_rest', 'mark']:
-            tracking.save(self.db_name, season, episode, shows, show_to_dl)
+            nondbshow = True if self.show_type == 'nondb' else False
+            tracking.save(self.db_name, season, episode, shows,
+                          show_to_dl, nondbshow=nondbshow)
 
         return show_to_dl
 

@@ -11,15 +11,14 @@ class Tracking:
     def __init__(self):
         pass
 
-    def save(self, show_title, season, episode, data, chosen_url):
+    def save(self, show_title, season, episode, data,
+             chosen_url, nondbshow=False):
         magnet_hash = self._extract_hash(chosen_url)
         data = json.dumps(data)
         now = datetime.datetime.today()
         date = now.isoformat()
         # oneoff is a show that was downloaded via 'nondbshow'
-        oneoff = 0
-        if not season or not episode:
-            oneoff = 1
+        oneoff = 1 if nondbshow else 0
 
         sql = '''
             INSERT INTO tracking(
