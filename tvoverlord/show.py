@@ -7,6 +7,7 @@ from pprint import pprint as pp
 import click
 import logging
 import re
+import requests
 
 from tvoverlord.search import Search, SearchError
 from tvoverlord.tvutil import style, sxxexx, format_paragraphs
@@ -120,19 +121,54 @@ class Show:
         # self.tvapi = tv
         tv = self.tvapi
 
+        tvdb_msg = format_paragraphs('''
+
+            An error occurred while retrieving data from thetvdb.com.
+
+            This probably means that thetvdb is having issues.  This
+            error is usually caused by corrupted or incomplete data
+            being returned from thetvdb.
+
+            Keep retrying using the --no-cache flag or wait a while.
+
+            Checking thetvdb's twitter feed sometimes gives current
+            status: https://twitter.com/thetvdb
+
+            Or isitdownrightnow.com:
+            http://www.isitdownrightnow.com/thetvdb.com.html
+
+            If the error continues, open an issue at GitHub and paste
+            this error. https://github.com/8cylinder/tv-overlord/issues
+
+            Error #: {error_no}
+
+            Error message from stack trace:
+
+            {stack_msg}
+        ''')
+
         try:
             series = tv[self.db_name]
             self.show_exists = True
-        except KeyError:
-            sys.exit('TheTVDB is down or very slow, try again.')
+        except KeyError as e:
+            msg = tvdb_msg.format(error_no=101, stack_msg=e)
+            click.echo(msg, err=True)
+            sys.exit(1)
         except tvdb_api.tvdb_shownotfound:
             self.show_exists = False
             sys.exit('Show not found: %s' % self.db_name)
-        except tvdb_api.tvdb_error as e_msg:
-            click.echo(e_msg)
-            sys.exit('Error: %s' % self.db_name)
+        except tvdb_api.tvdb_error as e:
+            msg = tvdb_msg.format(error_no=102, stack_msg=e)
+            click.echo(msg, err=True)
+            sys.exit(1)
         except UnboundLocalError as e:
-            sys.exit(e)
+            msg = tvdb_msg.format(error_no=103, stack_msg=e)
+            click.echo(msg, err=True)
+            sys.exit(1)
+        except requests.exceptions.ChunkedEncodingError as e:
+            msg = tvdb_msg.format(error_no=104, stack_msg=e)
+            click.echo(msg, err=True)
+            sys.exit(1)
 
         for i in series.data:
             setattr(self, i, series.data[i])
@@ -140,6 +176,7 @@ class Show:
 
     def download_missing(self, episode_display_count, download_today=False):
         missing = self._get_missing(download_today)
+
         if self.db_search_engine_name:
             search_title = self.db_search_engine_name
         else:
