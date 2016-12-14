@@ -51,8 +51,8 @@
         <p><span class="commandline">
           pip3 install tvoverlord</span> — <a href="https://github.com/8cylinder/tv-overlord/wiki/FAQ">More details here</a>.</p>
 
-        <p>Latest version: <strong>1.4.5</strong> —
-          <a href="#1.4.5">Changes</a></p>
+        <p>Latest version: <img class="badge" src="https://badge.fury.io/py/tvoverlord.png"> —
+          <a href="#changes">Changes</a></p>
 
         <p>&nbsp;</p>
 
@@ -136,9 +136,72 @@
           <img class="media" src="images/calendar-x.png">
         </a>
 
-        <h2>Changes</h2>
+        <h2>Changes <a id="changes"></a></h2>
 
-        <h3>Version 1.4.0 <a id='1.4.0'></a></h3>
+        <h3>Version 1.4.7, 2016-12-05</h3>
+        <ul>
+          <li>Tvol now supports shows that use dates in their torrent
+            name instead of season and episode.
+            <a href="https://github.com/8cylinder/tv-overlord/wiki/Date-searches">
+            Docs here</a>.</li>
+          <li>1337X rewrote their html and the scraper works again.</li>
+          <li>Added more Bit Torrent Scene url's.</li>
+          <li>Emergency fix for ExtraTorrents malformed feed.</li>
+        </ul>
+
+        <h3>Version 1.4.5, 2016-11-11</h3>
+        <ul>
+          <li><p>Change download progressbar to "status lights".</p>
+            <p>The progressbar was the wrong tool since it implied
+              that searching was happening sequentially when it is
+              actually searching in parallel.  This also shows which
+              search engines are the slowest.</p></li>
+          <li><p>Added a search engine exclude option to downloading.</p>
+            <p>Using <code class="commandline">tvol download --exclude
+            pb</code> the piratebay would be excluded from searches.</p>
+            <p>This can be a comma separated list as well and if there
+            are spaces they should be wrapped in quotes.  The long and
+            short names can be used.  You can find these with the config
+            command under "Search engines".  Some examples:</p>
+            <ul>
+              <li>pb</li>
+              <li>PB,rb,13</li>
+              <li>'the pirate bay, rarbg, ez'</li>
+            </ul>
+          </li>
+        </ul>
+
+        <h3>Version 1.4.4</h3>
+        <ul>
+          <li>Adding new shows has been streamlined.</li>
+          <li>All error messages are going to stderr instead of
+            everything going to stdout.</li>
+          <li>getipintel.com is no longer being used to find out if
+            the user is connected to a VPN.  Now, an IP whitelist is being stored in the
+            db.  More <a href="https://github.com/8cylinder/tv-overlord/wiki/Config-file">
+            information here</a>.</li>
+        </ul>
+
+        <h3>Version 1.4.3</h3>
+        <ul>
+          <li>Users can opt-in to supply <a href="https://github.com/8cylinder/tv-overlord/wiki/Telemetry-data">telemetry
+            data</a></li>
+          <li>tvol will <a href="https://github.com/8cylinder/tv-overlord/wiki/Config-file">
+            notify the user</a> if a newer version is available.</li>
+          <li><a href="https://github.com/8cylinder/tv-overlord/wiki/Config-file#multiple-configs-named-configs">
+            Multiple configs</a> can be used by using named configs.</li>
+          <li>qBittorent is now supported</li>
+        </ul>
+
+        <h3>Version 1.4.1</h3>
+        <ul>
+          <li><code class="commandline">tvol nondbshow SEARCHSTRING</code> with no
+            matches, no longer causes error.</li>
+          <li>Remove non relevent options from nondbshow.</li>
+          <li>Remove '[enter] for #1' from all interactive ui's.</li>
+        </ul>
+
+        <h3>Version 1.4.0</h3>
         <ul>
           <li>When editing a show with <code class="commandline">tvol
             editshow &lt;show name&gt;</code> and more that one match
@@ -161,58 +224,6 @@
             are done. <a href="https://github.com/8cylinder/tv-overlord/wiki/Command-line-reference#add">More information here</a></li>
           <li>A bug that prevented using shows with more than 99
             episodes has been fixed.</li>
-        </ul>
-
-        <h3>Version 1.4.1 <a id='1.4.1'></a></h3>
-        <ul>
-          <li><code class="commandline">tvol nondbshow SEARCHSTRING</code> with no
-            matches, no longer causes error.</li>
-          <li>Remove non relevent options from nondbshow.</li>
-          <li>Remove '[enter] for #1' from all interactive ui's.</li>
-        </ul>
-
-        <h3>Version 1.4.3 <a id='1.4.3'></a></h3>
-        <ul>
-          <li>Users can opt-in to supply <a href="https://github.com/8cylinder/tv-overlord/wiki/Telemetry-data">telemetry
-            data</a></li>
-          <li>tvol will <a href="https://github.com/8cylinder/tv-overlord/wiki/Config-file">
-            notify the user</a> if a newer version is available.</li>
-          <li><a href="https://github.com/8cylinder/tv-overlord/wiki/Config-file#multiple-configs-named-configs">
-            Multiple configs</a> can be used by using named configs.</li>
-          <li>qBittorent is now supported</li>
-        </ul>
-
-        <h3>Version 1.4.4 <a id="1.4.4"></a></h3>
-        <ul>
-          <li>Adding new shows has been streamlined.</li>
-          <li>All error messages are going to stderr instead of
-            everything going to stdout.</li>
-          <li>getipintel.com is no longer being used to find out if
-            the user is connected to a VPN.  Now, an IP whitelist is being stored in the
-            db.  More <a href="https://github.com/8cylinder/tv-overlord/wiki/Config-file">
-            information here</a>.</li>
-        </ul>
-
-        <h3>Version 1.4.5, 2016-11-11<a id="1.4.5"></a></h3>
-        <ul>
-          <li><p>Change download progressbar to "status lights".</p>
-            <p>The progressbar was the wrong tool since it implied
-              that searching was happening sequentially when it is
-              actually searching in parallel.  This also shows which
-              search engines are the slowest.</p></li>
-          <li><p>Added a search engine exclude option to downloading.</p>
-            <p>Using <code class="commandline">tvol download --exclude
-            pb</code> the piratebay would be excluded from searches.</p>
-            <p>This can be a comma separated list as well and if there
-            are spaces they should be wrapped in quotes.  The long and
-            short names can be used.  You can find these with the config
-            command under "Search engines".  Some examples:</p>
-            <ul>
-              <li>pb</li>
-              <li>PB,rb,13</li>
-              <li>'the pirate bay, rarbg, ez'</li>
-            </ul>
-          </li>
         </ul>
 
       </div>
