@@ -58,16 +58,20 @@ class Provider(object):
             self.url = full_url
 
             parsed = feedparser.parse(full_url)
+            if 'bozo_exception' in parsed:
+                continue
 
             if len(parsed['entries']) == 0:
                 continue
 
-
             for show in parsed['entries']:
-                dt = datetime.fromtimestamp(mktime(show['published_parsed']))
-                date = dt.strftime('%b %d/%Y')
-                size = U.pretty_filesize (show['size'])
-                title = show['title']
+                try:
+                    dt = datetime.fromtimestamp(mktime(show['published_parsed']))
+                    date = dt.strftime('%b %d/%Y')
+                    size = U.pretty_filesize (show['size'])
+                    title = show['title']
+                except KeyError as e:
+                    continue
 
                 # extratorrent returns results that match any word in the
                 # search, so the results end up with a bunch of stuff we aren't
@@ -112,5 +116,5 @@ if __name__ == '__main__':
     #results = show.search ('"doctor who (2005) 5x01" OR "doctor who 2005 s05e01"')
     #results = show.search ('"doctor who (2005) s05e01"')
     #results = show.search('drunk history s03e04')
-    results = show.search('Gotham S02E01')
+    results = show.search('suits')
     pp(results)
