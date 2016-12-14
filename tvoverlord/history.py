@@ -115,18 +115,32 @@ class History:
         click.echo()
 
         if choice == 'copy_all':
+            copied_all = True
             for episode in data[1]:
                 torrent_hash = episode[3]
                 torrent_dir, torrent_name = os.path.split(episode[2])
                 click.echo('Copying: %s... ' % episode[1], nl=False)
-                DownloadManager(torrent_hash, torrent_dir, torrent_name)
-                click.echo('Done')
+                try:
+                    DownloadManager(torrent_hash, torrent_dir, torrent_name)
+                except OSError as e:
+                    copied_all = False
+                    click.echo(tvu.style(str(e), fg='red'))
+                else:
+                    click.echo(tvu.style('Done', fg='green'))
+            if not copied_all:
+                click.echo()
+                click.echo('Error: Some files could not be copied.')
+
         else:
             selected = [i for i in data[1] if choice in i][0]
             torrent_hash = selected[3]
             torrent_dir, torrent_name = os.path.split(selected[2])
             click.echo('Copying: %s... ' % selected[1], nl=False)
-            DownloadManager(torrent_hash, torrent_dir, torrent_name)
+            try:
+                DownloadManager(torrent_hash, torrent_dir, torrent_name)
+            except OSError as e:
+                click.echo(tvu.style(str(e), fg='red'))
+                sys.exit(1)
             click.echo('Done')
 
     def download(self):

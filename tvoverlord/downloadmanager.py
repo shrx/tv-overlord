@@ -70,12 +70,14 @@ class DownloadManager:
         if not os.path.exists(Config.tv_dir):
             msg = 'Destination: "{}" does not exist'.format(Config.tv_dir)
             Config.logging.error(msg)
-            sys.exit(msg)
+            raise OSError(msg)
+            # sys.exit(msg)
 
         if not os.path.exists(filename):
-            msg = 'Source: "{}" does not exist'.format(filename)
+            msg = 'Source does not exist'.format(filename)
             Config.logging.error(msg)
-            sys.exit(msg)
+            raise OSError(msg)
+            # sys.exit(msg)
 
         source = filename
         if Config.single_file:
