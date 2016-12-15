@@ -455,7 +455,6 @@ class Show:
 
     def _ask(self, shows, season, episode, display_count,
              nondb=False, date_search=None):
-        print('>>>sed', season, episode, date_search)
         click.echo()
         if not shows[1]:
             # use ljust to cover over the progressbar
