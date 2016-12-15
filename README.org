@@ -5,7 +5,7 @@ Website: [[http://www.tvoverlord.com][www.tvoverlord.com]]  ---  [[https://githu
 
 [[https://badge.fury.io/py/tvoverlord.svg]]
 
-Follow TV Overlord on twitter: [[https:twitter.com/tv_overlord][@tv_overlord]]
+Follow TV Overlord on twitter: [[https://twitter.com/tv_overlord][@tv_overlord]]
 
 TV Overlord is a *semi automatic* command line tool to download and
 manage TV shows from newsgroups or bittorent.  It will download nzb
