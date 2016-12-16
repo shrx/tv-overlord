@@ -271,3 +271,15 @@ a.clean, a.clean:hover, a.clean:active {
   display: inline-block !important;
   padding-left: 10px;
 }
+.twit a {
+  line-height: normal;
+  border-bottom: none;
+  padding-bottom: none;
+}
+.twit a:hover {
+  background-color: unset;
+  border-bottom: none;
+}
+.twit img {
+  vertical-align: bottom;
+}
