@@ -320,24 +320,29 @@ class Show:
                 last_episode = episode
 
         last_sxxexx = style(sxxexx(last_season, last_episode), bold=True)
-        click.echo()
-        click.echo('The last episode broadcast was %s.' % last_sxxexx)
-        msg = 'Start downloading the [f]irst, [l]atest or season and episode?'
-        start = click.prompt(msg)
 
-        if start == 'f':
-            se = ep = 0
-        elif start == 'l':
-            se = last_season
-            ep = last_episode
+        if int(last_season) == 1 and int(last_episode) == 0:
+            se = 0
+            ep = 0
         else:
-            try:
-                se, ep = [int(i) for i in start.split()]
-            except ValueError:
-                sys.exit('Season and episode must be two numbers seperated by a space.')
+            click.echo()
+            click.echo('The last episode broadcast was %s.' % last_sxxexx)
+            msg = 'Start downloading the [f]irst (or [enter]), [l]atest or season and episode?'
+            start = click.prompt(msg, default='f')
 
-        if ep > 0:
-            ep -= 1  # episode in db is the NEXT episode
+            if start == 'f':
+                se = ep = 0
+            elif start == 'l':
+                se = last_season
+                ep = last_episode
+            else:
+                try:
+                    se, ep = [int(i) for i in start.split()]
+                except ValueError:
+                    sys.exit('Season and episode must be two numbers seperated by a space.')
+
+            if ep > 0:
+                ep -= 1  # episode in db is the NEXT episode
 
         msg = self._add_new_db(season=se, episode=ep)
         click.echo()
