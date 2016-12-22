@@ -126,9 +126,9 @@ class Show:
 
             An error occurred while retrieving data from thetvdb.com.
 
-            This probably means that thetvdb is having issues.  This
-            error is usually caused by corrupted or incomplete data
-            being returned from thetvdb.
+            This may mean that thetvdb is having issues.  This error
+            is usually caused by corrupted or incomplete data being
+            returned from thetvdb.
 
             Keep retrying using the --no-cache flag or wait a while.
 
@@ -168,6 +168,10 @@ class Show:
             sys.exit(1)
         except requests.exceptions.ChunkedEncodingError as e:
             msg = tvdb_msg.format(error_no=104, stack_msg=e)
+            click.echo(msg, err=True)
+            sys.exit(1)
+        except requests.exceptions.ConnectionError as e:
+            msg = tvdb_msg.format(error_no=105, stack_msg=e)
             click.echo(msg, err=True)
             sys.exit(1)
 
@@ -271,7 +275,13 @@ class Show:
         return ret
 
     def add_new(self, name):
-        result = self.tvapi.search(name)
+        try:
+            result = self.tvapi.search(name)
+        except KeyError as e:
+            click.echo(
+                'Show data returned from TheTVDB.com has an error in it.',
+                err=True)
+            sys.exit(1)
 
         if not result:
             click.echo('No show found.')
