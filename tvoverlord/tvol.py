@@ -576,7 +576,7 @@ def history(criteria, what_to_show):
     hist.show(what_to_show)
 
 
-@tvol.command(context_settings=CONTEXT_SETTINGS)
+@tvol.command('re-copy', context_settings=CONTEXT_SETTINGS)
 @click.argument('criteria', required=False)
 def copy(criteria):
     """Re copy a show to the library location.
@@ -594,10 +594,10 @@ def copy(criteria):
     hist.copy()
 
 
-@tvol.command(context_settings=CONTEXT_SETTINGS)
+@tvol.command('re-download', context_settings=CONTEXT_SETTINGS)
 @click.argument('criteria', required=False)
 def redownload(criteria):
-    """Re download a show.
+    """Redownload a previous magnet link.
 
     CRITERIA can be days, a date or a show title.  If its days, it
     will show results from now to X days ago.  If it is a date, it
@@ -610,6 +610,23 @@ def redownload(criteria):
     criteria = parse_history(criteria)
     hist = History(criteria)
     hist.download()
+
+
+@tvol.command('re-search', context_settings=CONTEXT_SETTINGS)
+@click.argument('show-name', nargs=3)
+def research(show_name):
+    """Search again for a specific episode.
+
+    Search for show, season, episode.  Using this won't change the
+    current season and episode numbers.  For example, if you are at
+    S04E09 of a show and want to go back and find a better version of
+    an episode you have already downloaded, you can use this and it
+    won't change the current S04E09 in the db.
+    """
+    send(te, v)
+    shows = list(Shows(show_name[0]))
+    show = shows[0]
+    show.re_search(show.db_name, show_name[1], show_name[2])
 
 
 @tvol.command(context_settings=CONTEXT_SETTINGS)

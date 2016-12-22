@@ -242,6 +242,37 @@ class Show:
             self._update_db(season=episode['season'],
                             episode=episode['episode'])
 
+    def re_search(self, show_name, season, episode):
+        results = self.search_provider.search(
+            show_name,
+            season=season,
+            episode=episode,
+            search_type=Config.search_type,
+        )
+        if results:
+            showid = self._ask(
+                results,
+                display_count=10,
+                season=season,
+                episode=episode,
+            )
+        else:
+            click.echo('"%s" is listed in TheTVDB, but not found in any search engines' % (
+                show_name))
+
+        if showid == 'skip_rest':
+            return
+        elif showid == 'skip':
+            return
+        elif showid == 'mark':
+            # mark the episode as watched, but don't download it
+            self._update_db(season=episode['season'],
+                            episode=episode['episode'])
+            return
+
+        self._download(showid)
+        # self._update_db(season=season, episode=episode)
+
     def is_missing(self, download_today=False):
         missing = self._get_missing(download_today)
         self.missing = missing
