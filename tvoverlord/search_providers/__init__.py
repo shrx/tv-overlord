@@ -23,4 +23,5 @@ from . import btstorr_cc
 
 # newsgroup search engines
 from . import nzbclub_com
+from . import nzb
 # from . import nzbindex_com

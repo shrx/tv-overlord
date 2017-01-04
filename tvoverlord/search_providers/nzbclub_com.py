@@ -27,7 +27,7 @@ class Provider(object):
             show_title, season_just, episode, show_title, season, episode)
         return fixed
 
-    def search(self, search_string, season=False, episode=False):
+    def search(self, search_string, season=False, episode=False, idx=None):
 
         """
         Default Search: Our default is prefix match
@@ -104,7 +104,7 @@ class Provider(object):
                 size,
                 date,
                 self.shortname,
-                nzbfile_url,
+                '%s|%s' % (idx, nzbfile_url),
             ])
 
         return show_data

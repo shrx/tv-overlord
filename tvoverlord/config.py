@@ -391,7 +391,12 @@ class Configuration:
 
         cfg = configparser.ConfigParser(
             allow_no_value=True, interpolation=None)
-        cfg.read(str(self.cb.user_config))
+        try:
+            cfg.read(str(self.cb.user_config))
+        except configparser.DuplicateSectionError as e:
+            click.echo(e, err=True)
+            click.echo('Section names in config file must all be unique.', err=True)
+            sys.exit(1)
 
         # Settings from config.ini ---------------------------------
         try:
@@ -466,6 +471,19 @@ class Configuration:
                 cfg.get('File Locations', 'staging'))
         except configparser.NoOptionError:
             self.staging = None
+
+        # [Newznab]
+        try:
+            newznab = dict(cfg['Newznab'])
+            self.newznab = {
+                k: [i.strip() for i in v.split(',')]
+                for k, v in newznab.items()}
+        except KeyError:
+            self.newznab = {}
+
+        # [nzb]
+        self.nzbs = [
+            dict(v) for k, v in cfg.items() if k.lower().startswith('nzb:')]
 
 
 Config = Configuration()
