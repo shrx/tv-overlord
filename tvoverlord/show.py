@@ -8,6 +8,7 @@ import click
 import logging
 import re
 import requests
+import xml
 
 from tvoverlord.search import Search, SearchError
 from tvoverlord.tvutil import style, sxxexx, format_paragraphs
@@ -120,7 +121,7 @@ class Show:
         # tv = tvdb_api.Tvdb(apikey=Config.thetvdb_apikey,
         #                    cache=Config.use_cache)
         # self.tvapi = tv
-        tv = self.tvapi
+        # tv = self.tvapi
 
         tvdb_msg = format_paragraphs('''
 
@@ -149,15 +150,21 @@ class Show:
         ''')
 
         try:
-            series = tv[self.db_name]
+            series = self.tvapi[self.db_name]
             self.show_exists = True
+        except xml.etree.ElementTree.ParseError as e:
+            print('-' * 20)
+            print(e)
+            print('-' * 20)
         except KeyError as e:
+            # print('>>>', e)
             msg = tvdb_msg.format(error_no=101, stack_msg=e)
             click.echo(msg, err=True)
             sys.exit(1)
         except tvdb_api.tvdb_shownotfound:
             self.show_exists = False
-            sys.exit('Show not found: %s' % self.db_name)
+            click.echo('\nShow not found: %s' % self.db_name, err=True)
+            return
         except tvdb_api.tvdb_error as e:
             msg = tvdb_msg.format(error_no=102, stack_msg=e)
             click.echo(msg, err=True)

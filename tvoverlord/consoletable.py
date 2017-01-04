@@ -102,20 +102,11 @@ class ConsoleTable:
         flex_width = (Config.console_columns - sum(header.widths) -
                       NUMBER_SPACE - BAR_COUNT)
 
-        for title, width, alignment in zip(header.titles,
-                                           header.widths,
-                                           header.alignments):
+        for title, width in zip(header.titles,
+                                header.widths):
             if width == 0:
                 width = flex_width
-            if alignment == '<':
-                title = title[:width].ljust(width)
-            elif alignment == '>':
-                title = title[:width].rjust(width)
-            elif alignment == '=':
-                title = title[:width].center(width)
-            else:
-                title = title[:width].ljust(width)
-
+            title = title[:width].ljust(width)
             header_row.append(
                 style(title,
                       bg=colors.header.bg,

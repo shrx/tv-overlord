@@ -43,30 +43,35 @@ class Search(object):
             if engine.Provider.name.lower() in Config.blacklist:
                 inlist = False
             if inlist:
-                self.torrent_engines.append(engine)
+                self.torrent_engines.append(engine.Provider())
 
-        # for nzb searches, only the first one listed will be used
-        self.newsgroup_engines = [nzbclub_com]
+        self.newsgroup_engines = [nzbclub_com.Provider()]
+        for site in Config.nzbs:
+            self.newsgroup_engines.append(
+                nzb.Provider(site))
 
-    def job(self, engine, search_string, season, episode, date_search):
-        search = engine.Provider()
+    def job(self, engine, search_string, season, episode, date_search, idx=None):
+        search = engine
         if date_search:
             search_string = '%s %s' % (search_string, date_search)
             season = episode = False
-        search_results = search.search(search_string, season, episode)
 
-        # for info about each search
-        # click.echo('%s -- %s' % (search.name, len(search_results)))
+        if self.search_type == 'torrent':
+            search_results = search.search(search_string, season, episode)
+        elif self.search_type == 'nzb':
+            search_results = search.search(search_string, season, episode, idx)
+
         self.se_order.append(search.name)
         return search_results + [search.name]
 
     def test_each(self, search_string, show_results):
+        """Do a test search for each search engine"""
         engines = self.torrent_engines + self.newsgroup_engines
         indent = '  '
         click.echo()
         click.echo('Searching for: %s' % search_string)
         for engine in engines:
-            search = engine.Provider()
+            search = engine
             name = '%s (%s)' % (search.name, search.shortname)
             click.echo(tu.style(name, bold=True))
 
@@ -121,7 +126,7 @@ class Search(object):
             header = [
                 [search_string, ''],
                 ['Name', 'Size', 'Date', 'SE'],
-                [0, 10, 12, 2],
+                [0, 10, 12, 3],
                 ['<', '>', '<', '<']]
 
         if self.search_type == 'torrent':
@@ -135,13 +140,16 @@ class Search(object):
         # socket.setdefaulttimeout(0.1)
         episodes = []
         with concurrent.futures.ThreadPoolExecutor(max_workers=8) as executor:
+            # For nzb's, the idx is needed so Provider.download knows
+            # which engine was used.  It's not needed for torrents
+            # because there is no download method.
             res = {
                 executor.submit(
-                    self.job, engine, search_string, season, episode, date_search
-                ): engine for engine in engines
+                    self.job, engine, search_string, season, episode, date_search, idx
+                ): engine for idx, engine in enumerate(engines)
             }
 
-            names = [i.Provider().name for i in engines]
+            names = [i.name for i in engines]
             names.sort()
             names = [' %s ' % i for i in names]
             names = [tu.style(i, fg='white', bg='red') for i in names]
@@ -161,6 +169,7 @@ class Search(object):
                 else:
                     title = '%s %s' % (search_string.strip(),
                                        tu.sxxexx(season, episode))
+                title = title.ljust(Config.console_columns)
                 click.echo(tu.style(title, bold=True))
                 click.echo(' '.join(names))
                 # move up two lines
@@ -293,23 +302,17 @@ class Search(object):
 
         else:  # is a nzb file
             final_name = ''
-            # only cleans name for tv show downloads
-            if self.season and self.episode:
-                final_name = '%s.%s.nzb' % (
-                    self.show_name.replace(' ', '.'),
-                    "S%sE%s" % (self.season.rjust(2, '0'),
-                                self.episode.rjust(2, '0'))
-                )
-            else:
-                show_fname = 'unknown'
-                for f in self.episodes:
-                    if chosen_show == f[4]:
-                        show_fname = tu.clean_filename(f[0], strict=True)
-                final_name = '%s.nzb' % (show_fname)
 
-            downloader = self.newsgroup_engines[0].Provider()
+            show_fname = 'unknown'
+            for f in self.episodes:
+                if chosen_show == f[4]:
+                    show_fname = tu.clean_filename(f[0], strict=True)
+            final_name = '%s.nzb' % (show_fname)
+
+            idx, guid = chosen_show.split('|')
+            downloader = self.newsgroup_engines[int(idx)]
             downloaded_filename = downloader.download(
-                chosen_show, destination, final_name)
+                guid, destination, final_name)
 
         return downloaded_filename
 
@@ -317,7 +320,6 @@ class Search(object):
         """Display the search engine name on the right side of the progressbar"""
         try:
             engine_name = future.result()[-1]
-            # print('\n%s' % engine_name)
             engine_name += ' done'
             self.last_engine = engine_name
             return engine_name

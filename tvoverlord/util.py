@@ -93,6 +93,9 @@ class U:
         if not sep:
             sep = "\u2026"
 
+        if length in (1, 2):
+            return text[:length]
+
         if len(text) <= length:
             return text
 
@@ -139,6 +142,10 @@ if __name__ == '__main__':
     for j in (13, 14):
         for i in range(10, 20):
             click.echo(">%s<" % (U.snip(seq[0:i], j).ljust(j)))
+
+    click.echo(U.snip('abcd', 1))
+    click.echo(U.snip('abcd', 2))
+    click.echo(U.snip('abcd', 3))
 
     print('\nTesting U.style()\n', line)
 
