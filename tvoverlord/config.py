@@ -460,6 +460,13 @@ class Configuration:
         except configparser.NoOptionError:
             self.telemetry_ok = None
 
+        try:
+            filter_list = cfg.get('App Settings', 'filters')
+            self.filter_list = [
+                i.strip().lower() for i in filter_list.split(',') if i.strip()]
+        except configparser.NoOptionError:
+            self.filter_list = []
+
         # [File Locations]
         try:
             self.tv_dir = os.path.expanduser(

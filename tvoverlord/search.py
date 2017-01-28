@@ -183,9 +183,20 @@ class Search(object):
         if self.search_type == 'torrent':
             self.sort_torrents(episodes)
 
+        if Config.filter_list:
+            episodes = [i for i in episodes if self.filter_episode(i)]
+
         self.episodes = episodes
         # return search_results
         return [header] + [episodes]
+
+    def filter_episode(self, episode):
+        bad = False
+        for f in Config.filter_list:
+            if f.lower() in episode[0].lower():
+                bad = True
+        if not bad:
+            return episode
 
     def sort_torrents(self, episodes):
         # sort by seeds
