@@ -400,7 +400,9 @@ def list_missing(today):
               help='Number of search results to list. (default: 5)')
 @click.option('--exclude', '-x',
               help='Comma seperated list of search engines to ignore.')
-def download(show_name, today, ignore, count, exclude):
+@click.option('--filters', '-f',
+              help='Comma seperated list of strings to filter search results.  This will override config.ini.')
+def download(show_name, today, ignore, count, exclude, filters):
     """Download available episodes.
 
     If SHOW_NAME is used, it will download any shows that match that title
@@ -418,6 +420,10 @@ def download(show_name, today, ignore, count, exclude):
         blacklist = [
             i.strip().lower() for i in exclude.split(',') if i.strip()]
         Config.blacklist = list(set(Config.blacklist + blacklist))
+
+    if filters:
+        Config.filter_list = [
+            i.strip().lower() for i in filters.split(',') if i.strip()]
 
     shows = Shows(name_filter=show_name)
     for show in shows:
