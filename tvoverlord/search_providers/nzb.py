@@ -62,8 +62,20 @@ class Provider:
             self.notify(e)
             return
 
+        if not r.content:
+            msg = 'No data return from server'
+            self.log(msg)
+            self.notify(msg)
+            return
+
+        try:
+            xmldoc = etree.fromstring(r.content)
+        except etree.ParseError as e:
+            self.notify(e)
+            self.log(e)
+            return
+
         # an error has been returned from newznab
-        xmldoc = etree.fromstring(r.content)
         if xmldoc.tag == 'error':
             msg_content = dict(xmldoc.items())
             error_code = msg_content['code']

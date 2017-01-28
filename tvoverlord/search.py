@@ -136,7 +136,7 @@ class Search(object):
         else:
             raise ValueError('search_type can only be "torrent" or "nzb"')
 
-        # socket.setdefaulttimeout(5)
+        socket.setdefaulttimeout(10)
         # socket.setdefaulttimeout(0.1)
         episodes = []
         with concurrent.futures.ThreadPoolExecutor(max_workers=8) as executor:

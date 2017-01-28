@@ -26,7 +26,7 @@ from tvoverlord.remote import VersionCheck
 from tvoverlord.remote import Telemetry
 
 
-__version__ = '1.4.8'
+__version__ = '1.4.9'
 
 
 def edit_db(search_str):
@@ -617,6 +617,10 @@ def redownload(criteria):
 def research(show_name):
     """Search again for a specific episode.
 
+    The command requires 3 arguments, SHOWNAME, SEASON, EPISODE:
+
+    eg. tvol re-search Grimm 1 10
+
     Search for show, season, episode.  Using this won't change the
     current season and episode numbers.  For example, if you are at
     S04E09 of a show and want to go back and find a better version of
@@ -625,8 +629,12 @@ def research(show_name):
     """
     send(te, v)
     shows = list(Shows(show_name[0]))
-    show = shows[0]
-    show.re_search(show.db_name, show_name[1], show_name[2])
+    if shows:
+        show = shows[0]
+        show.re_search(show.db_name, show_name[1], show_name[2])
+    else:
+        click.echo('Show not found, is it active?', err=True)
+
 
 
 @tvol.command(context_settings=CONTEXT_SETTINGS)
@@ -706,10 +714,15 @@ def config(edit, test_se, show, create_config_name):
     for engines in engines_types:
         for engine in engines:
             click.echo()
-            click.secho(engine.Provider.name, bold=True, nl=False)
-            click.echo(' (%s)' % engine.Provider.shortname)
-            for url in engine.Provider.provider_urls:
-                click.echo('  %s' % url)
+            click.secho(engine.name, bold=True, nl=False)
+            click.echo(' (%s)' % engine.shortname)
+            try:
+                for url in engine.provider_urls:
+                    click.echo('  %s' % url)
+            except AttributeError:
+                # there is no provider_urls.  Most likely an nzb
+                # search engine which only uses one url: engine.url.
+                click.echo('  %s' % engine.url)
 
     # blacklisted search engines
     if Config.blacklist:
