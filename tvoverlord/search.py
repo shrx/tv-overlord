@@ -34,6 +34,8 @@ class Search(object):
             bitsnoop, extratorrent, thepiratebay_sx, btstorr_cc,
             onethreethreesevenx_to, rarbg_to, eztv_ag]
 
+        newsgroup_engines = [nzbclub_com.Provider()]
+
         # remove any providers listed in the blacklist
         self.torrent_engines = []
         for engine in torrent_engines:
@@ -45,7 +47,16 @@ class Search(object):
             if inlist:
                 self.torrent_engines.append(engine.Provider())
 
-        self.newsgroup_engines = [nzbclub_com.Provider()]
+        self.newsgroup_engines = []
+        for engine in newsgroup_engines:
+            inlist = True
+            if engine.shortname.lower() in Config.blacklist:
+                inlist = False
+            if engine.name.lower() in Config.blacklist:
+                inlist = False
+            if inlist:
+                self.newsgroup_engines.append(engine)
+
         for site in Config.nzbs:
             self.newsgroup_engines.append(
                 nzb.Provider(site))
