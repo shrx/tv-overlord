@@ -401,7 +401,7 @@ def list_missing(today):
 @click.option('--exclude', '-x',
               help='Comma seperated list of search engines to ignore.')
 @click.option('--filters', '-f',
-              help='Comma seperated list of strings to filter search results.  This will override config.ini.')
+              help='Comma seperated list of strings to filter search results.  Prepend strings that must appear in the filename with "+".  Prepend strings that shouldn\'t appear in the filename with "-".   This will override config.ini.')
 def download(show_name, today, ignore, count, exclude, filters):
     """Download available episodes.
 
@@ -422,8 +422,17 @@ def download(show_name, today, ignore, count, exclude, filters):
         Config.blacklist = list(set(Config.blacklist + blacklist))
 
     if filters:
+        Config.filter_list_bad = []
+        Config.filter_list_good = []
         Config.filter_list = [
             i.strip().lower() for i in filters.split(',') if i.strip()]
+        for f in Config.filter_list:
+            if f.startswith("+"):
+                Config.filter_list_good.append(f[1:])
+            elif f.startswith("-"):
+                Config.filter_list_bad.append(f[1:])
+            else:
+                Config.filter_list_bad.append(f)
 
     shows = Shows(name_filter=show_name)
     for show in shows:
