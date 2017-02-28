@@ -460,10 +460,19 @@ class Configuration:
         except configparser.NoOptionError:
             self.telemetry_ok = None
 
+        self.filter_list_bad = []
+        self.filter_list_good = []
         try:
             filter_list = cfg.get('App Settings', 'filters')
             self.filter_list = [
                 i.strip().lower() for i in filter_list.split(',') if i.strip()]
+            for f in self.filter_list:
+                if f.startswith("+"):
+                    self.filter_list_good.append(f[1:])
+                elif f.startswith("-"):
+                    self.filter_list_bad.append(f[1:])
+                else:
+                    self.filter_list_bad.append(f)
         except configparser.NoOptionError:
             self.filter_list = []
 
