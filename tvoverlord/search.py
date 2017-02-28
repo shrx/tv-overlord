@@ -203,11 +203,19 @@ class Search(object):
 
     def filter_episode(self, episode):
         bad = False
-        for f in Config.filter_list:
-            if f.lower() in episode[0].lower():
-                bad = True
-        if not bad:
-            return episode
+        good = False if Config.filter_list_good else True
+        if not good:
+            for f in Config.filter_list_good:
+                if f.lower() in episode[0].lower():
+                    good = True
+                    break
+        if good:
+            for f in Config.filter_list_bad:
+                if f.lower() in episode[0].lower():
+                    bad = True
+                    break
+            if not bad:
+                return episode
 
     def sort_torrents(self, episodes):
         # sort by seeds
